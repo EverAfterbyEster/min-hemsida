@@ -1,0 +1,246 @@
+body {
+    margin: 0;
+    font-family: 'Georgia', serif;
+    background-color: #fffdf8;
+    color: #4b3b2b;
+  }
+  
+  #toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #D0ACAC;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    font-family: 'Georgia', serif;
+    text-align: center;
+  }
+  
+  #toolbar select,
+  #toolbar button:not(#sumButton) {
+    background-color: #f7e7ce;
+    border: 1px solid #d4b98c;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #4b3b2b;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    line-height: 1;
+    height: 46px;
+  }
+  
+  #toolbar button:not(#sumButton):hover,
+  #toolbar select:hover {
+    background-color: #e6d3b3;
+    border-color: #c2a77a;
+  }
+  
+  #toolbar select {
+    min-width: 240px;
+  }
+  
+  #sumButton {
+    background-color: #d4b98c;
+    color: white;
+    width: 120px;
+    height: 120px;
+    border: none;
+    border-radius: 60px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-left: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-family: inherit; /* ✅ Lägg till detta */
+  }
+  
+  
+  #sumButton:hover {
+    background-color: #c2a77a;
+    transform: scale(1.05);
+  }
+  
+  #canvas {
+    border: none;
+    background-color: #fffdf8;
+    margin: 20px auto;
+    display: block;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+  }
+  
+  #summaryBox, #userFormBox {
+    max-width: 400px;
+    background: #fffef9;
+    border: 1px solid #d4b98c;
+    padding: 20px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+  }
+  
+  #summaryBox p, #userFormBox p {
+    margin: 0 0 8px;
+    font-weight: bold;
+    color: #4b3b2b;
+  }
+  
+  #summaryBox select, #summaryBox button,
+  #userFormBox input, #userFormBox button, #userFormBox select {
+    margin-top: 12px;
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #d4b98c;
+    background-color: #fffdf8;
+    border-radius: 6px;
+  }
+  
+  #summaryBox button,
+  #userFormBox button {
+    background-color: #f7e7ce;
+    color: #4b3b2b;
+    padding: 8px 14px;
+    margin-top: 8px;
+    border: 1px solid #d4b98c;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  #summaryBox button:hover,
+  #userFormBox button:hover {
+    background-color: #e6d3b3;
+  }
+  
+  #summaryBox button:last-of-type {
+    background-color: #6c757d;
+  }
+  
+  .quantity-control {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+    padding: 10px;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+  
+  .quantity-control label {
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+  
+  .quantity-control div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  
+  .quantity-control button {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 4px;
+    background-color: #ddd;
+    cursor: pointer;
+  }
+  
+  .quantity-control span {
+    min-width: 24px;
+    text-align: center;
+    font-family: monospace;
+  }
+  
+  .quantity-control small {
+    font-size: 12px;
+    color: #666;
+    margin-left: 4px;
+  }
+  
+  #summaryBox small, #userFormBox small {
+    display: block;
+    margin-top: 10px;
+    color: #555;
+  }
+/* Hindrar horisontell scroll på hela sidan */
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
+  /* Gör så att toolbar fyller hela bredden */
+  #toolbar {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  body {
+    overflow: auto;
+  }
+  #canvasContainer {
+    width: 100vw;
+    height: calc(100vh - 120px); /* Justera om du har ett verktygsfält t.ex. */
+    overflow: auto;
+  }
+  canvas {
+    display: block;
+  }
+  #canvasContainer {
+    width: 100vw;
+    height: calc(100vh - 200px); /* justera efter behov */
+    overflow: auto;
+    border: none;
+  }
+  
+  canvas {
+    display: block;
+    margin: 0;
+  }
+
+  #summaryBox {
+    padding: 20px 30px; /* Minska topp/botten-padding (tidigare t.ex. 20px 30px?) */
+    max-height: 95vh;   /* Så rutan aldrig blir högre än 90% av skärmen */
+    overflow-y: auto;   /* Visa scroll om innehållet är för långt */
+  }
+  .nav-bar {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .nav-bar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 16px;
+  }
+  
+  .nav-bar a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+    background-color: rgba(208, 172, 172, 0.8);
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .nav-bar a:hover {
+    background-color: rgba(208, 172, 172, 1);
+  }
+ 
+      

@@ -1,0 +1,53 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ritverktyg – Bordsplacering</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div style="padding: 10px; background: #eee;">
+    <label for="titleInput">Rubrik:</label>
+    <input type="text" id="titleInput" value="Bröllop – Emma & Johan, 2025-07-12" oninput="drawAll()" style="width: 300px; padding: 4px; font-family: 'Georgia', serif;">
+  </div>
+
+  <div id="toolbar">
+    <select id="tableType">
+      <option value="round-6">Runt bord – 6 platser</option>
+      <option value="round-8">Runt bord – 8 platser</option>
+      <option value="rect-4">Rektangulärt bord – 4 platser</option>
+      <option value="rect-6">Rektangulärt bord – 6 platser</option>
+      <option value="rect-8">Rektangulärt bord – 8 platser</option>
+    </select>
+    <button onclick="addSelectedTable()">Lägg till bord</button>
+    <button onclick="rotateSelected()">Rotera bord</button>
+    <button onclick="renameTable()">Döp om bord</button>
+    <button onclick="addGuest()">Lägg till gäst</button>
+    <button onclick="removeSelected()">Ta bort markerad</button>
+    <button onclick="toggleAxes()">Visa/Dölj avstånd</button>
+    <button onclick="saveAsImage()">Spara som bild</button>
+    <button onclick="createGuestList()">Skapa gästlista</button>
+    <button id="sumButton" onclick="summarizeOrder()" disabled style="opacity: 0.5; cursor: not-allowed;">
+      Summera beställning
+    </button>
+    
+    <!-- <button id="sumButton" onclick="summarizeOrder()">Summera beställning</button> (Ta bort denna text samt ovan "sumButton" för att aktivera knappen)
+  </div>
+
+  <!-- ✅ Riktig canvas-container -->
+  <div id="canvasContainer">
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <div id="summaryBox"></div>
+  <div id="userFormBox"></div>
+
+  <script src="ritverktyg.js"></script>
+  <script src="bestallning.js"></script>
+  <script src="kontaktform.js"></script>
+</body>
+
+
+</html>
