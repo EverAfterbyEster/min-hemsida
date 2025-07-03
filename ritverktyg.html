@@ -47,6 +47,34 @@
   <script src="ritverktyg.js"></script>
   <script src="bestallning.js"></script>
   <script src="kontaktform.js"></script>
+
+    <script>
+  // Enkel mobilupptäckt
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    // Skapa popup
+    const warning = document.createElement("div");
+    warning.style.position = "fixed";
+    warning.style.top = "0";
+    warning.style.left = "0";
+    warning.style.width = "100%";
+    warning.style.background = "#ffe2e2";
+    warning.style.padding = "16px";
+    warning.style.textAlign = "center";
+    warning.style.fontFamily = "sans-serif";
+    warning.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
+    warning.style.zIndex = "9999";
+    warning.innerHTML = `
+      📱 Denna sida fungerar bäst på dator.<br>
+      Mobilversionen är inte riktigt färdig ännu.
+      <br><br>
+      <button onclick="this.parentElement.remove()" style="margin-top: 8px; padding: 6px 12px;">Okej!</button>
+    `;
+    document.body.appendChild(warning);
+  }
+</script>
+
 <!-- 100% privacy-first analytics -->
 <script async defer src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
 <noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt="" /></noscript>
