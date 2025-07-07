@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="sv">
 <head>
@@ -6,79 +5,220 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ritverktyg – Bordsplacering</title>
   <link rel="stylesheet" href="style.css">
+  <!-- Skriv ut-inställningar för checklista -->
+  
 </head>
 <body>
   <div style="padding: 10px; background: #eee;">
     <label for="titleInput">Rubrik:</label>
-    <input type="text" id="titleInput" value="Bröllop – Emma & Johan, 2025-07-12" oninput="drawAll()" style="width: 300px; padding: 4px; font-family: 'Georgia', serif;">
+    <input type="text" id="titleInput" value="Anna & Noah 2026-07-12" oninput="drawAll()" style="width: 300px; padding: 4px; font-family: 'Georgia', serif;">
   </div>
 
   <div id="toolbar">
-    <select id="tableType">
-      <option value="round-6">Runt bord – 6 platser</option>
-      <option value="round-8">Runt bord – 8 platser</option>
-      <option value="rect-4">Rektangulärt bord – 4 platser</option>
-      <option value="rect-6">Rektangulärt bord – 6 platser</option>
-      <option value="rect-8">Rektangulärt bord – 8 platser</option>
-    </select>
-    <button onclick="addSelectedTable()">Lägg till bord</button>
-    <button onclick="rotateSelected()">Rotera bord</button>
-    <button onclick="renameTable()">Döp om bord</button>
-    <button onclick="addGuest()">Lägg till gäst</button>
-    <button onclick="removeSelected()">Ta bort markerad</button>
-    <button onclick="toggleAxes()">Visa/Dölj avstånd</button>
-    <button onclick="saveAsImage()">Spara som bild</button>
-    <button onclick="createGuestList()">Skapa gästlista</button>
-    <button id="sumButton" onclick="summarizeOrder()" disabled style="opacity: 0.5; cursor: not-allowed;">
-      Summera beställning
+    <button class="hamburger" aria-label="Öppna meny" aria-expanded="false">
+      <span></span><span></span><span></span>
     </button>
-    
-    <!-- <button id="sumButton" onclick="summarizeOrder()">Summera beställning</button> (Ta bort denna text samt ovan "sumButton" för att aktivera knappen)
+    <div class="toolbar-items">
+      <select id="tableType">
+        <option value="round-6">Runt bord – 6 platser</option>
+        <option value="round-8">Runt bord – 8 platser</option>
+        <option value="rect-4">Rektangulärt bord – 4 platser</option>
+        <option value="rect-6">Rektangulärt bord – 6 platser</option>
+        <option value="rect-8">Rektangulärt bord – 8 platser</option>
+      </select>
+      <button onclick="addSelectedTable()">Lägg till bord</button>
+      <button onclick="rotateSelected()">Rotera bord</button>
+      <button onclick="renameTable()">Döp om bord</button>
+      <button onclick="addGuest()">Lägg till gäst</button>
+      <button onclick="removeSelected()">Ta bort markerad</button>
+      <button onclick="toggleAxes()">Visa/Dölj avstånd</button>
+      <button onclick="saveAsImage()">Spara som bild</button>
+      <button onclick="createGuestList()">Skapa gästlista</button>
+      <button onclick="createChecklist()">Skapa checklista</button>
+      <button id="sumButton" onclick="summarizeOrder()" disabled style="opacity: 0.5; cursor: not-allowed;">Summera beställning</button>
+    </div>
   </div>
 
-  <!-- ✅ Riktig canvas-container -->
   <div id="canvasContainer">
     <canvas id="canvas"></canvas>
   </div>
-
   <div id="summaryBox"></div>
   <div id="userFormBox"></div>
+
+  <!-- Modal-överlägg för checklista -->
+<div id="modalOverlay"
+style="display:none;
+       position:fixed;
+       top:0; left:0;
+       width:100%; height:100%;
+       background:rgba(0,0,0,0.5);
+       z-index:10000;">
+</div>
+
+<!-- Checklista-modal -->
+<div id="checklistContainer"
+style="display:none;
+       position:fixed;
+       top:50%; left:50%;
+       transform:translate(-50%, -50%);
+       background:#f9f7f1;
+       border:1px solid #ddd;
+       padding:16px;
+       box-shadow:0 4px 12px rgba(0,0,0,0.2);
+       z-index:10001;
+       width:90%; max-width:400px;
+       border-radius:8px;">
+
+<!-- Stäng-knapp -->
+<button class="close-modal no-print"
+     onclick="closeChecklist()"
+     style="position:absolute;
+            top:8px; right:8px;
+            background:none;
+            border:none;
+            font-size:1.2rem;
+            cursor:pointer;">
+&times;
+</button>
+    <h2>Checklista</h2>
+
+    <ul id="checklist">
+      <li><label><input type="checkbox" data-id="lokal"> Lokal <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="inbjudningar"> Inbjudningar <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="catering"> Catering <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="dekorationer"> Dekorationer <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="musik"> Musik <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="fotograf"> Fotograf <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="transport"> Transport <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="boende"> Boende <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="underhallning"> Underhållning <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="matdryck"> Mat & Dryck <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="kladsel"> Klädsel & Skönhet <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="ceremoni"> Ceremoni-detaljer <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="efterfest"> Efterfest <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="budget"> Budget & Avtal <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+      <li><label><input type="checkbox" data-id="ovrigt"> Övrigt <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button></label></li>
+    </ul>
+    <div style="margin-top:8px; display:flex; gap:8px;">
+      <input type="text"
+             id="newChecklistItem"
+             placeholder="Ny punkt"
+             style="flex:1;
+                    padding:4px;
+                    box-sizing:border-box;">
+      <button onclick="addChecklistItem()"
+              style="background:#f3e0bd;
+                     border:1px solid #dbccab;
+                     border-radius:8px;
+                     padding:6px 12px;
+                     cursor:pointer;">
+        Lägg till
+      </button>
+      <!-- Inlagd Skriv ut-knapp inne i checklist-container -->
+      <button onclick="printChecklist()"
+              class="no-print"
+              style="background:#f3e0bd;
+                     border:1px solid #dbccab;
+                     border-radius:8px;
+                     padding:6px 12px;
+                     cursor:pointer;">
+        Skriv ut
+      </button>
+    </div>
+  
+  </div>
 
   <script src="ritverktyg.js"></script>
   <script src="bestallning.js"></script>
   <script src="kontaktform.js"></script>
+  <script>
+    function createChecklist() {
+      document.getElementById('modalOverlay').style.display = 'block';
+      document.getElementById('checklistContainer').style.display = 'block';
+    }
+    function closeChecklist() {
+      document.getElementById('modalOverlay').style.display = 'none';
+      document.getElementById('checklistContainer').style.display = 'none';
+    }
+    function addChecklistItem() {
+      const ul = document.getElementById('checklist');
+      const text = document.getElementById('newChecklistItem').value.trim();
+      if (!text) return;
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <label>
+          <input type="checkbox"> ${text}
+          <button class="remove-item" onclick="removeChecklistItem(event)" style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:4px 8px;margin-left:8px;cursor:pointer;">Ta bort</button>
+        </label>`;
+      ul.appendChild(li);
+      document.getElementById('newChecklistItem').value = '';
+    }
+    function removeChecklistItem(event) {
+      const li = event.target.closest('li');
+      if (li) li.remove();
+    }
+  </script>
+  <!-- Lägg detta precis innan </body> -->
+<!-- Modal-överlägg för gästlistan -->
+<div id="guestModalOverlay" class="no-print"
+     style="display:none;
+            position:fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            background:rgba(0,0,0,0.5);
+            z-index:10000;">
+</div>
 
-    <script>
-  // Enkel mobilupptäckt
-  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+<!-- Gästlista-modal -->
+<div id="guestListContainer" class="no-print"
+     style="display:none;
+            position:fixed;
+            top:50%; left:50%;
+            transform:translate(-50%, -50%);
+            background:#f9f7f1;
+            border:1px solid #ddd;
+            padding:16px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.2);
+            z-index:10001;
+            width:90%; max-width:400px;
+            border-radius:8px;">
 
-  if (isMobile) {
-    // Skapa popup
-    const warning = document.createElement("div");
-    warning.style.position = "fixed";
-    warning.style.top = "0";
-    warning.style.left = "0";
-    warning.style.width = "100%";
-    warning.style.background = "#ffe2e2";
-    warning.style.padding = "16px";
-    warning.style.textAlign = "center";
-    warning.style.fontFamily = "sans-serif";
-    warning.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
-    warning.style.zIndex = "9999";
-    warning.innerHTML = `
-      📱 Denna sida fungerar bäst på dator.<br>
-      Mobilversionen är inte riktigt färdig ännu.
-      <br><br>
-      <button onclick="this.parentElement.remove()" style="margin-top: 8px; padding: 6px 12px;">Okej!</button>
-    `;
-    document.body.appendChild(warning);
-  }
-</script>
+  <!-- Stäng-knapp -->
+  <button class="close-modal no-print"
+          onclick="closeGuestList()"
+          style="position:absolute;
+                 top:8px; right:8px;
+                 background:none;
+                 border:none;
+                 font-size:1.2rem;
+                 cursor:pointer;">
+    &times;
+  </button>
 
-<!-- 100% privacy-first analytics -->
-<script async defer src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
-<noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt="" /></noscript>
+  <h2>Gästlista</h2>
+
+  <ul id="guestList">
+    <!-- createGuestList() fyller på denna lista -->
+  </ul>
+
+  <div style="margin-top:12px; text-align:right;">
+    <!-- Skriv ut-knapp för gästlistan -->
+    <button onclick="printGuestList()"
+            class="no-print"
+            style="background:#f3e0bd;
+                   border:1px solid #dbccab;
+                   border-radius:8px;
+                   padding:6px 12px;
+                   cursor:pointer;">
+      Skriv ut
+    </button>
+  </div>
+</div>
+
+
+
+  <!-- 100% privacy-first analytics -->
+  <script async defer src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+  <noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt="" /></noscript>
 </body>
-
-
 </html>
