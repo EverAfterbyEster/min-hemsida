@@ -485,3 +485,4 @@ window.addEventListener('afterprint', () => {
   document.body.classList.remove('print-checklist-mode');
   document.body.classList.remove('print-guestlist-mode');
 });
+
