@@ -120,7 +120,8 @@ function drawAll(isForExport = false) {
     const viewCenterY = window.scrollY + window.innerHeight / 2;
   
     ctx.save();
-    ctx.strokeStyle = "#888";
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = "#000";
     ctx.lineWidth = 1;
     ctx.setLineDash([5, 3]);
   
@@ -137,7 +138,7 @@ function drawAll(isForExport = false) {
     ctx.stroke();
   
     ctx.setLineDash([]);
-    ctx.fillStyle = "#444";
+    ctx.fillStyle = "#000";
     ctx.font = "10px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
@@ -170,7 +171,6 @@ function drawAll(isForExport = false) {
   }
   
    ctx.restore();
-   
 
 }
 
@@ -246,14 +246,41 @@ function saveAsImage() {
   link.click();
 }
 
+// --- Ersätt befintlig createGuestList() med detta ---
 function createGuestList() {
   const guests = objects.filter(o => o.type === "guest");
   if (guests.length === 0) {
     alert("Inga gäster tillagda ännu.");
     return;
   }
-  alert("Gästlista:\n\n" + guests.map((g, i) => `${i + 1}. ${g.name}`).join("\n"));
+
+  const ul = document.getElementById('guestList');
+  ul.innerHTML = '';  // töm tidigare lista
+
+  guests.forEach((g, i) => {
+    const li = document.createElement('li');
+    li.textContent = `${i + 1}. ${g.name}`;
+    ul.appendChild(li);
+  });
+
+  // Visa modal + overlay
+  document.getElementById('guestModalOverlay').style.display = 'block';
+  document.getElementById('guestListContainer').style.display = 'block';
 }
+
+// --- Lägg till denna funktion under createGuestList() ---
+function closeGuestList() {
+  document.getElementById('guestModalOverlay').style.display = 'none';
+  document.getElementById('guestListContainer').style.display = 'none';
+}
+
+// --- (Valfritt) Stäng modalen vid Escape ---
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeGuestList();
+  }
+});
+
 function toggleAxes() {
     showAxes = !showAxes;
     drawAll();
@@ -391,8 +418,8 @@ drawAll();
     const cmToPx = 0.8; // 1 cm = 0.8 px
     const mToPx = cmToPx * 100; // 1 meter = 80 px
   
-    ctx.strokeStyle = "#ccc";
-    ctx.fillStyle = "#666";
+    ctx.strokeStyle = "#000";
+    ctx.fillStyle = "#000";
     ctx.lineWidth = 1;
     ctx.font = "10px sans-serif";
   
@@ -428,4 +455,33 @@ drawAll();
       ctx.fillText(m + " m", baseX + 5, y + 3);
     }
   }
+  document.addEventListener('DOMContentLoaded', () => {
+    const hamBtn = document.querySelector('.hamburger');
+    const toolbar = document.querySelector('.toolbar-items');
   
+    if (hamBtn && toolbar) {
+      hamBtn.addEventListener('click', () => {
+        const isOpen = toolbar.classList.toggle('active');
+        hamBtn.setAttribute('aria-expanded', isOpen);
+      });
+    }
+  });
+  // --- Utskriftsfunktion för checklistan ---
+function printChecklist() {
+  // Sätt klass för att visa bara checklistan
+  document.body.classList.add('print-checklist-mode');
+  window.print();
+}
+
+// --- Utskriftsfunktion för gästlistan ---
+function printGuestList() {
+  // Sätt klass för att visa bara gästlistan
+  document.body.classList.add('print-guestlist-mode');
+  window.print();
+}
+
+// --- Ta bort båda utskrifts-klasserna efter att själva print-dialogen stängts ---
+window.addEventListener('afterprint', () => {
+  document.body.classList.remove('print-checklist-mode');
+  document.body.classList.remove('print-guestlist-mode');
+});
