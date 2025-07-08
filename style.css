@@ -1,4 +1,5 @@
 body {
+    margin: 0;
     font-family: 'Georgia', serif;
     background-color: #fffdf8;
     color: #4b3b2b;
@@ -173,11 +174,34 @@ body {
     margin-top: 10px;
     color: #555;
   }
+/* Hindrar horisontell scroll på hela sidan */
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
   
   /* Gör så att toolbar fyller hela bredden */
   #toolbar {
     width: 100%;
     box-sizing: border-box;
+  }
+  body {
+    overflow: auto;
+  }
+  #canvasContainer {
+    width: 100vw;
+    height: calc(100vh - 120px); /* Justera om du har ett verktygsfält t.ex. */
+    overflow: auto;
+  }
+  canvas {
+    display: block;
+  }
+  #canvasContainer {
+    width: 100vw;
+    height: calc(100vh - 200px); /* justera efter behov */
+    overflow: auto;
+    border: none;
   }
   
   canvas {
@@ -540,37 +564,16 @@ body {
   }
 }
       
-html, body {
-    width: 100%;
-    height: 100%;         /* se till att sidan fyller viewport */
-    overflow: hidden;      /* lås hela sidscrollen */
-    margin: 0;
-    padding: 0;
-    font-family: 'Georgia', serif;
-    background-color: #fffdf8;
-    color: #4b3b2b;
+  
+/* Gör scrollen mjuk i iOS/Webkit */
+#canvasContainer {
+    overflow: auto;                     /* redan satt */
+    -webkit-overflow-scrolling: touch;  /* lägg till för “momentum” scroll */
   }
   
-  
-  #canvasContainer {
-    position: relative;               /* skapar eget stacking-context */
-    width: 100vw;
-    height: calc(100vh - 120px);      /* eller justera efter din toolbar */
-    overflow-x: auto;                 /* tillåter horisontell scroll inuti behållaren */
-    overflow-y: auto;                 /* om du vill ha vertikal scroll också */
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-x pan-y;
-    z-index: 1;                        /* låg nivå, under toolbar */
-  }
-  
+  /* Tillåt touch-panning på själva canvas-elementet */
   canvas {
-    display: block;
-    margin: 0;
+    touch-action: pan-x pan-y;          /* gör att drag på canvas scrollar behållaren */
   }
-  #toolbar {
-    position: relative;   /* eller fixed/absolute om du vill */
-    z-index: 10;          /* högre än canvasContainer (1) */
-    /* … övriga styling-regler … */
-  }
-    
+  
   
