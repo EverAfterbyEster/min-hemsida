@@ -1,5 +1,4 @@
 body {
-    margin: 0;
     font-family: 'Georgia', serif;
     background-color: #fffdf8;
     color: #4b3b2b;
@@ -174,34 +173,11 @@ body {
     margin-top: 10px;
     color: #555;
   }
-/* Hindrar horisontell scroll på hela sidan */
-body {
-    margin: 0;
-    padding: 0;
-    overflow-x: auto;
-  }
   
   /* Gör så att toolbar fyller hela bredden */
   #toolbar {
     width: 100%;
     box-sizing: border-box;
-  }
-  body {
-    overflow: auto;
-  }
-  #canvasContainer {
-    width: 100vw;
-    height: calc(100vh - 120px); /* Justera om du har ett verktygsfält t.ex. */
-    overflow: auto;
-  }
-  canvas {
-    display: block;
-  }
-  #canvasContainer {
-    width: 100vw;
-    height: calc(100vh - 200px); /* justera efter behov */
-    overflow: auto;
-    border: none;
   }
   
   canvas {
@@ -566,20 +542,23 @@ body {
       
 html, body {
     width: 100%;
-    /* Låt hela sidan scrolla vågrätt om innehållet är bredare */
     overflow-x: auto;
-    /* Momentum-scroll på iOS */
+    -webkit-overflow-scrolling: touch;  /* mjuk momentum-scroll på iOS */
+    touch-action: pan-x pan-y;          /* låter dig panorera med fingret */
+    margin: 0;
+    padding: 0;
+  }
+  
+  #canvasContainer {
+    width: 100vw;
+    height: calc(100vh - 120px);   /* justera efter din header/tool-bar */
+    overflow-x: auto;              /* horisontell scroll */
+    overflow-y: auto;              /* vertikal scroll om du vill */
     -webkit-overflow-scrolling: touch;
-    /* Tillåt panoreringsriktning både horisontellt och vertikalt */
     touch-action: pan-x pan-y;
   }
   
-  /* Se till att #canvasContainer tillåter att innehållet kan bli bredare än viewport */
-  #canvasContainer {
-    width: 100vw;
-    height: calc(100vh - 120px); /* eller justera efter behov */
-    overflow-x: auto;             /* horisontell scroll */
-    overflow-y: auto;             /* vertikal scroll */
-    /* momentum-scroll även här */
-    -webkit-overflow-scrolling: touch;
+  canvas {
+    display: block;                /* tar bort indrag/marginaler runt canvas */
   }
+  
