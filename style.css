@@ -542,23 +542,35 @@ body {
       
 html, body {
     width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;  /* mjuk momentum-scroll på iOS */
-    touch-action: pan-x pan-y;          /* låter dig panorera med fingret */
+    height: 100%;         /* se till att sidan fyller viewport */
+    overflow: hidden;      /* lås hela sidscrollen */
     margin: 0;
     padding: 0;
+    font-family: 'Georgia', serif;
+    background-color: #fffdf8;
+    color: #4b3b2b;
   }
   
+  
   #canvasContainer {
+    position: relative;               /* skapar eget stacking-context */
     width: 100vw;
-    height: calc(100vh - 120px);   /* justera efter din header/tool-bar */
-    overflow-x: auto;              /* horisontell scroll */
-    overflow-y: auto;              /* vertikal scroll om du vill */
+    height: calc(100vh - 120px);      /* eller justera efter din toolbar */
+    overflow-x: auto;                 /* tillåter horisontell scroll inuti behållaren */
+    overflow-y: auto;                 /* om du vill ha vertikal scroll också */
     -webkit-overflow-scrolling: touch;
     touch-action: pan-x pan-y;
+    z-index: 1;                        /* låg nivå, under toolbar */
   }
   
   canvas {
-    display: block;                /* tar bort indrag/marginaler runt canvas */
+    display: block;
+    margin: 0;
   }
+  #toolbar {
+    position: relative;   /* eller fixed/absolute om du vill */
+    z-index: 10;          /* högre än canvasContainer (1) */
+    /* … övriga styling-regler … */
+  }
+    
   
