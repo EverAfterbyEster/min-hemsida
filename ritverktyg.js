@@ -377,28 +377,41 @@ canvas.addEventListener("touchstart", (e) => {
     }
   }
   drawAll();
-}, { passive: false });
+}, { passive: true });
 
 canvas.addEventListener("touchmove", (e) => {
-  e.preventDefault();
-  if (!dragTarget) return;
-
-  const touch = e.touches[0];
-  const rect = canvas.getBoundingClientRect();
-  const mx = touch.clientX - rect.left;
-  const my = touch.clientY - rect.top;
-
-  if (dragTarget.type === "rect") {
-    const angle = (dragTarget.rotation || 0) * Math.PI / 180;
-    dragTarget.x = mx - (offsetX * Math.cos(angle) + offsetY * Math.sin(angle)) - dragTarget.w / 2;
-    dragTarget.y = my - (-offsetX * Math.sin(angle) + offsetY * Math.cos(angle)) - dragTarget.h / 2;
-  } else {
-    dragTarget.x = mx - offsetX;
-    dragTarget.y = my - offsetY;
-  }
-
-  drawAll();
-}, { passive: false });
+    // Logga om vi drar ett objekt eller inte
+    const active = !!dragTarget;
+    console.log("touchmove, dragging?", active);
+  
+    // Hämta första touchen
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const mx = touch.clientX - rect.left;
+    const my = touch.clientY - rect.top;
+  
+    // Om inget objekt är aktivt, släpp igenom scroll
+    if (!dragTarget) {
+      return;  // inga preventDefault → containern scrollar
+    }
+  
+    // Förhindra sid-scroll bara när vi drar ett objekt
+    e.preventDefault();
+  
+    // --- din befintliga drag-logik ---
+    if (dragTarget.type === "rect") {
+      const angle = (dragTarget.rotation || 0) * Math.PI / 180;
+      dragTarget.x = mx - (offsetX * Math.cos(angle) + offsetY * Math.sin(angle)) - dragTarget.w / 2;
+      dragTarget.y = my - (-offsetX * Math.sin(angle) + offsetY * Math.cos(angle)) - dragTarget.h / 2;
+    } else {
+      dragTarget.x = mx - offsetX;
+      dragTarget.y = my - offsetY;
+    }
+  
+    drawAll();
+  }, { passive: false });
+  
+  
 
 canvas.addEventListener("touchend", () => {
   dragTarget = null;
@@ -467,11 +480,13 @@ drawAll();
     }
   });
   // --- Utskriftsfunktion för checklistan ---
-function printChecklist() {
-  // Sätt klass för att visa bara checklistan
-  document.body.classList.add('print-checklist-mode');
-  window.print();
-}
+  function printChecklist() {
+    document.body.classList.add('print-checklist-mode');
+    setTimeout(() => {
+      window.print();
+      document.body.classList.remove('print-checklist-mode');
+    }, 100);
+  }
 
 // --- Utskriftsfunktion för gästlistan ---
 function printGuestList() {
@@ -485,4 +500,19 @@ window.addEventListener('afterprint', () => {
   document.body.classList.remove('print-checklist-mode');
   document.body.classList.remove('print-guestlist-mode');
 });
+// Lägg gärna detta i slutet av din <script>-fil eller precis före </body>
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('close-mobile-notice');
+    var notice = document.getElementById('mobile-notice');
+    btn.addEventListener('click', function() {
+      notice.style.display = 'none';
+    });
+  });
+  // Gör containern lyhörd för scroll på mobil
+document
+.getElementById('canvasContainer')
+.addEventListener('touchmove', () => {
+  /* tom */ 
+}, { passive: true });
 
+  
