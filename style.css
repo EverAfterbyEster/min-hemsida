@@ -574,7 +574,7 @@ body {
       align-items: center;
       justify-content: space-between;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      z-index: 2000;
+      z-index: 1001;
       font-family: inherit;
       color: #4b3b2b;
     }
@@ -643,28 +643,94 @@ body {
     z-index: 12;
   }
     
-/* --- Desktop: ingen hamburgare alls --- */
+  /* --- Desktop: ingen hamburgare alls --- */
 .hamburger {
-  display: none;
-}
-
-/* --- Mobil (≤600px): visa och positionera hamburgaren --- */
-@media (max-width: 600px) {
-  .hamburger {
-    display: flex;
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 1003;
-    /* övriga mobil-specifika regler här… */
-    transform: none;  /* om du tidigare satt translateY på hamburgaren */
+    display: none;
   }
-
+  
+  /* --- Mobil (≤600px): visa och positionera hamburgaren --- */
+  @media (max-width: 600px) {
+    .hamburger {
+      display: flex;
+      position: absolute;
+      top: 60px;
+      right: 12px;
+      z-index: 1003;
+      /* övriga mobil-specifika regler… */
+      transform: none;  /* ta bort transform: translateY(–50%) om du haft det globalt */
+    }
+  
+    .toolbar-items {
+      /* mobil-menyn ska ligga ovanför canvas */
+      position: absolute;
+      top: 50px;
+      right: 0;
+      z-index: 1002;
+    }
+  }
+  /* --- Desktop (bredare än 600px): toolbar i normalt flöde --- */
+@media (min-width: 601px) {
+    #toolbar {
+      position: static;    /* normal placering under titel-boxen */
+      margin-top: 80px;    /* lite luft uppifrån */
+      z-index: auto;       /* ta bort alla z-index som drar upp den */
+    }
+  }
+  #toolbar {
+    /* ... dina övriga regler ... */
+    min-height: 120px; /* eller vad som behövs för att rymma två rader */
+  }
   .toolbar-items {
-    position: absolute;
-    top: 50px;   /* justera om du vill ha mer luft under toolbaren */
-    right: 0;
-    z-index: 1002;
-    /* behåll display: none; och active-klassen som tidigare */
+    background: #D0ACAC;
+    padding: 16px;
+    border-radius: 8px;
   }
-}
+  /* ta då bort bakgrunden från #toolbar */
+  #toolbar {
+    background: none;
+  }
+/* ge hamburgarknappen samma bakgrund */
+.hamburger {
+    background-color: #f7e7ce;
+    border: 1px solid #d4b98c;
+    border-radius: 8px;
+    padding: 8px;
+    /* behåll dina befintliga mobil-regler för position, z-index etc */
+  }
+/* LÄGG LÄNGST UPP I din style.css: */
+#toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;        /* högre än canvas */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #D0ACAC;   /* rosa bar */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  }
+/* Flytta ner innehållet så att det inte hamnar under toolbar: */
+#canvasContainer {
+    margin-top: calc(16px * 2 + 46px); /* padding × 2 + knapp-höjd ≈ toolbar-höjd */
+    /* alternativt en fast höjd, t.ex. margin-top: 80px; */
+  }
+/* Mobil menyrad (samma rosa som #toolbar) */
+@media (max-width: 600px) {
+    .toolbar-items {
+      background: #D0ACAC;
+      width: 100%;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .hamburger {
+      /* ligger automatiskt inom #toolbar, så bakgrund syns bakom */
+      /* om du vill ge den egen bakgrund: */
+      background: #f7e7ce;
+      border: 1px solid #d4b98c;
+      border-radius: 8px;
+    }
+  }
+  
