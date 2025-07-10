@@ -733,4 +733,12 @@ body {
       border-radius: 8px;
     }
   }
-  
+ @media (min-width: 601px) {
+    #toolbar {
+      /* ny, kortare höjd bara på desktop */
+      padding: 8px 16px;
+    }
+    #canvasContainer {
+      margin-top: 8px;
+    }
+  } 
