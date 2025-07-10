@@ -574,7 +574,7 @@ body {
       align-items: center;
       justify-content: space-between;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      z-index: 1001;
+      z-index: 2000;
       font-family: inherit;
       color: #4b3b2b;
     }
@@ -587,8 +587,6 @@ body {
       cursor: pointer;
       color: #4b3b2b;
       padding: 0;
-      position: fixed;    /* se till att den är fixerad */
-      z-index: 2000;      /* högre än canvas och toolbar */
     }
   }
   #canvasContainer {
