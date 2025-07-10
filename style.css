@@ -605,18 +605,41 @@ body {
     cursor: pointer;
     touch-action: auto;   /* låter pek-drag bubbla upp till containern */
   }
-  
-/* Se till att verktygsfält och hamburgermeny ligger över canvas */
+  /* Se till att verktygsfält och hamburgermeny ligger över canvas */
 #toolbar {
-  position: relative;
-  z-index: 1002;
-}
-
-@media (max-width: 600px) {
-  .toolbar-items {
+    position: relative;
     z-index: 1002;
   }
-  .hamburger {
-    z-index: 1003;
+  
+  @media (max-width: 600px) {
+    .toolbar-items {
+      z-index: 1002;
+    }
+    .hamburger {
+      z-index: 1003;
+    }
   }
-}
+/* --- Lägg längst ner i din CSS --- */
+
+/* Se till att canvas‐containern ligger under toolbaren */
+#canvasContainer {
+    position: relative;
+    z-index: 0;              /* lägre än toolbaren */
+    overflow: scroll;         /* inte auto – säkerställer scroll på alla enheter */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Gör så toolbar + meny alltid ligger över canvas */
+  #toolbar {
+    position: relative;
+    z-index: 10;
+  }
+  .hamburger {
+    position: relative;
+    z-index: 11;
+  }
+  .toolbar-items {
+    position: absolute;       /* du har redan absolute mobil */
+    z-index: 12;
+  }
+    
