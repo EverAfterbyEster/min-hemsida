@@ -189,19 +189,9 @@ body {
   body {
     overflow: auto;
   }
-  #canvasContainer {
-    width: 100vw;
-    height: calc(100vh - 120px); /* Justera om du har ett verktygsfält t.ex. */
-    overflow: auto;
-  }
+ 
   canvas {
     display: block;
-  }
-  #canvasContainer {
-    width: 100vw;
-    height: calc(100vh - 200px); /* justera efter behov */
-    overflow: auto;
-    border: none;
   }
   
   canvas {
@@ -564,3 +554,55 @@ body {
   }
 }
       
+/* Grundstil – göm som standard */
+#mobile-notice {
+    display: none;
+  }
+  
+  /* Endast på mobil: visa rutan */
+  @media (max-width: 600px) {
+    #mobile-notice {
+      display: flex;
+      position: fixed;
+      top: 60px;               /* justera så den hamnar under toolbaren */
+      left: 8px;
+      right: 8px;
+      padding: 12px 16px;
+      background: #f7e7ce;
+      border: 1px solid #d4b98c;
+      border-radius: 8px;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      z-index: 1001;
+      font-family: inherit;
+      color: #4b3b2b;
+    }
+  
+    #mobile-notice button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+      color: #4b3b2b;
+      padding: 0;
+    }
+  }
+  #canvasContainer {
+    width: 100vw;
+    height: calc(100vh - 120px);     /* anpassa efter din toolbar-höjd */
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;  /* mjuk scroll på iOS */
+    touch-action: pan-x pan-y;          /* tillåt både horisontell och vertikal scroll */
+  }
+  
+  #canvas {
+    display: block;
+    margin: 20px auto;
+    background-color: #fffdf8;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    touch-action: auto;   /* låter pek-drag bubbla upp till containern */
+  }
+  
