@@ -606,3 +606,17 @@ body {
     touch-action: auto;   /* låter pek-drag bubbla upp till containern */
   }
   
+/* Se till att verktygsfält och hamburgermeny ligger över canvas */
+#toolbar {
+  position: relative;
+  z-index: 1002;
+}
+
+@media (max-width: 600px) {
+  .toolbar-items {
+    z-index: 1002;
+  }
+  .hamburger {
+    z-index: 1003;
+  }
+}
