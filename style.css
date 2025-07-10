@@ -587,6 +587,8 @@ body {
       cursor: pointer;
       color: #4b3b2b;
       padding: 0;
+      position: fixed;    /* se till att den är fixerad */
+      z-index: 2000;      /* högre än canvas och toolbar */
     }
   }
   #canvasContainer {
