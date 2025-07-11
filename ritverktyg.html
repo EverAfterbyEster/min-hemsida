@@ -5,18 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ritverktyg – Bordsplacering</title>
   <link rel="stylesheet" href="style.css">
-  <!-- Skriv ut-inställningar för checklista -->
   
 </head>
 <body>
-  <div style="padding: 10px; background: #eee;">
-    <label for="titleInput">Rubrik:</label>
-    <input type="text" id="titleInput" value="Anna & Noah 2026-07-12" oninput="drawAll()" style="width: 300px; padding: 4px; font-family: 'Georgia', serif;">
-  </div>
+  <!-- Mobil‐notis högst upp -->
   <div id="mobile-notice">
-  Mobilversionen är inte klar ännu
-  <button id="close-mobile-notice">×</button>
-</div>
+    <span>Mobilversionen är inte riktigt klar än, testa gärna på dator.</span>
+    <button id="close-mobile-notice" aria-label="Stäng">×</button>
+  </div>
+
+  <!-- Wrapper runt rubrik + toolbar -->
+  <div id="headerWrapper">
+
+    <!-- Din rubrikrad -->
+    <div style="padding: 10px; background: #eee;">
+      <label for="titleInput">Rubrik:</label>
+      <input type="text" id="titleInput" value="Anna & Noah 2026-07-12"
+             oninput="drawAll()"
+             style="width: 300px; padding: 4px; font-family: 'Georgia', serif;">
+    </div>
+  
 
   <div id="toolbar">
     <button class="hamburger" aria-label="Öppna meny" aria-expanded="false">
@@ -42,6 +50,7 @@
       <button id="sumButton" onclick="summarizeOrder()" disabled style="opacity: 0.5; cursor: not-allowed;">Summera beställning</button>
     </div>
   </div>
+</div>
 
   <div id="canvasContainer">
     <canvas id="canvas"></canvas>
@@ -118,20 +127,22 @@ style="display:none;
                      cursor:pointer;">
         Lägg till
       </button>
-      <!-- Inlagd Skriv ut-knapp inne i checklist-container -->
-      <button onclick="printChecklist()"
+      <!-- Ladda ner-knapp till checklista -->
+      <button onclick="downloadChecklist()"
               class="no-print"
               style="background:#f3e0bd;
                      border:1px solid #dbccab;
                      border-radius:8px;
                      padding:6px 12px;
                      cursor:pointer;">
-        Skriv ut
+        Ladda ner som .png
       </button>
     </div>
   
   </div>
 
+  <!-- Till nedladdningsfunktioner. Denna måste ligga innan 'ritverktyg.js' -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="ritverktyg.js"></script>
   <script src="bestallning.js"></script>
   <script src="kontaktform.js"></script>
@@ -206,15 +217,15 @@ style="display:none;
   </ul>
 
   <div style="margin-top:12px; text-align:right;">
-    <!-- Skriv ut-knapp för gästlistan -->
-    <button onclick="printGuestList()"
+    <!-- Ladda ner-knapp för gästlistan -->
+    <button onclick="downloadGuestList()"
             class="no-print"
             style="background:#f3e0bd;
                    border:1px solid #dbccab;
                    border-radius:8px;
                    padding:6px 12px;
                    cursor:pointer;">
-      Skriv ut
+      Ladda ner som .png
     </button>
   </div>
 </div>
@@ -226,4 +237,3 @@ style="display:none;
   <noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt="" /></noscript>
 </body>
 </html>
-
