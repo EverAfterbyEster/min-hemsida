@@ -13,12 +13,19 @@ let showAxes = false;
 
 function resizeCanvas() {
   const scale = window.devicePixelRatio || 1;
-  const extraWidth = window.innerWidth * 0.5;
+  const extraWidth = window.innerWidth < 600
+    ? window.innerWidth    // makes total width = 2× viewport
+    : window.innerWidth * 0.5;
   const extraHeight = window.innerHeight * 0.5;
-  canvas.width = (window.innerWidth + extraWidth) * scale;
-  canvas.height = (window.innerHeight + extraHeight) * scale;
-  canvas.style.width = (window.innerWidth + extraWidth) + "px";
-  canvas.style.height = (window.innerHeight + extraHeight) + "px";
+
+  const w = window.innerWidth + extraWidth;
+  const h = window.innerHeight + extraHeight;
+
+  canvas.width  = w * scale;
+  canvas.height = h * scale;
+
+  canvas.style.width  = w + "px";
+  canvas.style.height = h + "px";
 
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
   drawAll();
@@ -240,9 +247,87 @@ function renameTable() {
 }
 
 function saveAsImage() {
+  const scale  = window.devicePixelRatio || 1;
+  const pxPerM = 80;      // same scale you’re using throughout
+  const pad    = 40;      // CSS-px padding on each side
+  const minW   = 26 * pxPerM;  // default 60 m width in px
+  const minH   = 19 * pxPerM;  // default 40 m height in px
+
+  // 1) Find bounding box of objects
+  let minX = Infinity, minY = Infinity;
+  let maxX = -Infinity, maxY = -Infinity;
+
+  objects.forEach(obj => {
+    if (obj.type === 'circle' || obj.type === 'guest') {
+      const r = obj.type === 'guest' ? 20 : obj.r;
+      minX = Math.min(minX, obj.x - r);
+      minY = Math.min(minY, obj.y - r);
+      maxX = Math.max(maxX, obj.x + r);
+      maxY = Math.max(maxY, obj.y + r);
+    } else { // rect
+      const angle = ((obj.rotation||0) * Math.PI)/180;
+      const cx = obj.x + obj.w/2, cy = obj.y + obj.h/2;
+      const dx = Math.abs(Math.cos(angle)*obj.w/2) + Math.abs(Math.sin(angle)*obj.h/2);
+      const dy = Math.abs(Math.sin(angle)*obj.w/2) + Math.abs(Math.cos(angle)*obj.h/2);
+      minX = Math.min(minX, cx - dx);
+      minY = Math.min(minY, cy - dy);
+      maxX = Math.max(maxX, cx + dx);
+      maxY = Math.max(maxY, cy + dy);
+    }
+  });
+
+  // 2) If no objects, fall back to a centered default region
+  const worldCssW = canvas.width / scale;
+  const worldCssH = canvas.height / scale;
+  if (minX === Infinity) {
+    // center a default box
+    const cx = worldCssW/2, cy = worldCssH/2;
+    minX = cx - minW/2;
+    minY = cy - minH/2;
+    maxX = cx + minW/2;
+    maxY = cy + minH/2;
+  }
+
+  // 3) Add padding
+  minX = Math.max(0,   minX - pad);
+  minY = Math.max(0,   minY - pad);
+  maxX = Math.min(worldCssW, maxX + pad);
+  maxY = Math.min(worldCssH, maxY + pad);
+
+  // 4) Enforce minimum size
+  let w = maxX - minX;
+  let h = maxY - minY;
+  if (w < minW) {
+    const dw = (minW - w)/2;
+    minX = Math.max(0, minX - dw);
+    maxX = Math.min(worldCssW, maxX + dw);
+    w = maxX - minX;
+  }
+  if (h < minH) {
+    const dh = (minH - h)/2;
+    minY = Math.max(0, minY - dh);
+    maxY = Math.min(worldCssH, maxY + dh);
+    h = maxY - minY;
+  }
+
+  // 5) Render that region to an offscreen canvas
+  const exportCanvas = document.createElement('canvas');
+  exportCanvas.width  = w * scale;
+  exportCanvas.height = h * scale;
+  const ec = exportCanvas.getContext('2d');
+  ec.setTransform(scale, 0, 0, scale, 0, 0);
+  ec.drawImage(
+    canvas,
+    minX * scale, minY * scale,
+    w * scale,   h * scale,
+    0, 0,
+    w, h
+  );
+
+  // 6) Download it
   const link = document.createElement('a');
   link.download = 'bordsplacering.png';
-  link.href = canvas.toDataURL('image/png');
+  link.href     = exportCanvas.toDataURL('image/png');
   link.click();
 }
 
@@ -417,102 +502,158 @@ canvas.addEventListener("touchend", () => {
   dragTarget = null;
 });
 
-  
-
 drawAll();
 
-// ... all din befintliga kod ovanför drawAll() ...
+function drawScalebars() {
+  const cmToPx = 0.8; // 1 cm = 0.8 px
+  const mToPx = cmToPx * 100; // 1 meter = 80 px
 
-// ritverktyg.js
+  ctx.strokeStyle = "#000";
+  ctx.fillStyle = "#000";
+  ctx.lineWidth = 1;
+  ctx.font = "10px sans-serif";
 
+  // Horisontell skalstock centrerad
+  const startX = 200;
+  const endX = 1400;
+  const baseY = canvas.height - 40;
 
-  
-  function drawScalebars() {
-    const cmToPx = 0.8; // 1 cm = 0.8 px
-    const mToPx = cmToPx * 100; // 1 meter = 80 px
-  
-    ctx.strokeStyle = "#000";
-    ctx.fillStyle = "#000";
-    ctx.lineWidth = 1;
-    ctx.font = "10px sans-serif";
-  
-    // Horisontell skalstock centrerad
-    const startX = 200;
-    const endX = 1400;
-    const baseY = canvas.height - 40;
-  
-    ctx.textAlign = "center";
-    for (let m = 0; m <= (endX - startX) / mToPx; m++) {
-      const x = startX + m * mToPx;
-      if (x > endX) break;
-      ctx.beginPath();
-      ctx.moveTo(x, baseY);
-      ctx.lineTo(x, baseY + 10);
-      ctx.stroke();
-      ctx.fillText(m + " m", x, baseY + 22);
-    }
-  
-    // Vertikal skalstock centrerad
-    const startY = 100;
-    const endY = 600;
-    const baseX = 60;
-  
-    ctx.textAlign = "left";
-    for (let m = 0; m <= (endY - startY) / mToPx; m++) {
-      const y = startY + m * mToPx;
-      if (y > endY) break;
-      ctx.beginPath();
-      ctx.moveTo(baseX - 10, y);
-      ctx.lineTo(baseX, y);
-      ctx.stroke();
-      ctx.fillText(m + " m", baseX + 5, y + 3);
-    }
+  ctx.textAlign = "center";
+  for (let m = 0; m <= (endX - startX) / mToPx; m++) {
+    const x = startX + m * mToPx;
+    if (x > endX) break;
+    ctx.beginPath();
+    ctx.moveTo(x, baseY);
+    ctx.lineTo(x, baseY + 10);
+    ctx.stroke();
+    ctx.fillText(m + " m", x, baseY + 22);
   }
-  document.addEventListener('DOMContentLoaded', () => {
-    const hamBtn = document.querySelector('.hamburger');
-    const toolbar = document.querySelector('.toolbar-items');
-  
-    if (hamBtn && toolbar) {
-      hamBtn.addEventListener('click', () => {
-        const isOpen = toolbar.classList.toggle('active');
-        hamBtn.setAttribute('aria-expanded', isOpen);
+
+  // Vertikal skalstock centrerad
+  const startY = 100;
+  const endY = 600;
+  const baseX = 60;
+
+  ctx.textAlign = "left";
+  for (let m = 0; m <= (endY - startY) / mToPx; m++) {
+    const y = startY + m * mToPx;
+    if (y > endY) break;
+    ctx.beginPath();
+    ctx.moveTo(baseX - 10, y);
+    ctx.lineTo(baseX, y);
+    ctx.stroke();
+    ctx.fillText(m + " m", baseX + 5, y + 3);
+  }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const hamBtn   = document.querySelector('.hamburger');
+  const toolbar  = document.querySelector('.toolbar-items');
+
+  if (hamBtn && toolbar) {
+    // 1) Toggle open/close on hamburger
+    hamBtn.addEventListener('click', () => {
+      const isOpen = toolbar.classList.toggle('active');
+      hamBtn.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    // 2) Close menu after clicking any action button
+    toolbar.querySelectorAll('button').forEach(button => {
+      button.addEventListener('click', () => {
+        toolbar.classList.remove('active');
+        hamBtn.setAttribute('aria-expanded', 'false');
       });
-    }
-  });
-  // --- Utskriftsfunktion för checklistan ---
-  function printChecklist() {
-    document.body.classList.add('print-checklist-mode');
-    setTimeout(() => {
-      window.print();
-      document.body.classList.remove('print-checklist-mode');
-    }, 100);
+    });
   }
+});
 
-// --- Utskriftsfunktion för gästlistan ---
-function printGuestList() {
-  // Sätt klass för att visa bara gästlistan
-  document.body.classList.add('print-guestlist-mode');
-  window.print();
+// --- Nedladdningsfunktion för checklistan ---
+async function downloadChecklist() {
+  const container   = document.getElementById('checklistContainer');
+  const closeBtn    = container.querySelector('.close-modal');
+  const downloadBtn = container.querySelector('button[onclick="downloadChecklist()"]');
+  const controlsDiv = document.getElementById('newChecklistItem').closest('div');
+
+  // Hide UI chrome
+  closeBtn.style.display    = 'none';
+  downloadBtn.style.display = 'none';
+  controlsDiv.style.display = 'none';
+
+  try {
+    // Render to a canvas
+    const c = await html2canvas(container, {
+      backgroundColor: '#fff',
+      scale: 2
+    });
+
+    // 1) Synchronously get a base64 data URL
+    const dataURL = c.toDataURL('image/png');
+
+    // 2) Create a temporary anchor
+    const a = document.createElement('a');
+    a.href = dataURL;
+    a.download = 'checklista.png';
+
+    // 3) If download isn't supported, open in a new tab
+    if (typeof a.download === 'undefined') {
+      window.open(dataURL, '_blank');
+    } else {
+      // append it so Firefox on Android will honor the click
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+  } catch (err) {
+    console.error('Could not capture checklist:', err);
+    alert('Något gick fel vid nedladdningen. Prova igen.');
+  } finally {
+    // restore UI chrome
+    closeBtn.style.display    = '';
+    downloadBtn.style.display = '';
+    controlsDiv.style.display = '';
+  }
 }
 
-// --- Ta bort båda utskrifts-klasserna efter att själva print-dialogen stängts ---
-window.addEventListener('afterprint', () => {
-  document.body.classList.remove('print-checklist-mode');
-  document.body.classList.remove('print-guestlist-mode');
-});
-// Lägg gärna detta i slutet av din <script>-fil eller precis före </body>
-document.addEventListener('DOMContentLoaded', function() {
-    var btn = document.getElementById('close-mobile-notice');
-    var notice = document.getElementById('mobile-notice');
-    btn.addEventListener('click', function() {
-      notice.style.display = 'none';
-    });
-  });
-  // Gör containern lyhörd för scroll på mobil
-document
-.getElementById('canvasContainer')
-.addEventListener('touchmove', () => {
-  /* tom */ 
-}, { passive: true });
+// --- Nedladdningsfunktion för gästlistan ---
+async function downloadGuestList() {
+  const container   = document.getElementById('guestListContainer');
+  const closeBtn    = container.querySelector('.close-modal');
+  const downloadBtn = container.querySelector('button[onclick="downloadGuestList()"]');
 
-  
+  // hide the buttons so they don’t appear in the snapshot
+  closeBtn.style.display    = 'none';
+  downloadBtn.style.display = 'none';
+
+  try {
+    // render to an off‐screen canvas
+    const c = await html2canvas(container, {
+      backgroundColor: '#fff',
+      scale: 2
+    });
+
+    // get a base64 data URL synchronously
+    const dataURL = c.toDataURL('image/png');
+
+    // create a temporary <a>
+    const a = document.createElement('a');
+    a.href     = dataURL;
+    a.download = 'gastlista.png';
+
+    // if download attribute unsupported, open in new tab
+    if (typeof a.download === 'undefined') {
+      window.open(dataURL, '_blank');
+    } else {
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+  } catch (err) {
+    console.error('Could not capture guest list:', err);
+    alert('Något gick fel vid nedladdningen. Prova igen.');
+  } finally {
+    // restore buttons
+    closeBtn.style.display    = '';
+    downloadBtn.style.display = '';
+  }
+}
