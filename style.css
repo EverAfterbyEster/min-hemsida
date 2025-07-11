@@ -189,10 +189,7 @@ body {
   body {
     overflow: auto;
   }
- 
-  canvas {
-    display: block;
-  }
+  
   
   canvas {
     display: block;
@@ -560,11 +557,12 @@ body {
   }
   
   /* Endast på mobil: visa rutan */
+  /*
   @media (max-width: 600px) {
     #mobile-notice {
       display: flex;
       position: fixed;
-      top: 60px;               /* justera så den hamnar under toolbaren */
+      top: 60px;             
       left: 8px;
       right: 8px;
       padding: 12px 16px;
@@ -589,6 +587,8 @@ body {
       padding: 0;
     }
   }
+    */
+
   #canvasContainer {
     width: 100vw;
     height: calc(100vh - 120px);     /* anpassa efter din toolbar-höjd */
@@ -697,22 +697,35 @@ body {
     padding: 8px;
     /* behåll dina befintliga mobil-regler för position, z-index etc */
   }
-/* LÄGG LÄNGST UPP I din style.css: */
-#toolbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;        /* högre än canvas */
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    padding: 16px;
-    background: #D0ACAC;   /* rosa bar */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  #headerWrapper {
+    position: relative;
+    z-index: 1010;  /* högre än den fasta toolbaren */
   }
+  
+/* LÄGG LÄNGST UPP I din style.css: */
+/* --- Mobil (≤600px): toolbar fixed överst --- */
+@media screen and (max-width: 600px) {
+    #toolbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      /* behåll dina rosa bakgrund/box-shadow här */
+    }
+    /* Skjuter ner allt innehåll under den fixade toolbaren */
+    #canvasContainer {
+      margin-top: calc(16px * 2 + 46px);
+    }
+  }
+  
+  /* --- Desktop (≥601px): normal ”flödes-toolbar” --- */
+  @media screen and (min-width: 601px) {
+    #toolbar {
+      position: static;    /* normal placering under headerWrapper */
+      margin-bottom: 16px; /* lite luft */
+      z-index: auto;
+    }
+  }
+  
 /* Flytta ner innehållet så att det inte hamnar under toolbar: */
 #canvasContainer {
     margin-top: calc(16px * 2 + 46px); /* padding × 2 + knapp-höjd ≈ toolbar-höjd */
@@ -733,11 +746,75 @@ body {
       border-radius: 8px;
     }
   }
-@media (min-width: 601px) {
-  /* Gör toolbaren kortare och ge den luft under sig */
-  #toolbar {
-    padding: 8px 16px;    /* mindre höjd på baren */
-    margin-bottom: 16px;  /* tryck ner allt innehåll med 16px */
+  
+  @media (min-width: 601px) {
+    /* Gör toolbaren kortare och ge den luft under sig */
+    #toolbar {
+      padding: 8px 16px;    /* mindre höjd på baren */
+      margin-bottom: 16px;  /* tryck ner allt innehåll med 16px */
+    }
   }
-}
-
+  /* Bara på desktop (>600px) */
+@media screen and (min-width: 601px) {
+    #toolbar {
+      /* krympt padding om du vill göra baren lite mindre i höjdled */
+      padding: 12px 16px;  
+  
+      /* ge luft under toolbaren så att allt innehåll (canvas etc) skjuts ner */
+      margin-bottom: 24px;
+    }
+  }
+  /* ───── Desktop: fixad toolbar högst upp ───── */
+@media (min-width: 601px) {
+    #toolbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: #D0ACAC;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px; /* styr barens höjd */
+    }
+  
+    /* Tryck ner resten av innehållet */
+    #canvasContainer,
+    #canvas {
+      margin-top: 70px;  /* justera efter din toolbar-höjd */
+    }
+    /* Om du har en HTML-rubrik högst upp: */
+    #titleInput,
+    label[for="titleInput"] {
+      margin-top: 30px;
+    }
+  }
+  @media screen and (min-width: 601px) {
+    #toolbar {
+      position: fixed;
+      top: 40px;           /* istället för top: 0 */
+      left: 0;
+      right: 0;
+      /* resten som förut… */
+    }
+  
+    /* och skjuta ner innehållet så det inte ligger under verktygsfältet */
+    #canvasContainer {
+      margin-top: calc(40px + /*toolbar-höjd*/ 24px + /*padding-botten*/ 46px);
+      /* om du räknat ut padding-top (12px) ×2 + knapp-höjd 46px = 70px,
+         och rubrikrad 40px → total 110px, så margin-top:110px; */
+    }
+  }
+  #headerWrapper { position: relative; }
+  #toolbar {
+    position: fixed;
+    top:  /*höjden på titleBar i p*/x ;
+    left: 0; right: 0;
+    background: #D0ACAC;
+    /* … övriga regler … */
+  }
+      
