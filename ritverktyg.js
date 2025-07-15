@@ -15,7 +15,11 @@ function resizeCanvas() {
   const extraWidth = window.innerWidth < 600
     ? window.innerWidth  * 2
     : window.innerWidth * 0.5;
-  const extraHeight = window.innerHeight * 0.5;
+  //const extraHeight = window.innerHeight * 0.5; //HÄR
+
+  const extraHeight = window.innerWidth < 600
+    ? window.innerHeight * 1
+    : window.innerHeight * 0.5;
 
   const w = window.innerWidth + extraWidth;
   const h = window.innerHeight + extraHeight;
@@ -173,16 +177,6 @@ function onTitleChange() {
   document.getElementById('titleDisplay').textContent = text;
 }
 
-function updateLayout() {
-  const header = document.getElementById('headerWrapper');
-  const canvasContainer = document.getElementById('canvasContainer');
-  if (!header || !canvasContainer) return;
-
-  //canvasContainer.style.marginTop = header.offsetHeight + 'px'; //HÄR
-
-  drawAll();
-}
-
 function updateFloatingButtons() {
   const floatingButtons = document.getElementById('floatingButtons');
   const buttons = floatingButtons.querySelectorAll('button');
@@ -290,10 +284,10 @@ function saveAsImage() {
   const maxPadM  = 50;
   const maxPad   = maxPadM * pxPerM;
 
-  // ↓ new: height reserved for the title area (in CSS-px)
+  // height reserved for the title area (in CSS-px)
   const titleArea = 40;
 
-  // ↓ half-size on mobile if you still have that logic…
+  // half-size on mobile
   const isMobile = window.innerWidth <= 600;
   const baseMinW = 15 * pxPerM;
   const baseMinH = 10 * pxPerM;
@@ -396,7 +390,6 @@ function saveAsImage() {
   link.click();
 }
 
-// --- Ersätt befintlig createGuestList() med detta ---
 function createGuestList() {
   const guests = objects.filter(o => o.type === "guest");
   if (guests.length === 0) {
@@ -422,10 +415,144 @@ function closeGuestList() {
   document.getElementById('guestListContainer').style.display = 'none';
 }
 
-function toggleAxes() {
-    showAxes = !showAxes;
-    drawAll();
+function createChecklist() {
+  document.getElementById('modalOverlay').style.display = 'block';
+  document.getElementById('checklistContainer').style.display = 'block';
+}
+
+function closeChecklist() {
+  document.getElementById('modalOverlay').style.display = 'none';
+  document.getElementById('checklistContainer').style.display = 'none';
+}
+
+function addChecklistItem() {
+  const ul = document.getElementById('checklist');
+  const text = document.getElementById('newChecklistItem').value.trim();
+  if (!text) return;
+
+  const li = document.createElement('li');
+  li.innerHTML = `
+    <label>
+      <input type="checkbox"> ${text}
+    </label>
+    <button class="remove-item">Ta bort</button>
+    `;
+  
+  li.querySelector('.remove-item')
+    .addEventListener('click', removeChecklistItem);
+  
+  ul.appendChild(li);
+  document.getElementById('newChecklistItem').value = '';
+}
+
+function removeChecklistItem(event) {
+  const li = event.target.closest('li');
+  if (li) li.remove();
+}
+
+async function downloadChecklist() {
+  const container   = document.getElementById('checklistContainer');
+  const closeBtn    = document.getElementById('closeChecklistBtn');
+  const downloadBtn = document.getElementById('downloadChecklistBtn');
+  const controlsDiv = container.querySelector('.controls');
+
+  // 1) Hide UI chrome
+  closeBtn.style.display    = 'none';
+  downloadBtn.style.display = 'none';
+  controlsDiv.style.display = 'none';
+
+  // 2) Temporarily remove height/overflow constraints *and* horizontal clipping
+  const oldMaxH      = container.style.maxHeight;
+  const oldOverflowY = container.style.overflowY;
+  const oldOverflowX = container.style.overflowX;
+  container.style.maxHeight = 'none';
+  container.style.overflowY = 'visible';
+  container.style.overflowX = 'visible';   // ← allow all text to show
+  container.scrollTop       = 0;            // scroll to top
+
+  try {
+    // 3) Capture full expanded modal
+    const c = await html2canvas(container, {
+      backgroundColor: '#fff',
+      scale: 2
+    });
+
+    // 4) Download PNG as before
+    const dataURL = c.toDataURL('image/png');
+    const a       = document.createElement('a');
+    a.href        = dataURL;
+    a.download    = 'checklista.png';
+
+    if (typeof a.download === 'undefined') {
+      window.open(dataURL, '_blank');
+    } else {
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+  } catch (err) {
+    console.error('Could not capture checklist:', err);
+    alert('Något gick fel vid nedladdningen. Prova igen.');
+  } finally {
+    // 5) Restore UI & scrolling + clipping
+    closeBtn.style.display     = '';
+    downloadBtn.style.display  = '';
+    controlsDiv.style.display  = '';
+    container.style.maxHeight  = oldMaxH;
+    container.style.overflowY  = oldOverflowY;
+    container.style.overflowX  = oldOverflowX;
   }
+}
+
+// --- Nedladdningsfunktion för gästlistan ---
+async function downloadGuestList() {
+  const container   = document.getElementById('guestListContainer');
+  const closeBtn    = container.querySelector('.close-modal');
+  const downloadBtn = container.querySelector('button[onclick="downloadGuestList()"]');
+
+  // hide the buttons so they don’t appear in the snapshot
+  closeBtn.style.display    = 'none';
+  downloadBtn.style.display = 'none';
+
+  try {
+    // render to an off‐screen canvas
+    const c = await html2canvas(container, {
+      backgroundColor: '#fff',
+      scale: 2
+    });
+
+    // get a base64 data URL synchronously
+    const dataURL = c.toDataURL('image/png');
+
+    // create a temporary <a>
+    const a = document.createElement('a');
+    a.href     = dataURL;
+    a.download = 'gastlista.png';
+
+    // if download attribute unsupported, open in new tab
+    if (typeof a.download === 'undefined') {
+      window.open(dataURL, '_blank');
+    } else {
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+  } catch (err) {
+    console.error('Could not capture guest list:', err);
+    alert('Något gick fel vid nedladdningen. Prova igen.');
+  } finally {
+    // restore buttons
+    closeBtn.style.display    = '';
+    downloadBtn.style.display = '';
+  }
+}
+
+function toggleAxes() {
+  showAxes = !showAxes;
+  drawAll();
+}
 
 canvas.addEventListener("mousedown", (e) => {
   const mx = e.offsetX, my = e.offsetY;
@@ -564,8 +691,6 @@ canvas.addEventListener("touchmove", (e) => {
   
     drawAll();
   }, { passive: false });
-  
-  
 
 canvas.addEventListener("touchend", () => {
   dragTarget = null;
@@ -616,8 +741,34 @@ function drawScalebars() {
 document.addEventListener('DOMContentLoaded', () => {
   const hamBtn   = document.querySelector('.hamburger');
   const toolbar  = document.querySelector('.toolbar-items');
-  const closeBtn = document.getElementById('close-mobile-notice');
-  const notice   = document.getElementById('mobile-notice');
+  const closeBtn  = document.getElementById('closeSiteNoticeBtn');
+  const notice = document.getElementById('siteNotice');
+
+  // open modal
+  document
+    .getElementById('openChecklistBtn')
+    .addEventListener('click', createChecklist);
+
+  // add item
+  document
+    .getElementById('addChecklistItemBtn')
+    .addEventListener('click', addChecklistItem);
+
+  // download
+  document
+    .getElementById('downloadChecklistBtn')
+    .addEventListener('click', downloadChecklist);
+
+  // close modal via “×” button or backdrop
+  document
+    .getElementById('closeChecklistBtn')
+    .addEventListener('click', closeChecklist);
+  document
+    .getElementById('modalOverlay')
+    .addEventListener('click', closeChecklist);
+
+  document.querySelectorAll('#checklist .remove-item')
+    .forEach(btn => btn.addEventListener('click', removeChecklistItem));
 
   updateFloatingButtons();
 
@@ -637,6 +788,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Show the notice on page load
+  notice.style.display = 'block';
+
   if (closeBtn && notice) {
     closeBtn.addEventListener('click', () => {
       notice.style.display = 'none';
@@ -644,105 +798,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// --- Nedladdningsfunktion för checklistan ---
-async function downloadChecklist() {
-  const container   = document.getElementById('checklistContainer');
-  const closeBtn    = container.querySelector('.close-modal');
-  const downloadBtn = container.querySelector('button[onclick="downloadChecklist()"]');
-  const controlsDiv = document.getElementById('newChecklistItem').closest('div');
-
-  // Hide UI chrome
-  closeBtn.style.display    = 'none';
-  downloadBtn.style.display = 'none';
-  controlsDiv.style.display = 'none';
-
-  try {
-    // Render to a canvas
-    const c = await html2canvas(container, {
-      backgroundColor: '#fff',
-      scale: 2
-    });
-
-    // 1) Synchronously get a base64 data URL
-    const dataURL = c.toDataURL('image/png');
-
-    // 2) Create a temporary anchor
-    const a = document.createElement('a');
-    a.href = dataURL;
-    a.download = 'checklista.png';
-
-    // 3) If download isn't supported, open in a new tab
-    if (typeof a.download === 'undefined') {
-      window.open(dataURL, '_blank');
-    } else {
-      // append it so Firefox on Android will honor the click
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-
-  } catch (err) {
-    console.error('Could not capture checklist:', err);
-    alert('Något gick fel vid nedladdningen. Prova igen.');
-  } finally {
-    // restore UI chrome
-    closeBtn.style.display    = '';
-    downloadBtn.style.display = '';
-    controlsDiv.style.display = '';
-  }
-}
-
-// --- Nedladdningsfunktion för gästlistan ---
-async function downloadGuestList() {
-  const container   = document.getElementById('guestListContainer');
-  const closeBtn    = container.querySelector('.close-modal');
-  const downloadBtn = container.querySelector('button[onclick="downloadGuestList()"]');
-
-  // hide the buttons so they don’t appear in the snapshot
-  closeBtn.style.display    = 'none';
-  downloadBtn.style.display = 'none';
-
-  try {
-    // render to an off‐screen canvas
-    const c = await html2canvas(container, {
-      backgroundColor: '#fff',
-      scale: 2
-    });
-
-    // get a base64 data URL synchronously
-    const dataURL = c.toDataURL('image/png');
-
-    // create a temporary <a>
-    const a = document.createElement('a');
-    a.href     = dataURL;
-    a.download = 'gastlista.png';
-
-    // if download attribute unsupported, open in new tab
-    if (typeof a.download === 'undefined') {
-      window.open(dataURL, '_blank');
-    } else {
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-
-  } catch (err) {
-    console.error('Could not capture guest list:', err);
-    alert('Något gick fel vid nedladdningen. Prova igen.');
-  } finally {
-    // restore buttons
-    closeBtn.style.display    = '';
-    downloadBtn.style.display = '';
-  }
-}
-
 window.addEventListener('load', () => {
   resizeCanvas();
-  updateLayout();
   updateFloatingButtons();
 });
 
 window.addEventListener('orientationchange', () => {
   resizeCanvas();
-  updateLayout();
+});
+
+window.addEventListener('pageshow', () => {
+  if (closeBtn && notice) {
+    notice.style.display = 'block';
+    closeBtn.addEventListener('click', () => {
+      notice.style.display = 'none';
+    });
+  }
 });
