@@ -114,7 +114,7 @@ function drawAll() {
    const x = canvas.width * 0.49;
    const y = canvas.height * 0.50;
    
-   ctx.fillText("EverAfterbyEster", x, y);
+   //ctx.fillText("EverAfterbyEster", x, y);
    if (showAxes) {
     const meterToPx = 80;
     const viewCenterX = window.scrollX + window.innerWidth / 2;
@@ -180,11 +180,16 @@ function onTitleChange() {
 function updateFloatingButtons() {
   const floatingButtons = document.getElementById('floatingButtons');
   const buttons = floatingButtons.querySelectorAll('button');
+
+  const axesBtn = floatingButtons.querySelector('button[onclick="toggleAxes()"]');
+  if (axesBtn) axesBtn.disabled = false;
   
   if (!selected) {
     // No selection - disable all buttons
     floatingButtons.classList.add('disabled');
-    buttons.forEach(btn => btn.disabled = true);
+    buttons.forEach(btn => {
+      if (btn !== axesBtn) btn.disabled = true;
+    });
     return;
   }
 
@@ -192,19 +197,38 @@ function updateFloatingButtons() {
   
   // Enable/disable buttons based on selected type
   buttons.forEach(btn => {
+    if (btn === axesBtn) return; // skip the axes button
+
     const action = btn.getAttribute('onclick');
-    
     if (selected.type === "guest") {
       btn.disabled = (action !== "removeSelected()");
     } 
     else if (selected.type === "circle") {
       btn.disabled = (action === "rotateSelected()");
     } 
-    else { // rect or other types
+    else { // rect or other
       btn.disabled = false;
     }
   });
 }
+
+// Sum-button
+function canSummarize() {
+  // Condition: At least 1 table or guest needed to summarize
+  return objects.some(o => o.type === 'rect' || o.type === 'circle' || o.type === 'guest');
+}
+
+function updateSumButtonState() {
+  setSumButtonEnabled(canSummarize());
+}
+
+function setSumButtonEnabled(enabled) {
+  document.querySelectorAll('.sum-btn').forEach(btn => {
+    btn.disabled = !enabled;
+    btn.setAttribute('aria-disabled', String(!enabled));
+  });
+}
+// HIT
 
 function addSelectedTable() {
   const type = document.getElementById("tableType").value;
@@ -233,6 +257,7 @@ function addSelectedTable() {
     obj.tableNumber = nextTableNumber++;
     objects.push(obj);
     drawAll();
+    updateSumButtonState();
   }
 }
 
@@ -241,6 +266,7 @@ function addGuest() {
   if (name) {
     objects.push({ type: "guest", x: 300, y: 300, name });
     drawAll();
+    updateSumButtonState();
   }
 }
 
@@ -251,6 +277,7 @@ function removeSelected() {
     selected = null;
     drawAll();
     updateFloatingButtons();
+    updateSumButtonState();
 
     // If there are no more tables (rectangles or circles) on the canvas, reset numbering
     const hasAnyTable = objects.some(obj => obj.type === 'rect' || obj.type === 'circle');
@@ -455,11 +482,13 @@ async function downloadChecklist() {
   const closeBtn    = document.getElementById('closeChecklistBtn');
   const downloadBtn = document.getElementById('downloadChecklistBtn');
   const controlsDiv = container.querySelector('.controls');
-
+  const removeBtns  = Array.from(container.querySelectorAll('.remove-item'));
+  
   // 1) Hide UI chrome
   closeBtn.style.display    = 'none';
   downloadBtn.style.display = 'none';
   controlsDiv.style.display = 'none';
+  removeBtns.forEach(btn => btn.style.display = 'none');
 
   // 2) Temporarily remove height/overflow constraints *and* horizontal clipping
   const oldMaxH      = container.style.maxHeight;
@@ -499,6 +528,7 @@ async function downloadChecklist() {
     closeBtn.style.display     = '';
     downloadBtn.style.display  = '';
     controlsDiv.style.display  = '';
+    removeBtns.forEach(btn => btn.style.display = '');
     container.style.maxHeight  = oldMaxH;
     container.style.overflowY  = oldOverflowY;
     container.style.overflowX  = oldOverflowX;
@@ -606,14 +636,12 @@ canvas.addEventListener("mousemove", (e) => {
   drawAll();
 });
 
-//canvas.addEventListener("mouseup", () => dragTarget = null);
-
 canvas.addEventListener("mouseup", () => {
   if (!dragTarget && selected) {
     // Clear selection when clicking empty space
     selected = null;
     drawAll();
-    updateFloatingButtons(); // ADD THIS LINE
+    updateFloatingButtons();
   }
   dragTarget = null;
 });
@@ -738,11 +766,43 @@ function drawScalebars() {
   }
 }
 
+// ALLT TILL MARKERING ÄR FÖR TESTA STÄNG KNAPP //
+
+function bindClose() {
+  const btn = document.getElementById('closeSiteNoticeBtn');
+  if (!btn) return;
+
+  // Remove any old listeners in a single shot
+  const clone = btn.cloneNode(true);
+  btn.parentNode.replaceChild(clone, btn);
+
+  // Pointer events cover mouse + touch
+  clone.addEventListener('pointerup', hideSiteNotice, { passive: false });
+}
+
+function hideSiteNotice(e) {
+  e.preventDefault();
+  const notice = document.getElementById('siteNotice');
+  if (notice) notice.style.display = 'none'; // or: notice.hidden = true;
+}
+
+// 3. Don’t rebind here anymore
+function showSiteNotice() {
+  const notice = document.getElementById('siteNotice');
+  if (notice) {
+    notice.style.display = 'block'; // or: notice.hidden = false;
+  }
+}
+
+// HIT //
+
 document.addEventListener('DOMContentLoaded', () => {
   const hamBtn   = document.querySelector('.hamburger');
   const toolbar  = document.querySelector('.toolbar-items');
-  const closeBtn  = document.getElementById('closeSiteNoticeBtn');
-  const notice = document.getElementById('siteNotice');
+  console.log("Found toolbar:", toolbar);
+
+  bindClose();
+  showSiteNotice();
 
   // open modal
   document
@@ -770,6 +830,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('#checklist .remove-item')
     .forEach(btn => btn.addEventListener('click', removeChecklistItem));
 
+  /* When summ order is active, activate this: */
+  /*
+  document.querySelectorAll('.sum-btn').forEach(btn => {
+    btn.addEventListener('click', summarizeOrder);
+  });*/
+
+  updateSumButtonState();
   updateFloatingButtons();
 
   if (hamBtn && toolbar) {
@@ -787,15 +854,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
-
-  // Show the notice on page load
-  notice.style.display = 'block';
-
-  if (closeBtn && notice) {
-    closeBtn.addEventListener('click', () => {
-      notice.style.display = 'none';
-    });
-  }
 });
 
 window.addEventListener('load', () => {
@@ -807,11 +865,13 @@ window.addEventListener('orientationchange', () => {
   resizeCanvas();
 });
 
-window.addEventListener('pageshow', () => {
-  if (closeBtn && notice) {
-    notice.style.display = 'block';
-    closeBtn.addEventListener('click', () => {
-      notice.style.display = 'none';
-    });
+// ÄVEN DENNA ÄR FÖR STÄNGKNAPP-PROBLEM //
+
+window.addEventListener('pageshow', e => {
+  if (e.persisted) {
+    // Only run when coming from the back/forward cache
+    // e.g. ensure the notice is hidden if user closed it
+    const dismissed = localStorage.getItem('noticeDismissed') === '1';
+    if (!dismissed) showSiteNotice();
   }
 });
