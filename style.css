@@ -2,6 +2,8 @@
   --bg-page: #fffdf8; --color-text: #4b3b2b;
   --bg-toolbar: #D0ACAC; --bg-panel: #f7e7ce;
   --color-border: #d4b98c;
+  --button-highlight: #C88F4A;
+  --button-highlight-hover: #B47D3F;
   --space-sm: 8px;    --space-md: 16px;   --space-lg: 24px;
 }
 
@@ -29,33 +31,70 @@ body {
   will-change: transform; /*TEST*/
 }
 .titleRow {
-  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   background: var(--bg-toolbar);
   z-index: 1015;
 }
 
-#titleInput {
-  width: 100%;
-  max-width: 300px;
-  padding: 4px;
-  font-family: 'Georgia', serif;
-  box-sizing: border-box;
-}
-#titleInput,
-label[for="titleInput"] {
-  position: relative;
-  z-index: 1005;
-  font-size: 0.9rem;
+.titleRow::before {
+  content: "";
+  display: block;
+  height: 24px;
 }
 
-#titleDisplay {
-  display: none;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+#logo {
+  height: 100px;
+  margin-bottom: 4px;
+}
+
+.title-input-container {
+  flex: 1;
+  width: 100%;
+  padding: 0 0 0 var(--space-sm);
+  box-sizing: border-box;        /* include that padding inside the 100% */
+  max-width: none;               /* let it go full‑bleed if you want */
+  margin: 0 0 0;   /* vertical spacing below the logo */
   text-align: center;
-  font-weight: bold;
-  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ── Modern, rounded input styling ── */
+.title-input-container #titleInput {
+  width: 100%;
+  max-width: 700px;
+  margin: 0px auto 0;
+  text-align: left;    /* keep the text centered inside */
+  padding: 12px 16px;
+  font-size: 1.1rem;
+  color: gray;
+  font-style: normal; 
+  background-color: #f0f0f0;
+  border: none;              
+  border-radius: 12px;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+  transition: 
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease,
+    font-style 0.2s ease;
+  box-sizing: border-box;
+}
+
+.title-input-container #titleInput {
+  width: 100%;
+}
+
+.title-input-container #titleInput:focus {
+  outline: none;
+  background-color: var(--bg-page);
+  color: var(--color-text);        /* switch to black text */
+  font-style: normal;     /* switch to normal font */
+}
+
+#titleInput::placeholder {
+  color: gray;
+  font-style: normal;
 }
 
 #toolbar {
@@ -63,37 +102,39 @@ label[for="titleInput"] {
   position: relative;
   background: var(--bg-toolbar);
   min-height: 60px;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
-  padding: 0 var(--space-md);
+  padding: var(--space-sm);
   width: 100%;
   box-sizing: border-box;
   font-family: 'Georgia', serif;
   text-align: center;
-  z-index: 1002; 
+  z-index: 1002;
 }
 .hamburger {
   display: flex;
   position: relative;
   background: var(--bg-panel);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: 8px;
   padding: 8px;
-  z-index: 1015;
+  z-index: 1020;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 80px;
-  height: 28px;
+  justify-content: space-around;
+  width: 60px;
+  height: 40px;
   cursor: pointer;
+  pointer-events: auto;
   margin: 0;
 }
 .hamburger span {
+  display: block;
   width: 60%;
   height: 3px;
   background: var(--color-text);
   border-radius: 2px;
-  margin: 2px 0;
+  margin: 0;
 }
 .hamburger .menu-text {
   margin-top: 6px;
@@ -118,46 +159,92 @@ label[for="titleInput"] {
   box-sizing: border-box;
   z-index: 1005;
 }
+
 .toolbar-items.active {
-  display: block;
+  display: flex;
 }
-/* New button row container */
-.button-row {
-  position: relative;
-  display: none;
+
+#toolbar button:not(.hamburger) {
+  display: flex;
+  align-items: center;
+  text-align: left;        /* keep your left‑aligned text */
+  padding-left: var(--space-md);
+}
+
+.btn-icon {
+  font-size: 18px !important;
+
+  /* make the box exactly the same size */
+  width: 16px !important;
+  height: 16px !important;
+
+  /* inline-block so line-height is respected */
+  display: inline-block !important;
+  vertical-align: middle;
+
+  /* center the ligature inside that box */
+  line-height: 16px !important;
+  text-align: center !important;
+  margin-right: 12px;
+  color: var(--color-text);
+  /*
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  width: 100%;
-  z-index: 1001;
-}
-.toolbar-items #sumButton {
-  display: block; /* Ensure it's visible in mobile menu */
-  width: 100px;
-  height: 100px;
-  margin: 12px auto; /* Center with top/bottom margin */
-  border-radius: 60px;
-  /* Keep all other sumButton styles */
+  font-size: 1.2em;   
+  width: 1.0em;
+  height: 1.0em;
+  margin-right: 8px;
+  color: var(--color-text);
+  line-height: 1;*/
 }
 
-/* Modified sumButton style to match requirements */
-#sumButton {
-  background-color: var(--color-border);
-  color: white;
-  width: 100px;
-  height: 100px;
-  border: none;
-  border-radius: 60px;
+#toolbar select,
+#toolbar button:not(.hamburger) {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--color-border);
+  padding: 6px 16px;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  transition: background-color 0.3s ease, transform 0.2s ease;
   font-family: inherit;
-  margin: 0;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  line-height: 1;
+  height: 46px;
 }
 
-#sumButton:hover {
-  background-color: #c2a77a;
-  transform: scale(1.05);
+#toolbar #sumButtonMobile {
+  justify-content: center !important;
+  text-align: center !important;
+  padding-left: 0 !important;
+}
+
+/* Hover for normal buttons */
+#toolbar button:hover:not(.sum-btn):not(.hamburger),
+#toolbar select:hover {
+  background-color: #e6d3b3;
+  border-color: #c2a77a;
+}
+
+#toolbar button.sum-btn {
+  background-color: var(--button-highlight);
+  color:#fff;
+  font-weight:bold;
+}
+
+/* Hover/focus for enabled sum button */
+#toolbar button.sum-btn:not([disabled]):hover,
+#toolbar button.sum-btn:not([disabled]):focus-visible{
+  background-color: var(--button-highlight-hover);
+}
+
+/* 3. Disabled state — keep highlight, just fade */
+#toolbar button.sum-btn[disabled]{
+  opacity: .5;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 #toolbar label,
@@ -169,6 +256,10 @@ label[for="titleInput"] {
   padding: 10px;
 }
 
+#toolbar select {
+  min-width: 240px;
+}
+
 /* Floating Action Buttons - Core Styles */
 .floating-buttons {
   position: fixed;
@@ -177,7 +268,7 @@ label[for="titleInput"] {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  z-index: 1000;
+  z-index: 1020;
 }
 
 .floating-buttons button {
@@ -257,56 +348,57 @@ label[for="titleInput"] {
   touch-action: auto;     /* allow swipes on empty space to scroll the wrapper */
 }
 
-#mobile-notice {
-  display: flex;
+#siteNotice {
+  display: none;
   position: fixed;
-  top: 80px;               /* justera så den hamnar under toolbaren */
-  left: 8px;
-  right: 8px;
-  padding: 12px 16px;
+  top: calc(56px + 16px);
+  left: 8px; right: 8px;
+  padding: 16px;
   background: var(--bg-panel);
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  align-items: center;
-  justify-content: space-between;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  z-index: 1020;
+  z-index: 1050;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: calc(100vh - 96px);
   font-family: inherit;
   color: var(--color-text);
 }
-#mobile-notice button {
+
+#siteNotice .close-site-notice {
+  position: absolute;
+  top: 8px; right: 8px;
   background: none;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   line-height: 1;
   cursor: pointer;
   color: var(--color-text);
   padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  min-width: 48px;
+  min-height: 48px;
 }
 
-#toolbar select,
-#toolbar button:not(#sumButton) {
-  background-color: var(--bg-panel);
-  border: 1px solid var(--color-border);
-  padding: 6px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: inherit;
-  color: var(--color-text);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  line-height: 1;
-  height: 46px;
+#siteNotice h2 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
 }
-
-#toolbar button:not(#sumButton):hover,
-#toolbar select:hover {
-  background-color: #e6d3b3;
-  border-color: #c2a77a;
+#siteNotice p {
+  margin: 0 0 12px;
+  line-height: 1.4;
 }
-
-#toolbar select {
-  min-width: 240px;
+#siteNotice ol {
+  margin: 0 0 0;
+  padding-left: 20px;
+}
+#siteNotice ol li {
+  margin-bottom: 6px;
+  line-height: 1.4;
 }
 
 #summaryBox, #userFormBox {
@@ -554,53 +646,86 @@ label[for="titleInput"] {
   white-space: nowrap;
 }
 
-/* --- Desktop --- */
-@media screen and (min-width: 601px) {
-  .titleRow {
-    display: flex;
-    align-items: center;    /* vertically center label+input */
-    gap: var(--space-sm);   /* space between label and input */
-    padding: var(--space-md);
-  }
-  #titleInput {
-    width: 300px;
-  }
-  #titleDisplay {
-    display: flex;
-  }
-
+/* --- Desktop --- (större än ipad) */
+@media screen and (min-width: 1600px) {
   #toolbar {
-    position: relative;
-    left: 0; right: 0;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-sm);
-    padding: var(--space-md) 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;    /* or flex-start, as you prefer */
+    flex-wrap: nowrap;
+    gap: var(--space-sm);        /* space between title‐input and toolbar-items */
+    padding: 4px var(--space-sm);/* top/bottom 4px, left/right var(--space-sm) */
     min-height: 100px;
   }
+
+  /* 2) Title‑input sits to the left, no extra margins needed */
+  .title-input-container {
+    flex: 0 0 auto;             /* don’t grow/shrink */
+    max-width: 400px;
+  }
+
+  /* 3) Toolbar‑items as a simple flex row with the same gap */
+  .toolbar-items {
+    display: flex !important;
+    flex-direction: row;
+    gap: var(--space-sm);        /* same gap between buttons */
+    position: static;
+    background: transparent;
+    box-shadow: none;
+    margin: 0;                   /* reset any old margins */
+  }
+
+  /* 4) Remove per‑button margins—gap on parent covers it */
+  .toolbar-items > * {
+    min-width: 0;
+  }
+
+  /* prevent wrapping and enable ellipsis */
+  .toolbar-items > button,
+  .toolbar-items > select {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 0 0 140px;
+  }
+
+  .toolbar-items > button .btn-icon {
+    display: none !important;
+  }
+
+  .toolbar-items > button:not(.hamburger) {
+    justify-content: center;
+    text-align: center;
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+
+  #toolbar button#sumButtonMobile {
+    padding: 0 !important;
+    flex: 0 0 160px;           /* set explicit width */
+  }
+
   .hamburger {
     display: none;
   }
-  .toolbar-items {
-    display: flex;          /* override “display:none” */
-    position: static;       /* undo absolute positioning */
-    top: auto;              /* clear the mobile top:100% */
-    left: auto;
+  
+  #siteNotice {
+    top: calc(174px);
+    padding: 24px;
+    max-width: 500px;
+    left: calc(50% - 250px);
     right: auto;
-    flex-direction: row;    /* line up items in a row */
-    gap: 12px;              /* your spacing between buttons */
-    background: transparent;/* let #toolbar’s background show through */
-    box-shadow: none;       /* or a lighter shadow if you still want one */
   }
-  .toolbar-items #sumButton {
-    display: none; /* Hide from desktop toolbar-items */
+  #siteNotice h2 {
+    font-size: 1.6rem;
+    margin-bottom: 12px;
   }
-  .button-row {
-    display: flex;
-    padding: var(--space-sm) var(--space-sm) 0 0;
+  #siteNotice p {
+    margin-bottom: 16px;
   }
-  #mobile-notice {
-    display: none;
+  #siteNotice ol li {
+    margin-bottom: 8px;
+    font-size: 1.1rem;
   }
 
   #checklistContainer {
