@@ -574,7 +574,8 @@ async function downloadGuestList() {
       windowWidth: targetWidth,
       windowHeight: targetHeight,
       // slipp dölja knappar: ignorera .no-print helt
-      ignoreElements: el => el.classList?.contains('no-print')
+      ignoreElements: el => el !== container && el.classList?.contains('no-print')
+
     });
 
     const a = document.createElement('a');
