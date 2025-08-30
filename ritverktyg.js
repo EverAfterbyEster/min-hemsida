@@ -944,4 +944,7 @@ function exportGuestList(type) {
   }
   console.warn('Okänt exportformat:', type);
 }
+// gör funktionen synlig för HTML onclick:
+window.exportGuestList = exportGuestList;
+
 
