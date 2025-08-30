@@ -555,6 +555,14 @@ body {
   overflow-y: auto;         /* scroll if very long */
   border-radius: 8px;
 }
+/* Gästlista-modal: begränsa höjd + möjliggör scroll */
+#guestListContainer {
+  max-height: 80vh;       /* samma som checklistan */
+  overflow-x: hidden;
+  overflow-y: auto;       /* inre scroll när listan blir lång */
+  -webkit-overflow-scrolling: touch; /* mjuk iOS-scroll */
+}
+
 
 /* 3. Close button in top-right */
 #checklistContainer .close-modal {
