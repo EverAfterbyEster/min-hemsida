@@ -920,8 +920,59 @@ function _downloadBlob(filename, mime, data) {
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
 
-// --- Huvudfunktion: exportera från baren ---
-function exportGuestList(type) {
+// --- Ladda SheetJS dynamiskt vid behov ---
+function ensureSheetJS() {
+  return new Promise((resolve) => {
+    if (typeof XLSX !== 'undefined') return resolve(true);
+
+    const existing = document.querySelector('script[data-sheetjs]');
+    if (existing) {
+      existing.addEventListener('load', () => resolve(true));
+      existing.addEventListener('error', () => resolve(false));
+      return;
+    }
+
+    const tryLoad = (srcs) => {
+      if (!srcs.length) return resolve(false);
+      const src = srcs.shift();
+      const s = document.createElement('script');
+      s.defer = true;
+      s.crossOrigin = 'anonymous';
+      s.setAttribute('data-sheetjs', '1');
+      s.src = src;
+      s.onload = () => resolve(true);
+      s.onerror = () => tryLoad(srcs); // prova nästa CDN
+      document.head.appendChild(s);
+    };
+
+    tryLoad([
+      'https://cdn.jsdelivr.net/npm/xlsx@0.20.0/dist/xlsx.full.min.js?v=2',
+      'https://unpkg.com/xlsx@0.20.0/dist/xlsx.full.min.js'
+    ]);
+  });
+}
+
+// --- Skapa och ladda ner .xlsx ---
+function _exportXlsx(rows) {
+  const data = [['Nr','Namn'], ...rows];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Gästlista');
+  try {
+    XLSX.writeFile(wb, 'gastlista.xlsx');
+  } catch (e) {
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbout], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'gastlista.xlsx';
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }
+}
+
+// --- NY huvudfunktion: exportera från baren ---
+async function exportGuestList(type) {
   const rows = _readGuests();
   if (!rows.length) { alert('Gästlistan är tom.'); return; }
 
@@ -930,40 +981,22 @@ function exportGuestList(type) {
     _downloadBlob('gastlista.csv', 'text/csv;charset=utf-8;', csv);
     return;
   }
+
   if (type === 'xlsx') {
-  if (typeof XLSX === 'undefined') {
-    alert('Kan inte skapa .xlsx – biblioteket saknas. Kontrollera att xlsx.full.min.js laddas före ritverktyg.js.');
+    const ok = (typeof XLSX !== 'undefined') ? true : await ensureSheetJS();
+    if (!ok || typeof XLSX === 'undefined') {
+      alert('Kan inte skapa .xlsx – biblioteket kunde inte laddas. Prova igen eller använd CSV.');
+      return;
+    }
+    _exportXlsx(rows);
     return;
   }
-  const data = [['Nr','Namn'], ...rows];
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Gästlista');
-
-  try {
-    // För moderna webbläsare (inkl. Safari iOS nyare versioner)
-    XLSX.writeFile(wb, 'gastlista.xlsx');
-  } catch (e) {
-    // Fallback: skriv till ArrayBuffer och ladda ner via Blob
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([wbout], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'gastlista.xlsx';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-  return;
-}
 
   console.warn('Okänt exportformat:', type);
 }
-// gör funktionen synlig för HTML onclick:
+
+// Exponera för onclick i HTML
 window.exportGuestList = exportGuestList;
+
 
 
