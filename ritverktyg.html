@@ -347,10 +347,14 @@
     </button>
   </div>
 
-  <!-- Till nedladdningsfunktioner. Denna måste ligga innan 'ritverktyg.js' -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<!-- Bibliotek (måste ligga före din app) -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.20.0/dist/xlsx.full.min.js" defer></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.20.0/dist/xlsx.full.min.js"></script>
+<!-- Din app -->
+<script src="./ritverktyg.js" defer></script>
+
+
 
 
 
