@@ -305,17 +305,31 @@
     </ul>
 
     <div style="margin-top:12px; text-align:right;">
-      <!-- Ladda ner-knapp för gästlistan -->
-      <button onclick="downloadGuestList()"
-              class="no-print"
-              style="background:#f3e0bd;
-                    border:1px solid #dbccab;
-                    border-radius:8px;
-                    padding:6px 12px;
-                    cursor:pointer;">
-        Ladda ner som .png
-      </button>
-    </div>
+  <button class="no-print"
+          onclick="exportGuestList('csv')"
+          style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:6px 12px;cursor:pointer;">
+    Exportera CSV
+  </button>
+
+  <button class="no-print"
+          onclick="exportGuestList('xlsx')"
+          style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:6px 12px;cursor:pointer;">
+    Exportera .xlsx
+  </button>
+
+  <button onclick="downloadGuestList()"
+          class="no-print"
+          style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:6px 12px;cursor:pointer;">
+    Ladda ner som .png
+  </button>
+
+  <button onclick="closeGuestList()"
+          class="no-print"
+          style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:6px 12px;cursor:pointer;">
+    Stäng
+  </button>
+</div>
+
   </div>
 
   <div class="floating-buttons disabled" id="floatingButtons">
