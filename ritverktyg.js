@@ -535,47 +535,63 @@ async function downloadChecklist() {
   }
 }
 
-// --- Nedladdningsfunktion för gästlistan ---
 async function downloadGuestList() {
-  const container   = document.getElementById('guestListContainer');
-  const closeBtn    = container.querySelector('.close-modal');
-  const downloadBtn = container.querySelector('button[onclick="downloadGuestList()"]');
+  const container = document.getElementById('guestListContainer');
+  if (!container) return alert('Kunde inte hitta gästlistan.');
 
-  // hide the buttons so they don’t appear in the snapshot
-  closeBtn.style.display    = 'none';
-  downloadBtn.style.display = 'none';
+  // 1) Dölj all UI som inte ska med
+  const hiddenEls = Array.from(container.querySelectorAll('.no-print'));
+  const prevVisibility = hiddenEls.map(el => el.style.visibility);
+  hiddenEls.forEach(el => { el.style.visibility = 'hidden'; });
+
+  // 2) Spara nuvarande begränsningar och expandera till full storlek
+  const prev = {
+    maxHeight: container.style.maxHeight,
+    overflowY: container.style.overflowY,
+    overflowX: container.style.overflowX,
+    width: container.style.width,
+    height: container.style.height
+  };
+  container.style.maxHeight = 'none';
+  container.style.overflowY = 'visible';
+  container.style.overflowX = 'visible';
+  container.style.width = 'auto';
+  container.style.height = 'auto';
+  container.scrollTop = 0;
+
+  // 3) Vänta en micro-tick så layouten hinner uppdateras
+  await new Promise(r => setTimeout(r, 0));
 
   try {
-    // render to an off‐screen canvas
-    const c = await html2canvas(container, {
-      backgroundColor: '#fff',
-      scale: 2
+    // Beräkna ytan som ska fångas
+    const targetWidth  = Math.ceil(container.scrollWidth);
+    const targetHeight = Math.ceil(container.scrollHeight);
+
+    const canvas = await html2canvas(container, {
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      scale: Math.min(window.devicePixelRatio || 1, 2),
+      windowWidth: targetWidth,
+      windowHeight: targetHeight,
+      // slipp dölja knappar: ignorera .no-print helt
+      ignoreElements: el => el.classList?.contains('no-print')
     });
 
-    // get a base64 data URL synchronously
-    const dataURL = c.toDataURL('image/png');
-
-    // create a temporary <a>
     const a = document.createElement('a');
-    a.href     = dataURL;
     a.download = 'gastlista.png';
-
-    // if download attribute unsupported, open in new tab
-    if (typeof a.download === 'undefined') {
-      window.open(dataURL, '_blank');
-    } else {
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-
+    a.href = canvas.toDataURL('image/png');
+    a.click();
   } catch (err) {
-    console.error('Could not capture guest list:', err);
-    alert('Något gick fel vid nedladdningen. Prova igen.');
+    console.error(err);
+    alert('Kunde inte skapa bilden: ' + (err?.message || err));
   } finally {
-    // restore buttons
-    closeBtn.style.display    = '';
-    downloadBtn.style.display = '';
+    // 4) Återställ stilar och UI
+    container.style.maxHeight = prev.maxHeight;
+    container.style.overflowY = prev.overflowY;
+    container.style.overflowX = prev.overflowX;
+    container.style.width     = prev.width;
+    container.style.height    = prev.height;
+    hiddenEls.forEach((el, i) => { el.style.visibility = prevVisibility[i]; });
   }
 }
 
