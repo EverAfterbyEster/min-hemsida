@@ -892,3 +892,56 @@ window.addEventListener('pageshow', e => {
     if (!dismissed) showSiteNotice();
   }
 });
+// --- Läs gästdata ---
+function _readGuests() {
+  if (Array.isArray(window.guests) && window.guests.length) {
+    return window.guests.map((g, i) => {
+      const name = (g?.namn ?? g?.name ?? g ?? '').toString().trim();
+      return [i + 1, name];
+    });
+  }
+  const lis = document.querySelectorAll('#guestList li');
+  return Array.from(lis).map((li, i) => {
+    const name = (li.textContent || '').replace(/^\s*\d+\.\s*/, '').trim();
+    return [i + 1, name];
+  });
+}
+
+// --- CSV-hjälpare (svensk Excel: semikolon + BOM) ---
+function _makeCsv(rows) {
+  const all = [['Nr','Namn'], ...rows];
+  const csv = all.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  return "\uFEFF" + csv;
+}
+function _downloadBlob(filename, mime, data) {
+  const blob = new Blob([data], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+// --- Huvudfunktion: exportera från baren ---
+function exportGuestList(type) {
+  const rows = _readGuests();
+  if (!rows.length) { alert('Gästlistan är tom.'); return; }
+
+  if (type === 'csv') {
+    const csv = _makeCsv(rows);
+    _downloadBlob('gastlista.csv', 'text/csv;charset=utf-8;', csv);
+    return;
+  }
+  if (type === 'xlsx') {
+    if (typeof XLSX === 'undefined') {
+      alert('Kan inte skapa .xlsx – biblioteket saknas. Använd CSV eller lägg till SheetJS-skriptet.');
+      return;
+    }
+    const data = [['Nr','Namn'], ...rows];
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Gästlista');
+    XLSX.writeFile(wb, 'gastlista.xlsx');
+    return;
+  }
+  console.warn('Okänt exportformat:', type);
+}
+
