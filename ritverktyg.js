@@ -9,6 +9,8 @@ let selected = null;
 let nextTableNumber = 1;
 let showAxes = false;
 let hasCentered = false;  // HÄR
+let nextTableId = 1;
+
 
 function resizeCanvas() {
   const scale = window.devicePixelRatio || 1;
@@ -75,8 +77,7 @@ function drawAll() {
       ctx.strokeRect(-obj.w / 2, -obj.h / 2, obj.w, obj.h);
       ctx.fillStyle = "#000";
       ctx.font = "12px sans-serif";
-      ctx.fillText(`Bord ${obj.tableNumber}`, 0, -6);
-      ctx.fillText(`${obj.seats} platser`, 0, 12);
+      ctx.fillText(obj.label || "", 0, 0);   // 🟢 mitt i bordet
       ctx.restore();
     } else if (obj.type === "circle") {
       ctx.beginPath();
@@ -86,8 +87,7 @@ function drawAll() {
       ctx.stroke();
       ctx.fillStyle = "#000";
       ctx.font = "12px sans-serif";
-      ctx.fillText(`Bord ${obj.tableNumber}`, obj.x, obj.y - 6);
-      ctx.fillText(`${obj.seats} platser`, obj.x, obj.y + 12);
+      ctx.fillText(obj.label || "", obj.x, obj.y);  // 🟢 mitt i bordet
     } else if (obj.type === "guest") {
       ctx.beginPath();
       ctx.fillStyle = "#fffffe";
@@ -201,8 +201,9 @@ function updateFloatingButtons() {
 
     const action = btn.getAttribute('onclick');
     if (selected.type === "guest") {
-      btn.disabled = (action !== "removeSelected()");
-    } 
+      btn.disabled = !["removeSelected()", "renameTable()"].includes(action);
+    }
+    
     else if (selected.type === "circle") {
       btn.disabled = (action === "rotateSelected()");
     } 
@@ -221,6 +222,101 @@ function canSummarize() {
 function updateSumButtonState() {
   setSumButtonEnabled(canSummarize());
 }
+// === AUTO-PLACE GUESTS AROUND A NEW TABLE ===
+// === AUTO-PLACE GUESTS AROUND A NEW TABLE ===
+function autoAddGuestsForTable(table) {
+    const seatCount = table.seats || 0;
+    if (!seatCount) return;
+  
+    if (table.type === "rect") {
+      const cx = table.x + table.w / 2;
+      const cy = table.y + table.h / 2;
+      const halfW = table.w / 2;
+      const halfH = table.h / 2;
+  
+      const perSide = Math.floor(seatCount / 2);
+      const yOffset = 46; // luft från bordskant
+  
+      const ang = (table.rotation || 0) * Math.PI / 180;
+      const cos = Math.cos(ang), sin = Math.sin(ang);
+  
+      // smarta gap (lika stora, men aldrig mindre än minsta tillåtna)
+      function gapCenters(n) {
+        if (n <= 1) return [0];
+        const GUEST_R  = 20;   // matcha radie i drawAll()
+        const MIN_GAP  = 8;
+        const DIAM     = 2 * GUEST_R;
+        const MIN_STEP = DIAM + MIN_GAP;
+  
+        const naturalStep = (2 * halfW) / (n + 1);
+        let step, start;
+        if (naturalStep >= MIN_STEP) {
+          step  = naturalStep;
+          start = -halfW + step;
+        } else {
+          step  = MIN_STEP;
+          const total = step * (n + 1);
+          start = -total / 2 + step;
+        }
+        const xs = [];
+        for (let i = 0; i < n; i++) xs.push(start + i * step);
+        return xs;
+      }
+  
+      const xs   = gapCenters(perSide);
+      const topY = -halfH - yOffset;  // lokalt Y (ovansida)
+      const botY =  halfH + yOffset;  // lokalt Y (undersida)
+  
+      // skapa gäster med lokala coords och beräkna deras startpositioner
+      xs.forEach((lx) => {
+        // ovansida
+        let gx = cx + (lx * cos - topY * sin);
+        let gy = cy + (lx * sin + topY * cos);
+        objects.push({
+          type: "guest", name: "Gäst",
+          x: gx, y: gy,
+          parentId: table.tableId,
+          _localX: lx, _localY: topY
+        });
+  
+        // undersida
+        gx = cx + (lx * cos - botY * sin);
+        gy = cy + (lx * sin + botY * cos);
+        objects.push({
+          type: "guest", name: "Gäst",
+          x: gx, y: gy,
+          parentId: table.tableId,
+          _localX: lx, _localY: botY
+        });
+      });
+  
+    } else if (table.type === "circle") {
+      const cx = table.x, cy = table.y;
+      const rSeat = table.r + 48;     // avstånd från bordets centrum
+      const start = -Math.PI / 2;
+  
+      for (let i = 0; i < seatCount; i++) {
+        const a  = start + i * (2 * Math.PI / seatCount);
+        const lx = rSeat * Math.cos(a);
+        const ly = rSeat * Math.sin(a);
+        // rotation för cirkel används också (om du någon gång lägger till)
+        const ang = (table.rotation || 0) * Math.PI / 180;
+        const cos = Math.cos(ang), sin = Math.sin(ang);
+        const gx  = cx + (lx * cos - ly * sin);
+        const gy  = cy + (lx * sin + ly * cos);
+  
+        objects.push({
+          type: "guest", name: "Gäst",
+          x: gx, y: gy,
+          parentId: table.tableId,
+          _localX: lx, _localY: ly
+        });
+      }
+    }
+  }
+  
+
+
 
 function setSumButtonEnabled(enabled) {
   document.querySelectorAll('.sum-btn').forEach(btn => {
@@ -229,6 +325,20 @@ function setSumButtonEnabled(enabled) {
   });
 }
 // HIT
+function updateGuestsForTable(table) {
+    const cx = (table.type === "rect") ? table.x + table.w/2 : table.x;
+    const cy = (table.type === "rect") ? table.y + table.h/2 : table.y;
+    const ang = (table.rotation || 0) * Math.PI / 180;
+    const cos = Math.cos(ang), sin = Math.sin(ang);
+  
+    for (const g of objects) {
+      if (g.type !== "guest" || g.parentId !== table.tableId) continue;
+      const lx = g._localX, ly = g._localY; // lokala (bord-centrerade) koordinater
+      g.x = cx + (lx * cos - ly * sin);
+      g.y = cy + (lx * sin + ly * cos);
+    }
+  }
+  
 
 function addSelectedTable() {
   const type = document.getElementById("tableType").value;
@@ -255,10 +365,19 @@ function addSelectedTable() {
 
   if (obj) {
     obj.tableNumber = nextTableNumber++;
+    obj.tableId     = nextTableId++;
+    obj.label       = `Bord ${obj.tableNumber} – ${obj.seats} platser`;  // 🟢 nytt
+  
     objects.push(obj);
+  
+    // <-- Lägg till gäster automatiskt för det nya bordet
+    autoAddGuestsForTable(obj);
+  
     drawAll();
     updateSumButtonState();
   }
+  
+  
 }
 
 function addGuest() {
@@ -290,19 +409,41 @@ function removeSelected() {
 function rotateSelected() {
   if (selected && selected.type === "rect") {
     selected.rotation = ((selected.rotation || 0) + 90) % 360;
+
+    updateGuestsForTable(selected);
     drawAll();
+
   }
 }
 
 function renameTable() {
-  if (selected && (selected.type === "rect" || selected.type === "circle")) {
-    const input = prompt("Ange nytt bordsnummer:", selected.tableNumber || "");
-    if (input) {
-      selected.tableNumber = input;
-      drawAll();
+  if (!selected) return;
+
+  if (selected.type === "guest") {
+    const input = prompt("Ange nytt namn för gästen:", selected.name || "");
+    if (input !== null) {
+      const trimmed = input.trim();
+      if (trimmed) {
+        selected.name = trimmed;
+        drawAll();
+      }
+    }
+    return;
+  }
+
+  if (selected.type === "rect" || selected.type === "circle") {
+    const input = prompt("Ange nytt namn för bordet:", selected.label || "");
+    if (input !== null) {
+      const trimmed = input.trim();
+      if (trimmed) {
+        selected.label = trimmed;
+        drawAll();
+      }
     }
   }
 }
+
+
 
 function saveAsImage() {
   const scale    = window.devicePixelRatio || 1;
@@ -535,66 +676,113 @@ async function downloadChecklist() {
   }
 }
 
+// --- Nedladdningsfunktion för gästlistan ---
 async function downloadGuestList() {
-  const container = document.getElementById('guestListContainer');
-  if (!container) return alert('Kunde inte hitta gästlistan.');
+  const container   = document.getElementById('guestListContainer');
+  const closeBtn    = container.querySelector('.close-modal');
+  const downloadBtn = container.querySelector('button[onclick="downloadGuestList()"]');
 
-  // 1) Dölj all UI som inte ska med
-  const hiddenEls = Array.from(container.querySelectorAll('.no-print'));
-  const prevVisibility = hiddenEls.map(el => el.style.visibility);
-  hiddenEls.forEach(el => { el.style.visibility = 'hidden'; });
-
-  // 2) Spara nuvarande begränsningar och expandera till full storlek
-  const prev = {
-    maxHeight: container.style.maxHeight,
-    overflowY: container.style.overflowY,
-    overflowX: container.style.overflowX,
-    width: container.style.width,
-    height: container.style.height
-  };
-  container.style.maxHeight = 'none';
-  container.style.overflowY = 'visible';
-  container.style.overflowX = 'visible';
-  container.style.width = 'auto';
-  container.style.height = 'auto';
-  container.scrollTop = 0;
-
-  // 3) Vänta en micro-tick så layouten hinner uppdateras
-  await new Promise(r => setTimeout(r, 0));
+  // hide the buttons so they don’t appear in the snapshot
+  closeBtn.style.display    = 'none';
+  downloadBtn.style.display = 'none';
 
   try {
-    // Beräkna ytan som ska fångas
-    const targetWidth  = Math.ceil(container.scrollWidth);
-    const targetHeight = Math.ceil(container.scrollHeight);
-
-    const canvas = await html2canvas(container, {
-      backgroundColor: '#ffffff',
-      useCORS: true,
-      scale: Math.min(window.devicePixelRatio || 1, 2),
-      windowWidth: targetWidth,
-      windowHeight: targetHeight,
-      // slipp dölja knappar: ignorera .no-print helt
-      ignoreElements: el => el !== container && el.classList?.contains('no-print')
-
+    // render to an off‐screen canvas
+    const c = await html2canvas(container, {
+      backgroundColor: '#fff',
+      scale: 2
     });
 
+    // get a base64 data URL synchronously
+    const dataURL = c.toDataURL('image/png');
+
+    // create a temporary <a>
     const a = document.createElement('a');
+    a.href     = dataURL;
     a.download = 'gastlista.png';
-    a.href = canvas.toDataURL('image/png');
-    a.click();
+
+    // if download attribute unsupported, open in new tab
+    if (typeof a.download === 'undefined') {
+      window.open(dataURL, '_blank');
+    } else {
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
   } catch (err) {
-    console.error(err);
-    alert('Kunde inte skapa bilden: ' + (err?.message || err));
+    console.error('Could not capture guest list:', err);
+    alert('Något gick fel vid nedladdningen. Prova igen.');
   } finally {
-    // 4) Återställ stilar och UI
-    container.style.maxHeight = prev.maxHeight;
-    container.style.overflowY = prev.overflowY;
-    container.style.overflowX = prev.overflowX;
-    container.style.width     = prev.width;
-    container.style.height    = prev.height;
-    hiddenEls.forEach((el, i) => { el.style.visibility = prevVisibility[i]; });
+    // restore buttons
+    closeBtn.style.display    = '';
+    downloadBtn.style.display = '';
   }
 }
+// Exportera gästlista som CSV eller Excel (.xls)
+function exportGuestList(fmt = 'csv') {
+  const guests = objects.filter(o => o.type === 'guest');
+  if (guests.length === 0) {
+    alert('Inga gäster tillagda ännu.');
+    return;
+  }
+
+  // Karta: tableId -> visningsnamn (label eller "Bord X")
+  const tableMap = new Map();
+  for (const o of objects) {
+    if (o.type === 'rect' || o.type === 'circle') {
+      tableMap.set(o.tableId, o.label || (`Bord ${o.tableNumber || ''}`));
+    }
+  }
+
+  if (fmt === 'csv') {
+    // Semikolon ger snygg import i svensk Excel (decimal = ,)
+    const SEP = ';';
+    const rows = [];
+    rows.push(['Namn', 'Bord'].join(SEP));
+    for (const g of guests) {
+      const tableName = g.parentId ? (tableMap.get(g.parentId) || '') : '';
+      rows.push([g.name || 'Gäst', tableName].map(v => csvCell(v, SEP)).join(SEP));
+    }
+    const bom = '\uFEFF'; // BOM så Excel fattar UTF-8
+    const csv = bom + rows.join('\r\n');
+    downloadFile('gastlista.csv', 'text/csv;charset=utf-8', csv);
+
+  
+
+  } else {
+    alert('Okänt exportformat: ' + fmt);
+  }
+
+  // --- helpers ---
+  function csvCell(val, sep) {
+    if (val == null) val = '';
+    val = String(val);
+    const needsQuote = val.includes('"') || val.includes('\n') || val.includes('\r') || val.includes(sep);
+    if (val.includes('"')) val = val.replace(/"/g, '""');
+    return needsQuote ? `"${val}"` : val;
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function downloadFile(filename, mime, data) {
+    const blob = new Blob([data], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+}
+
 
 function toggleAxes() {
   showAxes = !showAxes;
@@ -649,6 +837,9 @@ canvas.addEventListener("mousemove", (e) => {
   } else {
     dragTarget.x = e.offsetX - offsetX;
     dragTarget.y = e.offsetY - offsetY;
+  }
+  if (dragTarget.type === "rect" || dragTarget.type === "circle") {
+    updateGuestsForTable(dragTarget);
   }
   drawAll();
 });
@@ -732,6 +923,9 @@ canvas.addEventListener("touchmove", (e) => {
     } else {
       dragTarget.x = mx - offsetX;
       dragTarget.y = my - offsetY;
+    }
+    if (dragTarget.type === "rect" || dragTarget.type === "circle") {
+      updateGuestsForTable(dragTarget);
     }
   
     drawAll();
@@ -892,111 +1086,4 @@ window.addEventListener('pageshow', e => {
     if (!dismissed) showSiteNotice();
   }
 });
-// --- Läs gästdata ---
-function _readGuests() {
-  if (Array.isArray(window.guests) && window.guests.length) {
-    return window.guests.map((g, i) => {
-      const name = (g?.namn ?? g?.name ?? g ?? '').toString().trim();
-      return [i + 1, name];
-    });
-  }
-  const lis = document.querySelectorAll('#guestList li');
-  return Array.from(lis).map((li, i) => {
-    const name = (li.textContent || '').replace(/^\s*\d+\.\s*/, '').trim();
-    return [i + 1, name];
-  });
-}
-
-// --- CSV-hjälpare (svensk Excel: semikolon + BOM) ---
-function _makeCsv(rows) {
-  const all = [['Nr','Namn'], ...rows];
-  const csv = all.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(';')).join('\r\n');
-  return "\uFEFF" + csv;
-}
-function _downloadBlob(filename, mime, data) {
-  const blob = new Blob([data], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-}
-
-// --- Ladda SheetJS dynamiskt vid behov ---
-function ensureSheetJS() {
-  return new Promise((resolve) => {
-    if (typeof XLSX !== 'undefined') return resolve(true);
-
-    const existing = document.querySelector('script[data-sheetjs]');
-    if (existing) {
-      existing.addEventListener('load', () => resolve(true));
-      existing.addEventListener('error', () => resolve(false));
-      return;
-    }
-
-    const tryLoad = (srcs) => {
-      if (!srcs.length) return resolve(false);
-      const src = srcs.shift();
-      const s = document.createElement('script');
-      s.defer = true;
-      s.crossOrigin = 'anonymous';
-      s.setAttribute('data-sheetjs', '1');
-      s.src = src;
-      s.onload = () => resolve(true);
-      s.onerror = () => tryLoad(srcs); // prova nästa CDN
-      document.head.appendChild(s);
-    };
-
-    tryLoad([
-      'https://cdn.jsdelivr.net/npm/xlsx@0.20.0/dist/xlsx.full.min.js?v=2',
-      'https://unpkg.com/xlsx@0.20.0/dist/xlsx.full.min.js'
-    ]);
-  });
-}
-
-// --- Skapa och ladda ner .xlsx ---
-function _exportXlsx(rows) {
-  const data = [['Nr','Namn'], ...rows];
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Gästlista');
-  try {
-    XLSX.writeFile(wb, 'gastlista.xlsx');
-  } catch (e) {
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([wbout], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'gastlista.xlsx';
-    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  }
-}
-
-// --- NY huvudfunktion: exportera från baren ---
-async function exportGuestList(type) {
-  const rows = _readGuests();
-  if (!rows.length) { alert('Gästlistan är tom.'); return; }
-
-  if (type === 'csv') {
-    const csv = _makeCsv(rows);
-    _downloadBlob('gastlista.csv', 'text/csv;charset=utf-8;', csv);
-    return;
-  }
-
-  if (type === 'xlsx') {
-    const ok = (typeof XLSX !== 'undefined') ? true : await ensureSheetJS();
-    if (!ok || typeof XLSX === 'undefined') {
-      alert('Kan inte skapa .xlsx – biblioteket kunde inte laddas. Prova igen eller använd CSV.');
-      return;
-    }
-    _exportXlsx(rows);
-    return;
-  }
-
-  console.warn('Okänt exportformat:', type);
-}
-
-// Exponera för onclick i HTML
-window.exportGuestList = exportGuestList;
-
-
 
