@@ -775,3 +775,18 @@ body {
     min-height: 44px !important;
   }
 }
+/* === Mobil tap-highlight bort === */
+html, body, canvas, button, .toolbar, .clickable {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ta bort ev. fokusram runt canvas */
+#canvas, #canvas:focus {
+  outline: none;
+}
+
+/* förhindra textmarkering när man drar på canvas */
+#canvas {
+  user-select: none;
+  -webkit-user-select: none;
+}
