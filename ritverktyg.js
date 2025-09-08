@@ -1041,11 +1041,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('#checklist .remove-item')
     .forEach(btn => btn.addEventListener('click', removeChecklistItem));
 
-  /* When summ order is active, activate this: */
-  /*
+  // Aktivera sammanställningsknappen
   document.querySelectorAll('.sum-btn').forEach(btn => {
     btn.addEventListener('click', summarizeOrder);
-  });*/
+  });
 
   updateSumButtonState();
   updateFloatingButtons();
