@@ -534,7 +534,7 @@ body {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.30);
   z-index: 10990;
 }
 
@@ -820,4 +820,74 @@ html, body, canvas, button, .toolbar, .clickable {
   content:"";
   display:block;
   height: calc(env(safe-area-inset-bottom) + 12px);
+}
+
+
+/* Mobil: kontrollera visning och scroll för menyn */
+@media (max-width: 768px) {
+  /* default: menyn dold */
+  #toolbar .toolbar-items {
+    display: none;
+  }
+  /* öppen meny */
+  #toolbar.open .toolbar-items {
+    display: block;
+    max-height: calc(100dvh - 160px); /* justera 160px efter headerns höjd */
+    overflow-y: auto;                  /* ← möjliggör scroll i menyn */
+    -webkit-overflow-scrolling: touch; /* mjuk scroll i iOS */
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+  }
+
+  /* föräldrar ska inte klippa bort scrollen */
+  #headerWrapper, #toolbar { overflow: visible; }
+
+  /* gör elementen lite kompaktare så mer får plats */
+  #toolbar .toolbar-items { gap: 8px; }
+  #toolbar .toolbar-items button,
+  #toolbar .toolbar-items select {
+    font-size: 14px;
+    line-height: 1.15;
+    padding: 8px 12px;
+    border-radius: 10px;
+  }
+  #toolbar .toolbar-items .material-icons,
+  #toolbar .toolbar-items .btn-icon {
+    font-size: 18px;
+    margin-right: 6px;
+  }
+}
+@media (max-width: 768px) {
+  #toolbar .toolbar-items { display: none; }
+  /* denna rad ersätter #toolbar.open .toolbar-items { … } */
+  #toolbar .toolbar-items.active {
+    display: block;
+    max-height: calc(100dvh - 160px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+  }
+}
+@media (max-width: 768px) {
+  #toolbar .toolbar-items a {
+    display: block;        /* gör så de staplas vertikalt */
+    padding: 15px 15px;    /* lite inre luft */
+    margin: 15px 0 !important;        /* avstånd mellan knapparna */
+  }
+}
+@media (max-width: 768px) {
+  /* tunnare knappar i hamburgermenyn */
+  #toolbar .toolbar-items button,
+  #toolbar .toolbar-items select {
+    height: 38px;         /* var 46px */
+    padding: 6px 12px;    /* lite mindre inre luft */
+    line-height: 1.1;
+  }
+}
+@media (max-width: 768px) {
+  /* ger mellanrum mellan varje direkt barn i hamburgermenyn */
+  #toolbar .toolbar-items > * + * {
+    margin-top: 8px; /* prova 8–12px efter smak */
+  }
 }
