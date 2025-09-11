@@ -117,7 +117,7 @@ function getSummaryDataFromDOM() {
 
     // Om raden är stolsöverdrag och du vill visa vald kvalitet i stället för mått:
     if (/stolsöverdrag/i.test(name) && !dims) {
-      dims = 'Stolsöverdrag i toppkvalitet (nya)'; // eller lämna '—'
+      dims = 'Stolsöverdrag'; // eller lämna '—'
     }
 
     rows.push({ name, count, dims: dims || '—' });
