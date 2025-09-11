@@ -14,6 +14,34 @@ let guests = window.guests || [];
 let todoItems = window.todoItems || [];
 let summary = window.summary || {};
 
+function initSiteNotice() {
+  const notice = document.getElementById('siteNotice');
+  const closeBtn = document.getElementById('closeSiteNoticeBtn');
+  const overlay = document.getElementById('modalOverlay');
+
+  // 1) Tvinga bort ev. kvarhängande overlay (iOS soft refresh/BFCache)
+  if (overlay) overlay.style.display = 'none';
+
+  // 2) Visa välkomstrutan bara om den inte redan stängts denna session
+  if (notice && !sessionStorage.getItem('siteNoticeClosed')) {
+    notice.style.display = 'block';
+  }
+
+  // 3) Sätt (eller åter-sätt) stäng-lyssnare
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      notice.style.display = 'none';
+      sessionStorage.setItem('siteNoticeClosed', '1');
+    };
+  }
+}
+
+// Kör både vid kall laddning och när sidan återställs från cache
+document.addEventListener('DOMContentLoaded', initSiteNotice);
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) initSiteNotice();
+});
+
 
 function resizeCanvas() {
   const scale = window.devicePixelRatio || 1;
