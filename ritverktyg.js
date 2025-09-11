@@ -1,7 +1,7 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-const objects = [];
+let objects = [];
 let dragTarget = null;
 let offsetX = 0;
 let offsetY = 0;
@@ -10,6 +10,9 @@ let nextTableNumber = 1;
 let showAxes = false;
 let hasCentered = false;  // HÄR
 let nextTableId = 1;
+let guests = window.guests || [];
+let todoItems = window.todoItems || [];
+let summary = window.summary || {};
 
 
 function resizeCanvas() {
@@ -377,7 +380,7 @@ function addSelectedTable() {
     updateSumButtonState();
   }
   
-  
+  onPlanChanged();
 }
 
 function addGuest() {
@@ -387,6 +390,7 @@ function addGuest() {
     drawAll();
     updateSumButtonState();
   }
+  onPlanChanged();
 }
 
 function removeSelected() {
@@ -404,6 +408,7 @@ function removeSelected() {
       nextTableNumber = 1;
     }
   }
+  onPlanChanged();
 }
 
 function rotateSelected() {
@@ -414,6 +419,7 @@ function rotateSelected() {
     drawAll();
 
   }
+  onPlanChanged();
 }
 
 function renameTable() {
@@ -429,6 +435,7 @@ function renameTable() {
       }
     }
     return;
+    onPlanChanged();
   }
 
   if (selected.type === "rect" || selected.type === "circle") {
@@ -852,6 +859,7 @@ canvas.addEventListener("mouseup", () => {
     updateFloatingButtons();
   }
   dragTarget = null;
+  onPlanChanged();
 });
 
 canvas.addEventListener("touchstart", (e) => {
@@ -932,6 +940,10 @@ canvas.addEventListener("touchmove", (e) => {
   }, { passive: false });
 
 canvas.addEventListener("touchend", () => {
+  if (dragTarget) {
+    // 👇 autospara bara om dragTarget faktiskt flyttats
+    onPlanChanged();
+  }
   dragTarget = null;
 });
 
@@ -1086,3 +1098,132 @@ window.addEventListener('pageshow', e => {
   }
 });
 
+/***** Steg A: Autospara + Spara/Ladda JSON *****/
+const STORAGE_KEY = "weddingPlan-v1";
+
+/** 1) Hämta sparad plan lokalt */
+function loadPlanFromLocal() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 2) Uppdatera visuell statusrad */
+function updateSaveStatus(msg) {
+  const el = document.getElementById("saveStatus");
+  if (!el) return;
+  el.textContent = msg || ("✔ Senast sparad " + new Date().toLocaleTimeString());
+}
+
+/** 3) Autospara (anropa vid varje förändring i planeringen) */
+let __saveTimer;
+function onPlanChanged() {
+  const plan = getCurrentPlan(); // TODO: returnera din aktuella plan (objekt)
+  if (!plan) return;
+
+  clearTimeout(__saveTimer);
+  __saveTimer = setTimeout(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
+    updateSaveStatus();
+  }, 800);
+}
+
+/** 4) Exportera som .json (används av “Spara som”-knappen) */
+function exportPlanJSON() {
+  const plan = getCurrentPlan() || loadPlanFromLocal() || {};
+  const blob = new Blob([JSON.stringify(plan, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "minplan.json";
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/** 5) Importera .json (återställ plan) */
+function importPlanJSON(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const plan = JSON.parse(String(e.target.result));
+      // Spara lokalt (så export funkar direkt)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
+      // Återställ i appen:
+      restorePlan(plan); // TODO: implementera – bygg upp bord/gäster/checklista från objektet
+      updateSaveStatus("✔ Planen har laddats");
+      alert("Planen har laddats.");
+    } catch {
+      alert("Ogiltig fil – kunde inte läsa planen.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+/** 6) Init knappar + auto-restore på sidladdning */
+window.addEventListener("DOMContentLoaded", () => {
+  // Knappar
+  const saveBtn = document.getElementById("saveJsonBtn");
+  const loadBtn = document.getElementById("loadJsonBtn");
+  const loadInput = document.getElementById("loadJsonInput");
+
+  saveBtn && saveBtn.addEventListener("click", exportPlanJSON);
+  loadBtn && loadBtn.addEventListener("click", () => loadInput && loadInput.click());
+  loadInput && loadInput.addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) importPlanJSON(file);
+    // rensa input så man kan ladda samma fil igen
+    e.target.value = "";
+  });
+
+  // Auto-restore vid start (om något finns sparat lokalt)
+  const saved = loadPlanFromLocal();
+  if (saved) {
+    try {
+      restorePlan(saved); // TODO: applicera planen på din canvas/state
+      updateSaveStatus("✔ Plan återställd");
+    } catch (err) {
+      console.warn("Kunde inte återställa plan från localStorage:", err);
+    }
+  }
+});
+
+/** =======================
+ *  KOPPLA DITT STATE HÄR
+ *  =======================
+ *  Implementera dessa två så de stämmer med din app.
+ *  - getCurrentPlan(): returnera ETT objekt med allt som behövs.
+ *  - restorePlan(plan): bygg upp UI från objektet (töm befintligt, rita upp, etc.).
+ */
+
+// EXEMPEL: Skelett – byt till dina riktiga datastrukturer.
+function getCurrentPlan() {
+  return {
+    schemaVersion: 1,
+    meta: { title: document.getElementById("titleInput")?.value || "" },
+    tables: objects,      // dina bord
+    guests: guests,       // gästlistan
+    todo: todoItems,      // checklista/to-do
+    summary: summary      // sammanställning
+  };
+}
+
+function restorePlan(plan) {
+  // Titel
+  const titleInput = document.getElementById("titleInput");
+  if (titleInput) titleInput.value = plan?.meta?.title || "";
+
+  // Skriv tillbaka dina arrayer/objekt
+  objects   = Array.isArray(plan?.tables) ? plan.tables : [];
+  guests    = Array.isArray(plan?.guests) ? plan.guests : [];
+  todoItems = Array.isArray(plan?.todo)   ? plan.todo   : [];
+  summary   = plan?.summary || {};
+
+  // Rita om UI/canvas efter restore
+  if (typeof drawAll === "function") drawAll();
+  if (typeof updateSumButtonState === "function") updateSumButtonState();
+
+  // Synka localStorage så export blir korrekt direkt
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
+}
