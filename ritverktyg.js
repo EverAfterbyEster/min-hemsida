@@ -14,33 +14,68 @@ let guests = window.guests || [];
 let todoItems = window.todoItems || [];
 let summary = window.summary || {};
 
+function forceHideOverlays() {
+  const ids = ['modalOverlay', 'guestModalOverlay'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.display = 'none';
+      el.style.pointerEvents = 'none';
+      el.setAttribute('aria-hidden', 'true');
+    }
+  });
+}
+
 function initSiteNotice() {
   const notice = document.getElementById('siteNotice');
   const closeBtn = document.getElementById('closeSiteNoticeBtn');
-  const overlay = document.getElementById('modalOverlay');
 
-  // 1) Tvinga bort ev. kvarhängande overlay (iOS soft refresh/BFCache)
-  if (overlay) overlay.style.display = 'none';
+  // 1) Nolla ev. kvarhängande overlay (iOS soft refresh / BFCache)
+  forceHideOverlays();
 
-  // 2) Visa välkomstrutan bara om den inte redan stängts denna session
-  if (notice && !sessionStorage.getItem('siteNoticeClosed')) {
-    notice.style.display = 'block';
+  // 2) Visa rutan om den inte stängts i denna session
+  const closed = sessionStorage.getItem('siteNoticeClosed') === '1';
+  if (notice) {
+    notice.style.display = closed ? 'none' : 'block';
+    notice.style.pointerEvents = 'auto';
   }
 
-  // 3) Sätt (eller åter-sätt) stäng-lyssnare
+  // 3) Stängknapp (stoppa bubblor så overlay-klicklyssnare aldrig triggas)
   if (closeBtn) {
-    closeBtn.onclick = () => {
-      notice.style.display = 'none';
+    const close = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (notice) notice.style.display = 'none';
       sessionStorage.setItem('siteNoticeClosed', '1');
     };
+    closeBtn.onclick = close;
+    closeBtn.addEventListener('touchend', close, {passive: false});
   }
 }
 
-// Kör både vid kall laddning och när sidan återställs från cache
+// Kör vid kall start…
 document.addEventListener('DOMContentLoaded', initSiteNotice);
+
+// …och när sidan återställs från cache (iOS Safari/Vivaldi)
 window.addEventListener('pageshow', (e) => {
-  if (e.persisted) initSiteNotice();
+  if (e.persisted) setTimeout(initSiteNotice, 0);
 });
+
+// Om du någonstans öppnar ett annat modal med overlay:
+function showOverlay() {
+  const el = document.getElementById('modalOverlay');
+  if (!el) return;
+  el.style.display = 'block';
+  el.style.pointerEvents = 'auto';
+  el.setAttribute('aria-hidden', 'false');
+}
+function hideOverlay() {
+  const el = document.getElementById('modalOverlay');
+  if (!el) return;
+  el.style.display = 'none';
+  el.style.pointerEvents = 'none';
+  el.setAttribute('aria-hidden', 'true');
+}
 
 
 function resizeCanvas() {
