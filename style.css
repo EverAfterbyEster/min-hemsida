@@ -891,3 +891,5 @@ html, body, canvas, button, .toolbar, .clickable {
     margin-top: 8px; /* prova 8–12px efter smak */
   }
 }
+/* style.css */
+#siteNotice { z-index: 11010; } /* högre än #modalOverlay (10990) */
