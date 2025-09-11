@@ -41,11 +41,12 @@
 
       <div class="title-input-container">
         <input
-          type="text"
-          id="titleInput"
-          placeholder="Skriv din rubrik här"
-          oninput="onTitleChange()"
-        />
+  type="text"
+  id="titleInput"
+  placeholder="Skriv din rubrik här"
+  oninput="onTitleChange(); onPlanChanged();"
+/>
+
         <!--<div id="titleDisplay">Anna & Noah 2026-07-12</div>-->
       </div>
 
@@ -113,6 +114,21 @@
           Skapa checklista
         </button>
 
+        <!-- Spara/Ladda + status -->
+<button id="saveJsonBtn" title="Spara som JSON">
+  <span class="material-icons btn-icon">save</span>
+  Spara som (.json)
+</button>
+
+<button id="loadJsonBtn" title="Ladda upp JSON">
+  <span class="material-icons btn-icon">upload_file</span>
+  Ladda upp (.json)
+</button>
+<input id="loadJsonInput" type="file" accept=".json" style="display:none" />
+
+<div id="saveStatus" style="font-size:12px;opacity:.75;margin-left:8px;"></div>
+
+
         <button
           id="sumButtonMobile"
           class="sum-btn sum-btn--mobile"
@@ -120,6 +136,9 @@
         >
           Sammanställ
         </button>
+
+        
+
         <!--
         <button onclick="addSelectedTable()">Lägg till bord</button>
         <button onclick="addGuest()">Lägg till gäst</button>
@@ -311,13 +330,13 @@
     Exportera kalkylblad
   </button>
 
-
+<!--
   <button onclick="downloadGuestList()"
           class="no-print"
           style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:6px 12px;cursor:pointer;">
     Ladda ner som .png
   </button>
-
+-->
   <button onclick="closeGuestList()"
           class="no-print"
           style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:6px 12px;cursor:pointer;">
@@ -346,10 +365,6 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
 <script src="./ritverktyg.js" defer></script>
 
-
-
-
-  <script src="ritverktyg.js" defer></script>
   <script src="bestallning.js" defer></script>
   <script src="kontaktform.js" defer></script>
 
