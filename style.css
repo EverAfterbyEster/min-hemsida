@@ -893,3 +893,8 @@ html, body, canvas, button, .toolbar, .clickable {
 }
 /* style.css */
 #siteNotice { z-index: 11010; } /* högre än #modalOverlay (10990) */
+
+#checklistContainer { 
+  /* ...övriga regler... */
+  z-index: 11010;      /* högre än #modalOverlay (10990) */
+}
