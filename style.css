@@ -898,3 +898,13 @@ html, body, canvas, button, .toolbar, .clickable {
   /* ...övriga regler... */
   z-index: 11010;      /* högre än #modalOverlay (10990) */
 }
+/* style.css */
+#siteNotice {
+  z-index: 11020; /* över overlay (10990) */
+}
+/* overlay ska inte kunna fånga klick när det är dolt */
+#modalOverlay { pointer-events: none; }
+#modalOverlay[aria-hidden="false"] {
+  display: block;
+  pointer-events: auto;   /* bara när aktivt */
+}
