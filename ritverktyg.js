@@ -14,6 +14,34 @@ let guests = window.guests || [];
 let todoItems = window.todoItems || [];
 let summary = window.summary || {};
 
+// === Persistenta räknare för bord ===
+// Hjälpfunktioner för fallback när meta saknas i en äldre JSON
+function computeNextTableNumberFromObjects(list = []) {
+  let maxNum = 0;
+  for (const o of list) {
+    if (o && (o.type === 'rect' || o.type === 'circle')) {
+      if (typeof o.tableNumber === 'number') {
+        maxNum = Math.max(maxNum, o.tableNumber);
+      } else if (typeof o.label === 'string') {
+        const m = o.label.match(/Bord\s+(\d+)/i);
+        if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10) || 0);
+      }
+    }
+  }
+  return maxNum + 1;
+}
+function computeNextTableIdFromObjects(list = []) {
+  let maxId = 0;
+  for (const o of list) {
+    if (o && (o.type === 'rect' || o.type === 'circle')) {
+      const tid = (typeof o.tableId === 'number') ? o.tableId : 0;
+      maxId = Math.max(maxId, tid);
+    }
+  }
+  return maxId + 1;
+}
+
+
 function forceHideOverlays() {
   const ids = ['modalOverlay', 'guestModalOverlay'];
   ids.forEach(id => {
@@ -76,6 +104,7 @@ function hideOverlay() {
   el.style.pointerEvents = 'none';
   el.setAttribute('aria-hidden', 'true');
 }
+
 
 
 function resizeCanvas() {
@@ -1264,13 +1293,18 @@ window.addEventListener("DOMContentLoaded", () => {
 function getCurrentPlan() {
   return {
     schemaVersion: 1,
-    meta: { title: document.getElementById("titleInput")?.value || "" },
-    tables: objects,      // dina bord
-    guests: guests,       // gästlistan
-    todo: todoItems,      // checklista/to-do
-    summary: summary      // sammanställning
+    meta: {
+      title: document.getElementById("titleInput")?.value || "",
+      nextTableNumber: (typeof nextTableNumber === 'number' ? nextTableNumber : 1),
+      nextTableId: (typeof nextTableId === 'number' ? nextTableId : 1)
+    },
+    tables: objects,
+    guests: guests,
+    todo: todoItems,
+    summary: summary
   };
 }
+
 
 function restorePlan(plan) {
   // Titel
@@ -1282,6 +1316,18 @@ function restorePlan(plan) {
   guests    = Array.isArray(plan?.guests) ? plan.guests : [];
   todoItems = Array.isArray(plan?.todo)   ? plan.todo   : [];
   summary   = plan?.summary || {};
+  // Återställ räknare för bord (med fallback om saknas i äldre filer)
+if (typeof plan?.meta?.nextTableNumber === "number") {
+  nextTableNumber = plan.meta.nextTableNumber;
+} else {
+  nextTableNumber = computeNextTableNumberFromObjects(objects);
+}
+if (typeof plan?.meta?.nextTableId === "number") {
+  nextTableId = plan.meta.nextTableId;
+} else {
+  nextTableId = computeNextTableIdFromObjects(objects);
+}
+
 
   // Rita om UI/canvas efter restore
   if (typeof drawAll === "function") drawAll();
@@ -1290,3 +1336,4 @@ function restorePlan(plan) {
   // Synka localStorage så export blir korrekt direkt
   localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
 }
+
