@@ -908,3 +908,20 @@ html, body, canvas, button, .toolbar, .clickable {
   display: block;
   pointer-events: auto;   /* bara när aktivt */
 }
+
+.quantity-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quantity-control .item-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.quantity-control img {
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
