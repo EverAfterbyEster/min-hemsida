@@ -23,16 +23,53 @@ function summarizeOrder() {
     <p><strong>Sammanställning:</strong></p>
 
     <div class="quantity-control">
-      <label>Stolsöverdrag:</label>
-      <div>
-        <button onclick="updateOverdrag(-1)">–</button>
-        <span id="overdragCount">${adjustableOverdrag}</span>
-        <button onclick="updateOverdrag(1)">+</button>
-      </div>
-    </div>
+  <label>Stolsöverdrag:</label>
+
+  <!-- Bilden på stolsöverdrag -->
+  <div class="item-image">
+    <img src="stolsoverdrag.png" alt="Stolsöverdrag" style="width:60px; height:auto; margin:4px 0;">
+  </div>
+
+  <div>
+    <button onclick="updateOverdrag(-1)">–</button>
+    <span id="overdragCount">${adjustableOverdrag}</span>
+    <button onclick="updateOverdrag(1)">+</button>
+  </div>
+</div>
+
+
+    <div class="quantity-control">
+  <label>Stolsrosetter:</label>
+  <!-- Bilden på stolsrosett -->
+  <div class="item-image">
+    <img src="stolsrosett.png" alt="Stolsrosett" style="width:60px; height:auto; margin:4px 0;">
+  </div>
+  <div>
+    <button onclick="updateRosett(-1)">–</button>
+    <span id="rosettCount">${adjustableOverdrag}</span>
+    <button onclick="updateRosett(1)">+</button>
+  </div>
+
+  <!-- Rullista för färgval -->
+  <div class="color-select">
+    <label for="rosettColor">Färg:</label>
+    <select id="rosettColor" name="rosettColor">
+      <option value="vit">Vit</option>
+      <option value="röd">Röd</option>
+      <option value="blå">Blå</option>
+      <option value="lila">Lila</option>
+      <option value="grön">Grön</option>
+    </select>
+  </div>
+</div>
+
+
 
     <div class="quantity-control">
       <label>Liten duk:</label>
+      <div class="item-image">
+    <img src="duk.png" alt="duk" style="width:60px; height:auto; margin:4px 0;">
+  </div>
       <div>
         <button onclick="updateDuk('liten', -1)">–</button>
         <span id="litenDukCount">${litenDuk}</span>
@@ -43,6 +80,9 @@ function summarizeOrder() {
 
     <div class="quantity-control">
       <label>Mellanduk:</label>
+      <div class="item-image">
+    <img src="duk.png" alt="duk" style="width:60px; height:auto; margin:4px 0;">
+  </div>
       <div>
         <button onclick="updateDuk('mellan', -1)">–</button>
         <span id="mellanDukCount">${mellanDuk}</span>
@@ -53,6 +93,9 @@ function summarizeOrder() {
 
     <div class="quantity-control">
       <label>Stor duk:</label>
+      <div class="item-image">
+    <img src="duk.png" alt="duk" style="width:60px; height:auto; margin:4px 0;">
+  </div>
       <div>
         <button onclick="updateDuk('stor', -1)">–</button>
         <span id="storDukCount">${storDuk}</span>
@@ -63,6 +106,9 @@ function summarizeOrder() {
 
     <div class="quantity-control">
       <label>Runt bord mellanduk:</label>
+      <div class="item-image">
+    <img src="duk.png" alt="duk" style="width:60px; height:auto; margin:4px 0;">
+  </div>
       <div>
         <button onclick="updateDuk('runtMellan', -1)">–</button>
         <span id="runtMellanDukCount">${runtMellanDuk}</span>
@@ -73,6 +119,9 @@ function summarizeOrder() {
 
     <div class="quantity-control">
       <label>Runt bord stor duk:</label>
+      <div class="item-image">
+    <img src="duk.png" alt="duk" style="width:60px; height:auto; margin:4px 0;">
+  </div>
       <div>
         <button onclick="updateDuk('runtStor', -1)">–</button>
         <span id="runtStorDukCount">${runtStorDuk}</span>
@@ -80,6 +129,60 @@ function summarizeOrder() {
       </div>
       <small>Dukens dimensioner 210–220 cm rund</small>
     </div>
+
+    <div class="quantity-control">
+  <label>Ljusslinga stor:</label>
+
+  <!-- Bilden på stolsöverdrag -->
+  <div class="item-image">
+    <img src="ljusslingastor.png" alt="ljusslingastor" style="width:60px; height:auto; margin:4px 0;">
+  </div>
+  <div>
+    <button onclick="updateLjusslinga30(-1)">–</button>
+    <span id="ljusslinga30Count">0</span>
+    <button onclick="updateLjusslinga30(1)">+</button>
+  </div>
+</div>
+
+<div class="quantity-control">
+  <label>Ljusslinga liten:</label>
+<!-- Bilden på stolsöverdrag -->
+  <div class="item-image">
+    <img src="ljusslingaliten.png" alt="ljusslingaliten" style="width:60px; height:auto; margin:4px 0;">
+  </div>
+  <div>
+    <button onclick="updateLjusslingaliten(-1)">–</button>
+    <span id="ljusslingalitenCount">0</span>
+    <button onclick="updateLjusslingaliten(1)">+</button>
+  </div>
+</div>
+
+<div class="quantity-control">
+  <label>Rislampa:</label>
+<!-- Bilden på stolsöverdrag -->
+  <div class="item-image">
+    <img src="rislampa.png" alt="rislampa" style="width:60px; height:auto; margin:4px 0;">
+  </div>
+  <div>
+    <button onclick="updaterislampa(-1)">–</button>
+    <span id="rislampaCount">0</span>
+    <button onclick="updaterislampa(1)">+</button>
+  </div>
+</div>
+
+<div class="quantity-control">
+  <label>Draperingstyg:</label>
+<!-- Bilden på stolsöverdrag -->
+  <div class="item-image">
+    <img src="draperingstyg.png" alt="draperingstyg" style="width:60px; height:auto; margin:4px 0;">
+  </div>
+  <div>
+    <button onclick="updatedraperingstyg(-1)">–</button>
+    <span id="draperingstygCount">0</span>
+    <button onclick="updatedraperingstyg(1)">+</button>
+  </div>
+  <small>Dimensioner 75 cm x 800 cm</small>
+</div>
 
 
     <button type="button" id="printSheetBtn" class="primary">Skriv ut</button>
@@ -205,8 +308,17 @@ function downloadCSV() {
 
   const sep = ';';
   const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const header = ['Artikel','Antal','Mått'].map(esc).join(sep);
-  const body = rows.map(r => [esc(r.name), esc(r.count), esc(r.dims)].join(sep)).join('\r\n');
+  const header = ['Artikel','Antal','Mått','Kommentar'].map(esc).join(sep);
+
+  const body = rows.map(r => {
+    let kommentar = '';
+    if (/stolsrosetter/i.test(r.name)) {
+      const färg = document.getElementById('rosettColor')?.value || '';
+      if (färg) kommentar = `Färg: ${färg}`;
+    }
+    return [esc(r.name), esc(r.count), esc(r.dims), esc(kommentar)].join(sep);
+  }).join('\r\n');
+  
   const csv = '\uFEFF' + header + '\r\n' + body;
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -246,3 +358,41 @@ function updateDuk(type, delta) {
   span.textContent = count;
 }
   
+function updateRosett(delta) {
+  const span = document.getElementById("rosettCount");
+  if (!span) return;
+  let count = parseInt(span.textContent, 10);
+  count = Math.max(0, count + delta);
+  span.textContent = count;
+}
+
+function updateLjusslinga30(delta) {
+  const span = document.getElementById("ljusslinga30Count");
+  if (!span) return;
+  let count = parseInt(span.textContent, 10);
+  count = Math.max(0, count + delta);
+  span.textContent = count;
+}
+function updateLjusslingaliten(delta) {
+  const span = document.getElementById("ljusslingalitenCount");
+  if (!span) return;
+  let count = parseInt(span.textContent, 10);
+  count = Math.max(0, count + delta);
+  span.textContent = count;
+}
+
+function updaterislampa(delta) {
+  const span = document.getElementById("rislampaCount");
+  if (!span) return;
+  let count = parseInt(span.textContent, 10);
+  count = Math.max(0, count + delta);
+  span.textContent = count;
+}
+
+function updatedraperingstyg(delta) {
+  const span = document.getElementById("draperingstygCount");
+  if (!span) return;
+  let count = parseInt(span.textContent, 10);
+  count = Math.max(0, count + delta);
+  span.textContent = count;
+}
