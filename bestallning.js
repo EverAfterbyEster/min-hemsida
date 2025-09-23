@@ -27,7 +27,7 @@ function summarizeOrder() {
 
   <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
-    <img src="stolsoverdrag.PNG" alt="Stolsöverdrag" style="width:60px; height:auto; margin:4px 0;">
+    <img src="stolsoverdrag.jpeg" alt="Stolsöverdrag" style="width:60px; height:auto; margin:4px 0;">
   </div>
 
   <div>
@@ -42,7 +42,7 @@ function summarizeOrder() {
   <label>Stolsrosetter:</label>
   <!-- Bilden på stolsrosett -->
   <div class="item-image">
-    <img src="stolsrosett.PNG" alt="Stolsrosett" style="width:60px; height:auto; margin:4px 0;">
+    <img src="stolsrosett.jpeg" alt="Stolsrosett" style="width:60px; height:auto; margin:4px 0;">
   </div>
   <div>
     <button onclick="updateRosett(-1)">–</button>
@@ -135,7 +135,7 @@ function summarizeOrder() {
 
   <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
-    <img src="ljusslingastor.PNG" alt="ljusslingastor" style="width:60px; height:auto; margin:4px 0;">
+    <img src="ljusslingastor.jpeg" alt="ljusslingastor" style="width:60px; height:auto; margin:4px 0;">
   </div>
   <div>
     <button onclick="updateLjusslinga30(-1)">–</button>
@@ -148,7 +148,7 @@ function summarizeOrder() {
   <label>Ljusslinga liten:</label>
 <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
-    <img src="ljusslingaliten.PNG" alt="ljusslingaliten" style="width:60px; height:auto; margin:4px 0;">
+    <img src="ljusslingaliten.jpeg" alt="ljusslingaliten" style="width:60px; height:auto; margin:4px 0;">
   </div>
   <div>
     <button onclick="updateLjusslingaliten(-1)">–</button>
@@ -161,7 +161,7 @@ function summarizeOrder() {
   <label>Rislampa:</label>
 <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
-    <img src="rislampa.PNG" alt="rislampa" style="width:60px; height:auto; margin:4px 0;">
+    <img src="rislampa.jpeg" alt="rislampa" style="width:60px; height:auto; margin:4px 0;">
   </div>
   <div>
     <button onclick="updaterislampa(-1)">–</button>
@@ -174,7 +174,7 @@ function summarizeOrder() {
   <label>Draperingstyg:</label>
 <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
-    <img src="draperingstyg.png" alt="draperingstyg" style="width:60px; height:auto; margin:4px 0;">
+    <img src="draperingstyg.jpeg" alt="draperingstyg" style="width:60px; height:auto; margin:4px 0;">
   </div>
   <div>
     <button onclick="updatedraperingstyg(-1)">–</button>
