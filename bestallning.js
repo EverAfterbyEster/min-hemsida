@@ -68,7 +68,7 @@ function summarizeOrder() {
     <div class="quantity-control">
       <label>Liten duk:</label>
       <div class="item-image">
-    <img src="duk.png" alt="duk" style="width:60px; height:auto; margin:4px 0;">
+    <img src="duk.jpeg" alt="duk" style="width:60px; height:auto; margin:4px 0;">
   </div>
       <div>
         <button onclick="updateDuk('liten', -1)">–</button>
@@ -81,7 +81,7 @@ function summarizeOrder() {
     <div class="quantity-control">
       <label>Mellanduk:</label>
       <div class="item-image">
-    <img src="duk.png" alt="duk" style="width:60px; height:auto; margin:4px 0;">
+    <img src="duk.jpeg" alt="duk" style="width:60px; height:auto; margin:4px 0;">
   </div>
       <div>
         <button onclick="updateDuk('mellan', -1)">–</button>
@@ -94,7 +94,7 @@ function summarizeOrder() {
     <div class="quantity-control">
       <label>Stor duk:</label>
       <div class="item-image">
-    <img src="duk.png" alt="duk" style="width:60px; height:auto; margin:4px 0;">
+    <img src="duk.jpeg" alt="duk" style="width:60px; height:auto; margin:4px 0;">
   </div>
       <div>
         <button onclick="updateDuk('stor', -1)">–</button>
@@ -107,7 +107,7 @@ function summarizeOrder() {
     <div class="quantity-control">
       <label>Runt bord mellanduk:</label>
       <div class="item-image">
-    <img src="duk.png" alt="duk" style="width:60px; height:auto; margin:4px 0;">
+    <img src="duk.jpeg" alt="duk" style="width:60px; height:auto; margin:4px 0;">
   </div>
       <div>
         <button onclick="updateDuk('runtMellan', -1)">–</button>
@@ -120,7 +120,7 @@ function summarizeOrder() {
     <div class="quantity-control">
       <label>Runt bord stor duk:</label>
       <div class="item-image">
-    <img src="duk.png" alt="duk" style="width:60px; height:auto; margin:4px 0;">
+    <img src="duk.jpeg" alt="duk" style="width:60px; height:auto; margin:4px 0;">
   </div>
       <div>
         <button onclick="updateDuk('runtStor', -1)">–</button>
