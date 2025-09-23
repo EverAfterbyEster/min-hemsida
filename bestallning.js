@@ -27,7 +27,7 @@ function summarizeOrder() {
 
   <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
-    <img src="stolsoverdrag.png" alt="Stolsöverdrag" style="width:60px; height:auto; margin:4px 0;">
+    <img src="stolsoverdrag.PNG" alt="Stolsöverdrag" style="width:60px; height:auto; margin:4px 0;">
   </div>
 
   <div>
@@ -42,7 +42,7 @@ function summarizeOrder() {
   <label>Stolsrosetter:</label>
   <!-- Bilden på stolsrosett -->
   <div class="item-image">
-    <img src="stolsrosett.png" alt="Stolsrosett" style="width:60px; height:auto; margin:4px 0;">
+    <img src="stolsrosett.PNG" alt="Stolsrosett" style="width:60px; height:auto; margin:4px 0;">
   </div>
   <div>
     <button onclick="updateRosett(-1)">–</button>
@@ -135,7 +135,7 @@ function summarizeOrder() {
 
   <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
-    <img src="ljusslingastor.png" alt="ljusslingastor" style="width:60px; height:auto; margin:4px 0;">
+    <img src="ljusslingastor.PNG" alt="ljusslingastor" style="width:60px; height:auto; margin:4px 0;">
   </div>
   <div>
     <button onclick="updateLjusslinga30(-1)">–</button>
@@ -148,7 +148,7 @@ function summarizeOrder() {
   <label>Ljusslinga liten:</label>
 <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
-    <img src="ljusslingaliten.png" alt="ljusslingaliten" style="width:60px; height:auto; margin:4px 0;">
+    <img src="ljusslingaliten.PNG" alt="ljusslingaliten" style="width:60px; height:auto; margin:4px 0;">
   </div>
   <div>
     <button onclick="updateLjusslingaliten(-1)">–</button>
@@ -161,7 +161,7 @@ function summarizeOrder() {
   <label>Rislampa:</label>
 <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
-    <img src="rislampa.png" alt="rislampa" style="width:60px; height:auto; margin:4px 0;">
+    <img src="rislampa.PNG" alt="rislampa" style="width:60px; height:auto; margin:4px 0;">
   </div>
   <div>
     <button onclick="updaterislampa(-1)">–</button>
