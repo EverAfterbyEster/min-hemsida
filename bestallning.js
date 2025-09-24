@@ -80,7 +80,7 @@ function summarizeOrder() {
 
       <!-- Val för servettfärg/typ -->
       <div class="color-select">
-        <label for="servettColor">Färg/typ:</label>
+        <label for="servettColor">Färg:</label>
         <select id="servettColor" name="servettColor">
           <option value="vit">Vit</option>
           <option value="ivory">Ivory</option>
