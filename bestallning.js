@@ -2,6 +2,7 @@
 function summarizeOrder() {
   // Count guests for chair covers
   const adjustableOverdrag = objects.filter(o => o.type === "guest").length;
+  const servetterPack = Math.ceil(adjustableOverdrag / 50) || 0;
 
   // Map tables to cloth sizes
   let litenDuk = 0, mellanDuk = 0, storDuk = 0, runtMellanDuk = 0, runtStorDuk = 0;
@@ -62,6 +63,38 @@ function summarizeOrder() {
     </select>
   </div>
 </div>
+
+    <!-- NEW: Servetter (50-pack) -->
+    <div class="quantity-control">
+      <label>Servetter (50-pack):</label>
+
+      <div class="item-image">
+        <img src="servetter.jpeg" alt="Servetter" style="width:60px; height:auto; margin:4px 0;">
+      </div>
+
+      <div>
+        <button onclick="updateServetter(-1)">–</button>
+        <span id="servetterCount">${servetterPack}</span>
+        <button onclick="updateServetter(1)">+</button>
+      </div>
+
+      <!-- Val för servettfärg/typ -->
+      <div class="color-select">
+        <label for="servettColor">Färg/typ:</label>
+        <select id="servettColor" name="servettColor">
+          <option value="vit">Vit</option>
+          <option value="ivory">Ivory</option>
+          <option value="svart">Svart</option>
+          <option value="röd">Röd</option>
+          <option value="blå">Blå</option>
+          <option value="grön">Grön</option>
+          <option value="lila">Lila</option>
+          <option value="mönstrad">Mönstrad</option>
+        </select>
+      </div>
+
+      <small>1 pack räcker till upp till 50 gäster</small>
+    </div>
 
 
 
@@ -315,7 +348,11 @@ function downloadCSV() {
     if (/stolsrosetter/i.test(r.name)) {
       const färg = document.getElementById('rosettColor')?.value || '';
       if (färg) kommentar = `Färg: ${färg}`;
+    } else if (/servetter/i.test(r.name)) {
+      const färg = document.getElementById('servettColor')?.value || '';
+      if (färg) kommentar = `Färg/typ: ${färg}`;
     }
+
     return [esc(r.name), esc(r.count), esc(r.dims), esc(kommentar)].join(sep);
   }).join('\r\n');
   
@@ -393,6 +430,13 @@ function updatedraperingstyg(delta) {
   const span = document.getElementById("draperingstygCount");
   if (!span) return;
   let count = parseInt(span.textContent, 10);
+  count = Math.max(0, count + delta);
+  span.textContent = count;
+}
+function updateServetter(delta) {
+  const span = document.getElementById("servetterCount");
+  if (!span) return;
+  let count = parseInt(span.textContent, 10) || 0;
   count = Math.max(0, count + delta);
   span.textContent = count;
 }
