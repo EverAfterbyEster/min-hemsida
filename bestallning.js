@@ -64,6 +64,21 @@ function summarizeOrder() {
   </div>
 </div>
 
+<div class="quantity-control">
+  <label>Namnskyltar:</label>
+
+  <div class="item-image">
+    <img src="namnskylt.jpeg" alt="Namnskylt" style="width:60px; height:auto; margin:4px 0;">
+  </div>
+
+  <div>
+    <button onclick="updateNamnskylt(-1)">–</button>
+    <span id="namnskyltCount">${adjustableOverdrag}</span>
+    <button onclick="updateNamnskylt(1)">+</button>
+  </div>
+</div>
+
+
     <!-- NEW: Servetter (50-pack) -->
     <div class="quantity-control">
       <label>Servetter (50-pack):</label>
@@ -435,6 +450,14 @@ function updatedraperingstyg(delta) {
 }
 function updateServetter(delta) {
   const span = document.getElementById("servetterCount");
+  if (!span) return;
+  let count = parseInt(span.textContent, 10) || 0;
+  count = Math.max(0, count + delta);
+  span.textContent = count;
+}
+
+function updateNamnskylt(delta) {
+  const span = document.getElementById("namnskyltCount");
   if (!span) return;
   let count = parseInt(span.textContent, 10) || 0;
   count = Math.max(0, count + delta);
