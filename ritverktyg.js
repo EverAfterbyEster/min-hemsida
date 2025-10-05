@@ -14,6 +14,7 @@ let guests = window.guests || [];
 let todoItems = window.todoItems || [];
 let summary = window.summary || {};
 
+
 // === Persistenta räknare för bord ===
 // Hjälpfunktioner för fallback när meta saknas i en äldre JSON
 function computeNextTableNumberFromObjects(list = []) {
@@ -476,14 +477,21 @@ function addSelectedTable() {
 }
 
 function addGuest() {
-  const name = prompt("Namn på gäst?");
-  if (name) {
-    objects.push({ type: "guest", x: 300, y: 300, name });
-    drawAll();
-    updateSumButtonState();
+  const promptText = (window.t && typeof t === "function")
+    ? t("prompt_guest_name")
+    : "Namn på gäst?"; // fallback om t saknas
+
+  const name = window.prompt(promptText) || "";
+  if (!name) {
+    onPlanChanged();
+    return;
   }
+  objects.push({ type: "guest", x: 300, y: 300, name });
+  drawAll();
+  updateSumButtonState();
   onPlanChanged();
 }
+
 
 function removeSelected() {
   if (selected) {
@@ -1336,4 +1344,3 @@ if (typeof plan?.meta?.nextTableId === "number") {
   // Synka localStorage så export blir korrekt direkt
   localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
 }
-
