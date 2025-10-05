@@ -21,10 +21,10 @@ function summarizeOrder() {
 
   const summaryBox = document.getElementById("summaryBox");
   summaryBox.innerHTML = `
-    <p><strong>Sammanställning:</strong></p>
+    <p><strong><span data-i18n="sum_heading">Sammanställning</span>:</strong></p>
 
     <div class="quantity-control">
-  <label>Stolsöverdrag:</label>
+  <label><span data-i18n="item_chair_cover">Stolsöverdrag</span>:</label>
 
   <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
@@ -40,7 +40,7 @@ function summarizeOrder() {
 
 
     <div class="quantity-control">
-  <label>Stolsrosetter:</label>
+  <label><span data-i18n="item_chair_bow">Stolsrosetter</span>:</label>
   <!-- Bilden på stolsrosett -->
   <div class="item-image">
     <img src="stolsrosett.jpeg" alt="Stolsrosett" style="width:60px; height:auto; margin:4px 0;">
@@ -65,7 +65,7 @@ function summarizeOrder() {
 </div>
 
 <div class="quantity-control">
-  <label>Namnskyltar:</label>
+  <label><span data-i18n="item_name_tags">Namnskyltar</span>:</label>
 
   <div class="item-image">
     <img src="namnskylt.jpeg" alt="Namnskylt" style="width:60px; height:auto; margin:4px 0;">
@@ -81,7 +81,7 @@ function summarizeOrder() {
 
     <!-- NEW: Servetter (50-pack) -->
     <div class="quantity-control">
-      <label>Servetter (50-pack):</label>
+      <label><span data-i18n="item_napkins_pack">Servetter (50-pack)</span>:</label>
 
       <div class="item-image">
         <img src="servetter.jpeg" alt="Servetter" style="width:60px; height:auto; margin:4px 0;">
@@ -108,13 +108,13 @@ function summarizeOrder() {
         </select>
       </div>
 
-      <small>1 pack räcker till upp till 50 gäster</small>
+      <small><span data-i18n="note_pack_50">1 pack räcker till upp till 50 gäster</span></small>
     </div>
 
 
 
     <div class="quantity-control">
-      <label>Liten duk:</label>
+      <label><span data-i18n="cloth_small">Liten duk</span>:</label>
       <div class="item-image">
     <img src="duk.jpeg" alt="duk" style="width:60px; height:auto; margin:4px 0;">
   </div>
@@ -123,11 +123,11 @@ function summarizeOrder() {
         <span id="litenDukCount">${litenDuk}</span>
         <button onclick="updateDuk('liten', 1)">+</button>
       </div>
-      <small>Dukens dimensioner 180 × 140 cm</small>
+      <small><span data-i18n="dims_small_rect">Dukens dimensioner 180 × 140 cm</span></small>
     </div>
 
     <div class="quantity-control">
-      <label>Mellanduk:</label>
+      <label><span data-i18n="cloth_medium">Mellanduk</span>:</label>
       <div class="item-image">
     <img src="duk.jpeg" alt="duk" style="width:60px; height:auto; margin:4px 0;">
   </div>
@@ -136,11 +136,11 @@ function summarizeOrder() {
         <span id="mellanDukCount">${mellanDuk}</span>
         <button onclick="updateDuk('mellan', 1)">+</button>
       </div>
-      <small>Dukens dimensioner 240 × 150 cm</small>
+      <small><span data-i18n="dims_medium_rect">Dukens dimensioner 240 × 150 cm</span></small>
     </div>
 
     <div class="quantity-control">
-      <label>Stor duk:</label>
+      <label><span data-i18n="cloth_large">Stor duk</span>:</label>
       <div class="item-image">
     <img src="duk.jpeg" alt="duk" style="width:60px; height:auto; margin:4px 0;">
   </div>
@@ -149,11 +149,11 @@ function summarizeOrder() {
         <span id="storDukCount">${storDuk}</span>
         <button onclick="updateDuk('stor', 1)">+</button>
       </div>
-      <small>Dukens dimensioner 300 × 150 cm</small>
+      <small><span data-i18n="dims_large_rect">Dukens dimensioner 300 × 150 cm</span></small>
     </div>
 
     <div class="quantity-control">
-      <label>Runt bord mellanduk:</label>
+      <label><span data-i18n="cloth_round_medium">Runt bord mellanduk</span>:</label>
       <div class="item-image">
     <img src="duk.jpeg" alt="duk" style="width:60px; height:auto; margin:4px 0;">
   </div>
@@ -162,11 +162,11 @@ function summarizeOrder() {
         <span id="runtMellanDukCount">${runtMellanDuk}</span>
         <button onclick="updateDuk('runtMellan', 1)">+</button>
       </div>
-      <small>Dukens dimensioner 195 cm rund</small>
+      <small><span data-i18n="dims_round_medium">Dukens dimensioner 195 cm rund</span></small>
     </div>
 
     <div class="quantity-control">
-      <label>Runt bord stor duk:</label>
+      <label><span data-i18n="cloth_round_large">Runt bord stor duk</span>:</label>
       <div class="item-image">
     <img src="duk.jpeg" alt="duk" style="width:60px; height:auto; margin:4px 0;">
   </div>
@@ -175,11 +175,11 @@ function summarizeOrder() {
         <span id="runtStorDukCount">${runtStorDuk}</span>
         <button onclick="updateDuk('runtStor', 1)">+</button>
       </div>
-      <small>Dukens dimensioner 210–220 cm rund</small>
+      <small><span data-i18n="dims_round_large">Dukens dimensioner 210–220 cm rund</span></small>
     </div>
 
     <div class="quantity-control">
-  <label>Ljusslinga stor:</label>
+  <label><span data-i18n="lights_big">Ljusslinga stor</span>:</label>
 
   <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
@@ -193,7 +193,7 @@ function summarizeOrder() {
 </div>
 
 <div class="quantity-control">
-  <label>Ljusslinga liten:</label>
+  <label><span data-i18n="lights_small">Ljusslinga liten</span>:</label>
 <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
     <img src="ljusslingaliten.jpeg" alt="ljusslingaliten" style="width:60px; height:auto; margin:4px 0;">
@@ -206,7 +206,7 @@ function summarizeOrder() {
 </div>
 
 <div class="quantity-control">
-  <label>Rislampa:</label>
+  <label><span data-i18n="paper_lantern">Rislampa</span>:</label>
 <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
     <img src="rislampa.jpeg" alt="rislampa" style="width:60px; height:auto; margin:4px 0;">
@@ -219,7 +219,7 @@ function summarizeOrder() {
 </div>
 
 <div class="quantity-control">
-  <label>Draperingstyg:</label>
+  <label><span data-i18n="drapery_fabric">Draperingstyg</span>:</label>
 <!-- Bilden på stolsöverdrag -->
   <div class="item-image">
     <img src="draperingstyg.jpeg" alt="draperingstyg" style="width:60px; height:auto; margin:4px 0;">
@@ -229,7 +229,7 @@ function summarizeOrder() {
     <span id="draperingstygCount">0</span>
     <button onclick="updatedraperingstyg(1)">+</button>
   </div>
-  <small>Dimensioner 75 cm x 800 cm</small>
+  <small><span data-i18n="dims_drapery">Dimensioner 75 cm x 800 cm</span></small>
 </div>
 
 
@@ -237,6 +237,7 @@ function summarizeOrder() {
   <button type="button" id="downloadSheetBtn">Hämta kalkylark</button>
   <button type="button" onclick="document.getElementById('summaryBox').style.display='none'">Avbryt</button>
   `;
+  if (typeof applyLang === "function") { try { applyLang(document.documentElement.lang || "sv"); } catch(e){} }
 
   summaryBox.style.display = "block";
 
