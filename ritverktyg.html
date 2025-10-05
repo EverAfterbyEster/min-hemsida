@@ -3,8 +3,6 @@
 <head>
   <meta charset="UTF-8">
 
-  <!-- Detect screen format -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Icon Font Loading-->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,7 +15,8 @@
 
   <title>Ritverktyg – Bordsplacering</title>
   <link rel="stylesheet" href="style.css">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
 </head>
 <body>
   <!-- Mobil‐notis högst upp 
@@ -40,15 +39,21 @@
       </button>
 
       <div class="title-input-container">
-        <input
-  type="text"
-  id="titleInput"
-  placeholder="Skriv din rubrik här"
-  oninput="onTitleChange(); onPlanChanged();"
-/>
+        <div class="title-input-group">
+          <input
+            type="text"
+            id="titleInput"
+            placeholder="Skriv din rubrik här"
+            data-i18n-placeholder="title_placeholder"
+            oninput="onTitleChange(); onPlanChanged();"
+          />
+          <button id="lang-toggle" class="lang-chip" aria-label="Byt språk">EN</button>
+        </div>
+      </div>
+      
 
         <!--<div id="titleDisplay">Anna & Noah 2026-07-12</div>-->
-      </div>
+      
 
       <!--
       <div class="toolbar-items">
@@ -83,59 +88,71 @@
       
       <div class="toolbar-items">
         <select id="tableType">
-          <option value="round-6">Runt bord – 6 platser</option>
-          <option value="round-8">Runt bord – 8 platser</option>
-          <option value="rect-4">Rektangulärt bord – 4 platser</option>
-          <option value="rect-6">Rektangulärt bord – 6 platser</option>
-          <option value="rect-8">Rektangulärt bord – 8 platser</option>
+          <option value="round-6" data-i18n="opt_round6">Runt bord – 6 platser</option>
+          <option value="round-8" data-i18n="opt_round8">Runt bord – 8 platser</option>
+          <option value="rect-4"  data-i18n="opt_rect4">Rektangulärt bord – 4 platser</option>
+          <option value="rect-6"  data-i18n="opt_rect6">Rektangulärt bord – 6 platser</option>
+          <option value="rect-8"  data-i18n="opt_rect8">Rektangulärt bord – 8 platser</option>
         </select>
+      
         <button onclick="addSelectedTable()">
           <span class="material-icons btn-icon">add</span>
-          Lägg till bord
+          <span data-i18n="btn_add_table">Lägg till bord</span>
         </button>
+      
 
-        <button onclick="addGuest()">
-          <span class="material-icons btn-icon">person_add</span>
-          Lägg till gäst
+        <button onclick="addGuest()" id="addGuestBtn" data-i18n-aria-label="btn_add_guest" aria-label="Lägg till gäst">
+          <span class="material-icons btn-icon" aria-hidden="true">person_add</span>
+          <span data-i18n="btn_add_guest">Lägg till gäst</span>
         </button>
+        
 
-        <button onclick="saveAsImage()">
+        <button onclick="saveAsImage()" id="saveAsImageBtn" data-i18n-aria-label="btn_save_As_Image" aria-label="Spara bild">
           <span class="material-icons btn-icon">arrow_downward</span>
-          Spara bild
+          <span data-i18n="btn_save_As_Image">Spara bild</span>
         </button>
 
-        <button onclick="createGuestList()">
+        <button onclick="createGuestList()" id="createGuestListBtn" data-i18n-aria-label="btn_create_GuestList" aria-label="Skapa gästlista">
           <span class="material-icons btn-icon">dehaze</span>
-          Skapa gästlista
+          <span data-i18n="btn_create_GuestList">Skapa gästlista</span>
         </button>
 
-        <button id="openChecklistBtn">
+        <button id="openChecklistBtn" data-i18n-aria-label="btn_open_Checklist" aria-label="Skapa checklista">
           <span class="material-icons btn-icon">checklist</span>
-          Skapa checklista
+          <span data-i18n="btn_open_Checklist">Skapa checklista</span>
         </button>
 
         <!-- Spara/Ladda + status -->
-<button id="saveJsonBtn" title="Spara som JSON">
-  <span class="material-icons btn-icon">save</span>
-  Spara som (.json)
+        <button id="saveJsonBtn"
+        title="Spara som JSON"
+        data-i18n-title="title_save_json">
+  <span class="material-icons btn-icon" aria-hidden="true">save</span>
+  <span data-i18n="btn_save_json">Spara som (.json)</span>
 </button>
 
-<button id="loadJsonBtn" title="Ladda upp JSON">
-  <span class="material-icons btn-icon">upload_file</span>
-  Ladda upp (.json)
+
+<button id="loadJsonBtn" 
+title="Ladda upp JSON"
+data-i18n-title="title_load_json">
+  <span class="material-icons btn-icon" aria-hidden="true">upload_file</span>
+  <span data-i18n="btn_load_json"> Ladda upp (.json)</span>
 </button>
 <input id="loadJsonInput" type="file" accept=".json" style="display:none" />
 
 <div id="saveStatus" style="font-size:12px;opacity:.75;margin-left:8px;"></div>
 
 
-        <button
-          id="sumButtonMobile"
-          class="sum-btn sum-btn--mobile"
-          disabled
-        >
-          Sammanställ
-        </button>
+<button
+id="sumButtonMobile"
+class="sum-btn sum-btn--mobile"
+data-i18n-title="title_calculate_totals"
+data-i18n-aria-label="btn_calculate_totals"
+title="Visa sammanställning"
+aria-label="Sammanställ"
+disabled
+>
+<span data-i18n="btn_calculate_totals">Sammanställ</span>
+</button>
 
         
 
@@ -183,104 +200,123 @@
   <!-- Modal -->
   <div id="checklistContainer">
     <button id="closeChecklistBtn" class="close-modal no-print">×</button>
-    <h2>Checklista</h2>
-
+    <h2 data-i18n="checklist_title">Checklista</h2>
+  
     <ul id="checklist">
       <li>
         <label>
           <input type="checkbox" data-id="lokal">
-          Lokal
+          <span data-i18n="check_lokal">Lokal</span>
         </label>
-        <button class="remove-item">Ta bort</button>
+        <button class="remove-item">
+          <span data-i18n="btn_remove">Ta bort</span>
+        </button>
       </li>
+  
       <li>
         <label>
-          <input type="checkbox" data-id="inbjudningar"> 
-          Inbjudningar
+          <input type="checkbox" data-id="inbjudningar">
+          <span data-i18n="check_invitations">Inbjudningar</span>
         </label>
-        <button class="remove-item">Ta bort</button>
+        <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
       </li>
+  
       <li>
         <label>
-          <input type="checkbox" data-id="catering"> 
-          Catering
+          <input type="checkbox" data-id="catering">
+          <span data-i18n="check_catering">Catering</span>
         </label>
-        <button class="remove-item">Ta bort</button>
-      </li>  
-      <li>
-        <label>
-          <input type="checkbox" data-id="dekorationer"> 
-          Dekorationer
-        </label>
-        <button class="remove-item">Ta bort</button>
-      </li> 
-      <li>
-        <label>
-          <input type="checkbox" data-id="musik"> 
-          Musik
-        </label>
-        <button class="remove-item">Ta bort</button>
-      </li> 
-      <li>
-        <label>
-          <input type="checkbox" data-id="fotograf"> 
-          Fotograf
-        </label>
-        <button class="remove-item">Ta bort</button>
-      </li> 
-      <li>
-        <label>
-          <input type="checkbox" data-id="transport"> 
-          Transport
-        </label>
-        <button class="remove-item">Ta bort</button>
-      </li>   
-      <li>
-        <label>
-          <input type="checkbox" data-id="boende"> 
-          Boende
-        </label>
-        <button class="remove-item">Ta bort</button>
-      </li> 
-      <li>
-        <label>
-          <input type="checkbox" data-id="underhallning"> 
-          Underhållning
-        </label>
-        <button class="remove-item">Ta bort</button>
-      </li> 
-      <li>
-        <label>
-          <input type="checkbox" data-id="matdryck"> 
-          Mat & Dryck
-        </label>
-        <button class="remove-item">Ta bort</button>
-      </li> 
-      <li>
-        <label>
-          <input type="checkbox" data-id="kladsel"> 
-          Klädsel & Skönhet
-        </label>
-        <button class="remove-item">Ta bort</button>
+        <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
       </li>
+  
       <li>
         <label>
-          <input type="checkbox" data-id="budget"> 
-          Budget
+          <input type="checkbox" data-id="dekorationer">
+          <span data-i18n="check_decorations">Dekorationer</span>
         </label>
-        <button class="remove-item">Ta bort</button>
+        <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+      </li>
+  
+      <li>
+        <label>
+          <input type="checkbox" data-id="musik">
+          <span data-i18n="check_music">Musik</span>
+        </label>
+        <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+      </li>
+  
+      <li>
+        <label>
+          <input type="checkbox" data-id="fotograf">
+          <span data-i18n="check_photographer">Fotograf</span>
+        </label>
+        <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+      </li>
+  
+      <li>
+        <label>
+          <input type="checkbox" data-id="transport">
+          <span data-i18n="check_transport">Transport</span>
+        </label>
+        <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+      </li>
+  
+      <li>
+        <label>
+          <input type="checkbox" data-id="boende">
+          <span data-i18n="check_accommodation">Boende</span>
+        </label>
+        <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+      </li>
+  
+      <li>
+        <label>
+          <input type="checkbox" data-id="underhallning">
+          <span data-i18n="check_entertainment">Underhållning</span>
+        </label>
+        <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+      </li>
+  
+      <li>
+        <label>
+          <input type="checkbox" data-id="matdryck">
+          <span data-i18n="check_food_drink">Mat &amp; Dryck</span>
+        </label>
+        <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+      </li>
+  
+      <li>
+        <label>
+          <input type="checkbox" data-id="kladsel">
+          <span data-i18n="check_attire_beauty">Klädsel &amp; Skönhet</span>
+        </label>
+        <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+      </li>
+  
+      <li>
+        <label>
+          <input type="checkbox" data-id="budget">
+          <span data-i18n="check_budget">Budget</span>
+        </label>
+        <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
       </li>
     </ul>
-
+  
     <div class="controls">
-      <input type="text" id="newChecklistItem" placeholder="Ny punkt">
-      <button id="addChecklistItemBtn">Lägg till</button>
-      <button id="downloadChecklistBtn" class="no-print">
+      <input id="newChecklistItem"
+             type="text"
+             placeholder="Ny punkt"
+             data-i18n-placeholder="check_item_placeholder">
+      <button id="addChecklistItemBtn" data-i18n="btn_add_item">Lägg till</button>
+      <button id="downloadChecklistBtn" class="no-print"
+              data-i18n="btn_download"
+              data-i18n-title="title_download"
+              title="Ladda ner">
         Ladda ner
       </button>
     </div>
   </div>
-
+  
   <!-- Modal-överlägg för gästlistan -->
   <div id="guestModalOverlay" class="no-print"
       style="display:none;
@@ -317,7 +353,7 @@
       &times;
     </button>
 
-    <h2>Gästlista</h2>
+    <h2 data-i18n="guestlist_title">Gästlista</h2>
 
     <ul id="guestList">
       <!-- createGuestList() fyller på denna lista -->
@@ -326,6 +362,9 @@
     <div style="margin-top:12px; text-align:right;">
   <button class="no-print"
           onclick="exportGuestList('csv')"
+          data-i18n="btn_export_sheet"
+          data-i18n-title="title_export_sheet"
+          title="Exportera kalkylblad"
           style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:6px 12px;cursor:pointer;">
     Exportera kalkylblad
   </button>
@@ -337,11 +376,12 @@
     Ladda ner som .png
   </button>
 -->
-  <button onclick="closeGuestList()"
-          class="no-print"
-          style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:6px 12px;cursor:pointer;">
-    Stäng
-  </button>
+<button class="no-print"
+onclick="closeGuestList()"
+data-i18n="btn_close"
+style="background:#f3e0bd;border:1px solid #dbccab;border-radius:8px;padding:6px 12px;cursor:pointer;">
+Stäng
+</button>
 </div>
 
   </div>
@@ -363,10 +403,13 @@
 
 <!-- Bibliotek (måste ligga före din app) -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
+<script src="lang.js" defer></script>
 <script src="./ritverktyg.js" defer></script>
 
   <script src="bestallning.js" defer></script>
   <script src="kontaktform.js" defer></script>
+
+  
 
   <!-- 100% privacy-first analytics -->
   <script async defer src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
