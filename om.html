@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="sv" data-page="om">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Om – Planeringsverktyg</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="./styles/base.css">
+  <style>
+    .hero { margin: 1.25rem 0 .75rem; }
+    .hero h1 { margin: 0; font-size: clamp(1.6rem, 2vw + 1rem, 2.2rem); }
+    .lead { font-size: 1.05rem; max-width: 65ch; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1rem 0 2rem; }
+    .card { background: #fff; border: 1px solid var(--border, #e6e6e6); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.06); padding: 1rem; }
+    .muted { color: #666; font-size: .95rem; }
+  </style>
+</head>
+<body class="site">
+  <!-- ===== Site-header (samma som på ritverktyget) ===== -->
+  <header class="site-header">
+    <div class="container header__row">
+      <a class="brand" href="./index.html">
+        <img src="./assets/logo.jpg" alt="Logotyp" class="brand__logo" />
+        <span class="brand__name">Planeringsverktyg</span>
+      </a>
+
+      <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">
+        <span class="sr-only">Öppna meny</span> ☰
+      </button>
+
+      <nav id="site-nav" class="nav" aria-label="Huvudmeny">
+        <ul class="nav__list">
+          <li><a class="nav__link" href="./index.html" data-i18n="nav_home">Hem</a></li>
+          <li><a class="nav__link" href="./ritverktyg.html" data-i18n="nav_tool">Ritverktyg</a></li>
+          <li><a class="nav__link" href="./Gallery.html" data-i18n="nav_gallery">Galleri</a></li>
+          <li><a class="nav__link nav__link--active" href="./om.html">Om</a></li>
+          <li><a class="nav__link" href="./kontakt.html" data-i18n="nav_contact">Kontakt</a></li>
+        </ul>
+        <button id="lang-toggle" class="lang-switch" type="button" aria-label="Byt språk">EN</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <div class="container">
+      <section class="hero">
+        <h1 data-i18n="about_title"></h1>
+        <p class="lead" data-i18n="about_lead"></p>
+      </section>
+  
+      <section class="info-grid">
+        <article class="card">
+          <h2 data-i18n="about_what_title"></h2>
+          <p data-i18n-html="about_what_html"></p>
+        </article>
+  
+        <article class="card">
+          <h2 data-i18n="about_privacy_title"></h2>
+          <p data-i18n-html="about_privacy_html"></p>
+        </article>
+  
+        <article class="card">
+          <h2 data-i18n="about_local_title"></h2>
+          <p data-i18n-html="about_local_html"></p>
+        </article>
+  
+        <article class="card">
+          <h2 data-i18n="about_who_title"></h2>
+          <p data-i18n-html="about_who_html"></p>
+        </article>
+      </section>
+  
+      <p class="muted" data-i18n-html="about_contact_html"></p>
+    </div>
+  </main>
+  
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="container footer__row">
+      <p class="footer__copy">
+        © <span id="year"></span> <span data-i18n="footer_brand"></span>
+      </p>
+      <nav class="footer__links" aria-label="Sidfotslänkar">
+        <a href="./om.html" data-i18n="footer_about"></a>
+        <a href="./villkor.html" data-i18n="footer_terms"></a>
+        <a href="./kontakt.html" data-i18n="footer_contact"></a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- JS (samma bas-skript som övriga sidor) -->
+  <script src="./scripts/main.js" defer></script>
+  <script src="./scripts/lang.js" defer></script>
+  <script src="./scripts/kontaktform.js" defer></script>
+
+  <script async defer src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+  <noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt="" /></noscript>
+</body>
+</html>
