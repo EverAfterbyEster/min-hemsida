@@ -1,81 +1,147 @@
-<!-- galleri.html -->
-<!DOCTYPE html>
-<html lang="sv">
+<!doctype html>
+<html lang="sv" data-page="galleri">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Galleri – Bröllopsplanering</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Galleri – Planeringsverktyg</title>
+
+  <!-- Ikonfont -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"></noscript>
+
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="./styles/base.css">
+
   <style>
-    body {
+    /* Enkel, responsiv galleri-grid som matchar sajtens 'container' look */
+    .gallery-hero {
+      margin: 1.25rem 0 .75rem;
+    }
+    .gallery-hero h1 {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #fffdf8;
+      font-size: clamp(1.6rem, 2vw + 1rem, 2.2rem);
     }
 
-    header {
-      padding: 20px;
-      background-color: #f9e5ec;
-      text-align: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 2rem;
-      color: #333;
-    }
-
-    .gallery {
+    .gallery-grid {
+      list-style: none;
+      padding: 0;
+      margin: .5rem 0 2rem;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 16px;
-      padding: 40px;
+      grid-template-columns: repeat( auto-fill, minmax(220px, 1fr) );
+      gap: .9rem;
     }
-
-    .gallery img {
-      width: 100%;
-      height: auto;
+    .gallery-grid figure {
+      margin: 0;
+      background: #fff;
+      border: 1px solid var(--border, #e6e6e6);
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: transform 0.3s;
+      box-shadow: 0 10px 30px rgba(0,0,0,.06);
+      overflow: hidden;
     }
-
-    .gallery img:hover {
-      transform: scale(1.03);
-    }
-
-    .back-link {
+    .gallery-grid img {
       display: block;
-      margin: 0 auto 40px;
-      text-align: center;
-      font-weight: bold;
-      color: #555;
-      text-decoration: none;
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
     }
-
-    .back-link:hover {
-      text-decoration: underline;
+    .gallery-grid figcaption {
+      padding: .5rem .7rem;
+      font-size: .95rem;
     }
   </style>
 </head>
-<body>
-  <header>
-    <h1>Galleri – Bröllopsbilder</h1>
+
+<body class="site">
+  <!-- ===== Site-header (samma som på ritverktyget) ===== -->
+  <header class="site-header">
+    <div class="container header__row">
+      <a class="brand" href="./index.html">
+        <img src="./assets/logo.jpg" alt="Logotyp" class="brand__logo" />
+        <span class="brand__name">Planeringsverktyg</span>
+      </a>
+
+      <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">
+        <span class="sr-only">Öppna meny</span> ☰
+      </button>
+
+      <nav id="site-nav" class="nav" aria-label="Huvudmeny">
+        <ul class="nav__list">
+          <li><a class="nav__link" href="./index.html" data-i18n="nav_home">Hem</a></li>
+          <li><a class="nav__link" href="./ritverktyg.html" data-i18n="nav_tool">Ritverktyg</a></li>
+          <li><a class="nav__link nav__link--active" href="./Gallery.html" data-i18n="nav_gallery">Galleri</a></li>
+          <li><a class="nav__link" href="./kontakt.html" data-i18n="nav_contact">Kontakt</a></li>
+        </ul>
+        <button id="lang-toggle" class="lang-switch" type="button" aria-label="Byt språk">EN</button>
+      </nav>
+    </div>
   </header>
 
-  <div class="gallery">
-    <img src="bild1.jpeg" alt="Bild 1">
-    <img src="bild2.jpeg" alt="Bild 2">
-    <img src="bilder/bild3.jpg" alt="Bild 3">
-    <img src="bilder/bild4.jpg" alt="Bild 4">
-    <img src="bilder/bild5.jpg" alt="Bild 5">
-    <img src="bilder/bild6.jpg" alt="Bild 6">
-    <img src="bilder/bild7.jpg" alt="Bild 7">
-    <img src="bilder/bild8.jpg" alt="Bild 8">
-    <img src="bilder/bild9.jpg" alt="Bild 9">
-    <img src="bilder/bild10.jpg" alt="Bild 10">
-  </div>
+  <!-- ===== Innehåll ===== -->
+  <main class="site-main">
+    <div class="container">
+      <section class="gallery-hero">
+        <h1>Galleri</h1>
+        <p>Här är några exempelbilder från våra bordsplaner.</p>
+      </section>
 
-  <a href="index.html" class="back-link">← Tillbaka till startsidan</a>
+      <ul class="gallery-grid" aria-label="Galleri">
+        <li>
+          <figure>
+            <img src="./assets/bild2.jpeg" alt="Bild 1" loading="lazy">
+            <figcaption>Dukning</figcaption>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <img src="./assets/bild1.jpeg" alt="Bild 2" loading="lazy">
+            <figcaption>Långbord</figcaption>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <img src="./assets/mall_1.png" alt="Bild 3" loading="lazy">
+            <figcaption>Mall Bankett</figcaption>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <img src="./assets/mall_2.png" alt="Bild 4" loading="lazy">
+            <figcaption>Mall 8 runda bord</figcaption>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <img src="./assets/bild5.png" alt="Bild 5" loading="lazy">
+            <figcaption>Inspiration</figcaption>
+          </figure>
+        </li>
+      </ul>
+    </div>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="container footer__row">
+      <p class="footer__copy">
+        © <span id="year"></span> <span data-i18n="footer_brand"></span>
+      </p>
+      <nav class="footer__links" aria-label="Sidfotslänkar">
+        <a href="./om.html" data-i18n="footer_about"></a>
+        <a href="./villkor.html" data-i18n="footer_terms"></a>
+        <a href="./kontakt.html" data-i18n="footer_contact"></a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- JS (samma bas-skript som övriga sidor) -->
+  <script src="./scripts/main.js" defer></script>
+  <script src="./scripts/lang.js" defer></script>
+  <script src="./scripts/kontaktform.js" defer></script>
+
+  <script async defer src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+  <noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt="" /></noscript>
 </body>
 </html>
