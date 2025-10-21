@@ -1,0 +1,754 @@
+/* Ritverktyg – Ivory & Gold. Scoped för att undvika krockar */
+:root{
+  --panel-bg: var(--surface);
+  --panel-border: var(--border);
+}
+
+/* ===== Appbar (rubrik + språk + verktyg i ett kort) ===== */
+[data-page="ritverktyg"] .appbar{
+  background:#fff;
+  border:1px solid var(--panel-border);
+  border-radius:var(--radius);
+  box-shadow:0 20px 40px rgba(0,0,0,.06);
+  padding:.9rem;
+  display:grid;
+  gap:.75rem;
+  margin-block:1rem;
+}
+
+[data-page="ritverktyg"] .appbar__row{
+  display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
+}
+[data-page="ritverktyg"] .appbar__row--top{
+  justify-content:space-between;
+}
+
+/* Rubrikfält + språkchip */
+[data-page="ritverktyg"] .title-input-group{ flex:1 1 420px; }
+[data-page="ritverktyg"] #titleInput{
+  width:100%; height:42px; padding:0 .9rem; font:inherit;
+  border:1px solid var(--panel-border); border-radius:12px; background:#fff;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,.03);
+}
+[data-page="ritverktyg"] .lang-chip{
+  height:42px; padding:0 .9rem; border-radius:999px; border:1px solid var(--panel-border);
+  background:#111; color:#fff; font-weight:600;
+}
+
+/* Verktygsraden (rad 2 i appbar) */
+[data-page="ritverktyg"] .appbar__row--tools select,
+[data-page="ritverktyg"] .appbar__row--tools button{
+  height:38px; padding:0 .9rem; border:1px solid var(--panel-border);
+  border-radius:10px; background:#fff; color:var(--text); font:inherit;
+}
+[data-page="ritverktyg"] .appbar__row--tools button:hover{ background:rgba(0,0,0,.04) }
+[data-page="ritverktyg"] .btn-icon{ font-size:18px; margin-right:.35rem; vertical-align:middle }
+[data-page="ritverktyg"] .grow{ flex:1 1 auto; }
+[data-page="ritverktyg"] .save-status{ color:var(--muted); font-size:12px; }
+[data-page="ritverktyg"] .sum-btn{ height:38px; }
+
+/* Responsiv finputs */
+@media (max-width: 860px){
+  [data-page="ritverktyg"] .appbar__row--tools{ gap:.6rem; }
+}
+
+/* ===== Informativ panel (siteNotice) ===== */
+[data-page="ritverktyg"] .notice{
+  background:#fff; border:1px solid var(--panel-border); border-radius:var(--radius);
+  padding:1rem; box-shadow:0 10px 30px rgba(0,0,0,.06); margin-top:1rem;
+  position:relative;
+}
+[data-page="ritverktyg"] .close-site-notice{
+  position:absolute; top:.5rem; right:.5rem; background:transparent; border:0; font-size:1.25rem; cursor:pointer;
+}
+
+/* ===== Canvasyta ===== */
+[data-page="ritverktyg"] .canvas-wrap{
+  background:#fff; border:1px solid var(--panel-border); border-radius:var(--radius);
+  padding:.75rem; margin-top:1rem; box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+[data-page="ritverktyg"] #canvas{
+  display:block;
+  width:auto;          /* låt attributen width/height (3000x2000) gälla */
+  max-width:none;
+  height:auto;
+  background:#fff;
+}
+
+
+/* ===== Modaler / backdrop ===== */
+#modalOverlay{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:10000;
+}
+
+/* ===== Flytande knappar ===== */
+[data-page="ritverktyg"] .floating-buttons{
+  position:fixed; right:1rem; bottom:1rem; display:grid; gap:.5rem; z-index:10010;
+}
+[data-page="ritverktyg"] .floating-buttons button{
+  width:42px; height:42px; border-radius:10px; border:1px solid var(--panel-border);
+  background:#fff; box-shadow:0 6px 18px rgba(0,0,0,.12); cursor:pointer;
+}
+
+/* ===== Inputs generellt ===== */
+[data-page="ritverktyg"] input[type="text"],
+[data-page="ritverktyg"] input[type="number"]{
+  border:1px solid var(--panel-border); border-radius:10px; padding:.5rem .6rem; font:inherit;
+}
+/* Dölj globala EN-knappen i headern på ritverktygssidan (vi har #lang-toggle i appbaren) */
+
+
+/* Hjälp-modal */
+[data-page="ritverktyg"] #modalOverlay{ /* du har redan denna – vi bara säkerställer z-index */
+  z-index:10000;
+}
+[data-page="ritverktyg"] .help-modal{
+  position:fixed; inset:auto auto 50% 50%;
+  transform:translate(-50%, 50%); /* centrera */
+  width:min(680px, calc(100% - 2rem));
+  background:#fff; border:1px solid var(--panel-border); border-radius:var(--radius);
+  box-shadow:0 30px 80px rgba(0,0,0,.20);
+  padding:1rem 1.2rem 1.2rem; z-index:10020; display:none;
+}
+[data-page="ritverktyg"] .help-modal[aria-hidden="false"]{ display:block; }
+[data-page="ritverktyg"] .help-list{ margin:.5rem 0 0 1.25rem; }
+[data-page="ritverktyg"] .help-list li{ margin:.4rem 0; }
+/* Gör canvas-ytan scrollbar i båda led */
+[data-page="ritverktyg"] .canvas-wrap{
+  overflow:auto;                 /* ⟵ ger rullning i ytan */
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior: contain;  /* stoppa scroll-kedja till body */
+  background:#FFFBF2;            /* valfri ljus canvasbakgrund */
+  max-width:100%;
+  height: clamp(420px, 70vh, calc(100dvh - 260px)); /* höjd som ryms på skärmen */
+  padding:.75rem;                 /* du har redan padding – ok */
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+/* Viktigt: låt canvas behålla sin egen pixelbredd – skala inte till 100% */
+[data-page="ritverktyg"] #canvas{
+  display:block;
+  max-width:none;  /* ⟵ kritiskt, annars krymper den och du får ingen scroll */
+  height:auto;
+  background:#fff;
+}
+
+
+[data-page="ritverktyg"] .canvas-card{
+  background:#fff; border:1px solid var(--panel-border);
+  border-radius:var(--radius); box-shadow:0 10px 30px rgba(0,0,0,.08);
+  padding:.75rem;
+}
+[data-page="ritverktyg"] .canvas-viewport{
+  overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+  background:#FFFBF2;
+  max-width:100%;
+  height: clamp(420px, 70vh, calc(100dvh - 260px));
+  border-radius: calc(var(--radius) - 6px);
+}
+[data-page="ritverktyg"] .canvas-viewport #canvas{
+  display:block; max-width:none; height:auto; background:#fff;
+}
+/* Modal-overlay finns redan, säkra z-index */
+[data-page="ritverktyg"] #modalOverlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; z-index:10000;
+}
+
+/* Checklista som modal */
+[data-page="ritverktyg"] #checklistContainer{
+  position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:min(720px, calc(100% - 2rem));
+  max-height:min(80vh, 720px);
+  overflow:auto;
+
+  background:#fff; border:1px solid var(--panel-border);
+  border-radius:var(--radius);
+  box-shadow:0 30px 80px rgba(0,0,0,.20);
+  padding:1rem 1.2rem 1.2rem;
+  z-index:10020;
+
+  display:none;            /* ⟵ gömd från start */
+}
+
+/* Visa/göm via aria-hidden */
+[data-page="ritverktyg"] #checklistContainer[aria-hidden="false"]{ display:block; }
+
+/* Stäng-knapp uppe till höger */
+[data-page="ritverktyg"] .close-modal{
+  position:absolute; right:.5rem; top:.5rem;
+  width:36px; height:36px; border-radius:999px; border:1px solid var(--border);
+  background:#fff; cursor:pointer; font-size:18px; line-height:1;
+}
+/* Visuell stil är redan satt via .floating-buttons button */
+/* Pseudo-helskärm (fallback för iOS Safari) */
+body.is-pseudo-fs, html.is-pseudo-fs { overflow: hidden; }
+[data-page="ritverktyg"] body.is-pseudo-fs .site-header,
+[data-page="ritverktyg"] body.is-pseudo-fs .site-footer { display: none; }
+[data-page="ritverktyg"] body.is-pseudo-fs .site-main {
+  position: fixed; inset: 0; z-index: 9999; background: var(--bg);
+}
+/* Två staplar: selection (beroende av markering) och global (alltid aktiv) */
+[data-page="ritverktyg"] .fb-stack { display:grid; gap:.5rem; }
+
+/* När flyt-menyn har .disabled ska BARA selection-knapparna stängas av */
+[data-page="ritverktyg"] .floating-buttons.disabled { pointer-events: auto; } /* ⟵ viktigt */
+[data-page="ritverktyg"] .floating-buttons.disabled .fb-stack--selection button {
+  pointer-events: none;
+  opacity: .5;
+}
+[data-page="ritverktyg"] .floating-buttons.disabled .fb-stack--global button {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+
+/* ===== Helskärm: låt viewport fylla hela skärmen ===== */
+[data-page="ritverktyg"] .canvas-viewport:fullscreen {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  width: 100dvw;
+  height: 100dvh;
+  max-width: none;
+}
+
+/* Fallback-läge (pseudo-helskärm) */
+body.is-pseudo-fs [data-page="ritverktyg"] .canvas-viewport {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  width: 100dvw;
+  height: 100dvh;
+  max-width: none;
+}
+
+/* Se till att canvas inte skalas ner i FS */
+[data-page="ritverktyg"] .canvas-viewport:fullscreen #canvas,
+body.is-pseudo-fs [data-page="ritverktyg"] .canvas-viewport #canvas {
+  max-width: none;
+  height: auto;
+}
+
+
+/* När vi kör pseudo-helskärm: göm header/footer och lås scroll */
+html.is-pseudo-fs, body.is-pseudo-fs { overflow: hidden; }
+body.is-pseudo-fs .site-header,
+body.is-pseudo-fs .site-footer { display: none; }
+/* Overlay */
+[data-page="ritverktyg"] #guestModalOverlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:10000;
+  display:none; /* gömd från start */
+}
+
+/* Modal: centrerad och gömd från start */
+[data-page="ritverktyg"] .guestlist-modal{
+  position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:min(700px, calc(100% - 2rem));
+  max-height:80vh; overflow:auto;
+
+  background:#fff; border:1px solid var(--panel-border);
+  border-radius:var(--radius); box-shadow:0 30px 80px rgba(0,0,0,.2);
+  padding:1rem 1.2rem;
+  z-index:10020;
+
+  display:none; /* gömd från start */
+}
+
+/* Om din JS sätter aria-hidden=false → visa */
+[data-page="ritverktyg"] .guestlist-modal[aria-hidden="false"]{ display:block; }
+
+/* (Om din JS istället sätter class="open") → stöd även det */
+[data-page="ritverktyg"] .guestlist-modal.open{ display:block; }
+
+/* Stäng-knappen */
+[data-page="ritverktyg"] .close-modal{
+  position:absolute; right:.5rem; top:.5rem;
+  width:36px; height:36px; border-radius:999px;
+  border:1px solid var(--border);
+  background:#fff; cursor:pointer;
+}
+/* Backdrop + modal (matchar övriga dina modaler) */
+#modalOverlay{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:10000;
+}
+#checklistContainer{
+  position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:min(720px, calc(100% - 2rem));
+  max-height:min(80vh, 720px); overflow:auto;
+  background:#fff; border:1px solid var(--panel-border,#e6e6e6);
+  border-radius:var(--radius,12px);
+  box-shadow:0 30px 80px rgba(0,0,0,.20);
+  padding:1rem 1.2rem 1.2rem; z-index:10020;
+  display:none;
+}
+#checklistContainer[aria-hidden="false"]{ display:block; }
+
+/* ===== Checklista – proffsig, stabil layout ===== */
+#checklist{
+  list-style:none;
+  padding:0;
+  margin: .75rem 0 1rem;
+  display:flex;
+  flex-direction:column;
+  gap:.5rem;
+}
+
+/* Varje rad fyller panelens bredd -> knappen kan alltid högerställas */
+#checklist li{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  width:100%;
+  min-height:42px;
+  padding:.55rem .75rem;
+  border:1px solid var(--panel-border, #e6e6e6);
+  border-radius:12px;
+  background:#fff;
+  transition:background .15s, border-color .15s, box-shadow .15s;
+}
+#checklist li:hover{
+  background:#fafafa;
+  border-color:#ddd;
+  box-shadow:0 2px 10px rgba(0,0,0,.03);
+}
+
+/* Checkbox + text ligger tillsammans till vänster och kan radbrytas */
+#checklist li > label{
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  flex:1 1 auto;          /* tar all ledig bredd */
+  min-width:0;            /* tillåt radbrytning */
+  cursor:pointer;
+}
+#checklist input[type="checkbox"]{
+  width:18px; height:18px;
+  accent-color: var(--text, #111);
+}
+
+/* Struken/tonad text när punkten är klar */
+#checklist input[type="checkbox"]:checked + span{
+  text-decoration: line-through;
+  opacity:.6;
+}
+
+/* “Ta bort” – alltid längst till höger, identisk storlek */
+#checklist .remove-item{
+  margin-left:auto;        /* ⟵ gör att den alltid pressas till höger */
+  flex:0 0 auto;
+  height:32px;
+  padding:0 .7rem;
+  border:1px solid var(--panel-border, #e6e6e6);
+  border-radius:999px;
+  background:#f7f7f7;
+  font:inherit;
+  cursor:pointer;
+  white-space:nowrap;      /* ingen radbrytning av texten */
+}
+#checklist .remove-item:hover{ background:#efefef; }
+#checklist .remove-item:focus-visible{
+  outline:2px solid #4f46e5; outline-offset:2px;
+}
+
+/* Inmatningsrad under listan */
+#checklistContainer .controls{
+  display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; margin-top:.75rem;
+}
+#checklistContainer .controls input[type="text"]{
+  flex:1 1 260px; min-width:200px;
+  height:38px; padding:0 .75rem;
+  border:1px solid var(--panel-border, #e6e6e6);
+  border-radius:10px; font:inherit;
+}
+#checklistContainer .controls button{
+  height:38px; padding:0 .9rem;
+  border:1px solid var(--panel-border, #e6e6e6);
+  border-radius:10px; background:#fff; font:inherit; cursor:pointer;
+}
+#checklistContainer .controls button:hover{ background:#f4f4f4; }
+
+/* Gästlistans UL */
+[data-page="ritverktyg"] #guestList{
+  list-style:none;
+  padding:0;
+  margin:.75rem 0 1rem;
+  display:flex;
+  flex-direction:column;
+  gap:.5rem;
+}
+
+/* Varje rad */
+[data-page="ritverktyg"] #guestList li{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  width:100%;
+  min-height:42px;
+  padding:.55rem .75rem;
+  border:1px solid var(--panel-border, #e6e6e6);
+  border-radius:12px;
+  background:#fff;
+  transition:background .15s, border-color .15s, box-shadow .15s;
+}
+[data-page="ritverktyg"] #guestList li:hover{
+  background:#fafafa;
+  border-color:#ddd;
+  box-shadow:0 2px 10px rgba(0,0,0,.03);
+}
+
+/* Om du använder <label><input><span>…</span></label> – matcha checklistan */
+[data-page="ritverktyg"] #guestList li > label{
+  display:flex; align-items:center; gap:.6rem;
+  flex:1 1 auto; min-width:0; cursor:pointer;
+}
+[data-page="ritverktyg"] #guestList input[type="checkbox"]{ width:18px; height:18px; accent-color: var(--text,#111); }
+[data-page="ritverktyg"] #guestList input[type="checkbox"]:checked + span{
+  text-decoration: line-through; opacity:.6;
+}
+
+/* “Ta bort”/”Ändra”-knapp längst till höger (om du har en sådan) */
+[data-page="ritverktyg"] #guestList .remove-item{
+  margin-left:auto; flex:0 0 auto; height:32px; padding:0 .7rem;
+  border:1px solid var(--panel-border,#e6e6e6);
+  border-radius:999px; background:#f7f7f7; font:inherit; cursor:pointer; white-space:nowrap;
+}
+[data-page="ritverktyg"] #guestList .remove-item:hover{ background:#efefef; }
+[data-page="ritverktyg"] #guestList .remove-item:focus-visible{ outline:2px solid #4f46e5; outline-offset:2px; }
+
+/* Sammanställning som modal */
+[data-page="ritverktyg"] .summary-modal{
+  position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:min(720px, calc(100% - 2rem));
+  max-height:min(80vh, 720px);
+  overflow:auto;
+  background:#fff; border:1px solid var(--panel-border);
+  border-radius:var(--radius);
+  box-shadow:0 30px 80px rgba(0,0,0,.20);
+  padding:1rem 1.2rem 1.2rem;
+  z-index:10020;
+  display:none;
+}
+[data-page="ritverktyg"] .summary-modal[aria-hidden="false"]{ display:block; }
+
+/* === Sammanställning: rad-kort ===================================== */
+[data-page="ritverktyg"] #summaryContent{
+  display: grid;
+  gap: .6rem;               /* luft mellan raderna */
+}
+
+/* Varje produkt/post */
+[data-page="ritverktyg"] #summaryContent .quantity-control{
+  display: grid;
+  grid-template-columns: 72px 1fr auto;   /* bild | info | qty-pill */
+  gap: .75rem .75rem;
+  align-items: center;
+
+  background:#fff;
+  border:1px solid var(--panel-border);
+  border-radius:12px;
+  padding:.6rem .75rem;
+  box-shadow:0 2px 10px rgba(0,0,0,.03);
+}
+
+/* Bilden till vänster */
+[data-page="ritverktyg"] #summaryContent .quantity-control img{
+  width:72px; height:72px; object-fit:cover; border-radius:10px;
+  grid-column:1; grid-row:1 / span 2;
+  background:#f6f6f6;
+}
+
+/* Titel (vi sätter class .title via JS nedan – fallback till <label>) */
+[data-page="ritverktyg"] #summaryContent .quantity-control .title,
+[data-page="ritverktyg"] #summaryContent .quantity-control > label:first-child{
+  grid-column:2; grid-row:1;
+  margin:0; font-weight:600;
+}
+
+/* Väljare/optioner (t.ex. Färg) under titeln */
+[data-page="ritverktyg"] #summaryContent .quantity-control .options,
+[data-page="ritverktyg"] #summaryContent .quantity-control select,
+[data-page="ritverktyg"] #summaryContent .quantity-control .meta{
+  grid-column:2; grid-row:2;
+}
+[data-page="ritverktyg"] #summaryContent .quantity-control select{
+  height:36px; padding:0 .6rem; border:1px solid var(--panel-border);
+  border-radius:10px; font:inherit; background:#fff;
+}
+
+/* Qty-pill till höger (± [antal]) */
+[data-page="ritverktyg"] #summaryContent .quantity-control .qty,
+[data-page="ritverktyg"] #summaryContent .quantity-control .quantity,
+[data-page="ritverktyg"] #summaryContent .quantity-control .quantity-buttons{
+  grid-column:3; grid-row:1 / span 2;
+  justify-self:end;
+
+  display:inline-flex; align-items:center; gap:.35rem;
+  border:1px solid var(--panel-border);
+  border-radius:999px; padding:.25rem;
+  background:#fafafa;
+}
+
+[data-page="ritverktyg"] #summaryContent .quantity-control button{
+  width:30px; height:30px; border-radius:999px; border:1px solid var(--panel-border);
+  background:#fff; cursor:pointer; font:inherit; line-height:1;
+}
+[data-page="ritverktyg"] #summaryContent .quantity-control button:hover{ background:#f4f4f4; }
+
+[data-page="ritverktyg"] #summaryContent .quantity-control [data-qty],
+[data-page="ritverktyg"] #summaryContent .quantity-control [id$="Count"],
+[data-page="ritverktyg"] #summaryContent .quantity-control .count{
+  min-width:2ch; text-align:center; font-variant-numeric: tabular-nums; font-weight:600;
+}
+
+/* Liten hjälptråd under kortet (t.ex. “1 pack räcker…”) */
+[data-page="ritverktyg"] #summaryContent .quantity-control small{
+  grid-column:1 / -1; opacity:.7; margin-top:.25rem;
+}
+
+/* Mobiljusteringar */
+@media (max-width: 560px){
+  [data-page="ritverktyg"] #summaryContent .quantity-control{
+    grid-template-columns: 56px 1fr;         /* bild | innehåll */
+  }
+  [data-page="ritverktyg"] #summaryContent .quantity-control img{
+    width:56px; height:56px;
+  }
+  [data-page="ritverktyg"] #summaryContent .quantity-control .qty,
+  [data-page="ritverktyg"] #summaryContent .quantity-control .quantity,
+  [data-page="ritverktyg"] #summaryContent .quantity-control .quantity-buttons{
+    grid-column:2; grid-row:1; justify-self:end; margin-left:.5rem;
+  }
+}
+
+
+.canvas-viewport { position: relative; }
+#wallCanvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 2; pointer-events: none; /* blir 'auto' när verktyget är aktivt */
+}
+#wallCanvas.active { pointer-events: auto; cursor: crosshair; }
+
+.canvas-viewport { position: relative; }
+#gridCanvas, #wallCanvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none;
+}
+#gridCanvas { z-index: 1; }
+#wallCanvas { z-index: 2; }
+#wallCanvas.active { pointer-events: auto; cursor: crosshair; }
+
+.draw-help {
+  position: absolute; left: 12px; bottom: 12px; z-index: 3;
+  background: rgba(0,0,0,.7); color: #fff;
+  font-size: .9rem; line-height: 1.35;
+  padding: 8px 10px; border-radius: 8px; max-width: min(420px, 80vw);
+  backdrop-filter: blur(4px);
+}
+.draw-help kbd {
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.3);
+  padding: 0 .35em; border-radius: 4px; font-size: .85em;
+}
+
+/* Trevligare touch-känsla */
+#wallCanvas { touch-action: none; }
+
+.canvas-viewport { position: relative; overflow: auto; }
+#canvas, #wallCanvas { position: absolute; inset: 0; display: block; }
+#canvas     { z-index: 1; }
+#wallCanvas { z-index: 2; pointer-events: none; }
+#wallCanvas.active { pointer-events: auto; }
+/* ===== Modal – minimalistisk, tillgänglig och hög z-index ===== */
+.modal[aria-hidden="true"] { display: none; }
+.modal {
+  position: fixed; inset: 0; z-index: 9999;
+  display: grid; place-items: center;
+}
+.modal__backdrop {
+  position: absolute; inset: 0; background: rgba(0,0,0,.4);
+}
+.modal__dialog {
+  position: relative;
+  max-width: 560px; width: min(92vw, 560px);
+  background: #fff; color: #111; border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.25);
+  padding: 20px 22px 18px;
+}
+.modal__close {
+  position: absolute; top: 8px; right: 10px;
+  border: 0; background: transparent; font-size: 28px; line-height: 1;
+  cursor: pointer;
+}
+.modal__content { margin: 8px 0 14px; }
+.modal__content ol { padding-left: 20px; }
+.modal__content kbd {
+  padding: 2px 6px; border: 1px solid #ccc; border-bottom-width: 2px;
+  border-radius: 6px; font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: .9em; background: #f7f7f7;
+}
+.modal__check { display: inline-flex; gap: .5rem; align-items: center; margin-top: 6px; }
+.modal__actions { display: flex; justify-content: end; gap: .5rem; }
+
+/* En enkel primärknapp om du inte redan har .btn .btn--primary */
+.btn { padding: 8px 14px; border: 0; border-radius: 10px; cursor: pointer; }
+.btn--primary { background: #2f6feb; color: #fff; }
+.btn--primary:focus { outline: 2px solid #2f6feb44; outline-offset: 2px; }
+/* === Verktygs-hamburgare (mobil) ==================================== */
+[data-page="ritverktyg"] .tools-toggle{
+  display:none;
+  height:38px; padding:0 .9rem;
+  border:1px solid var(--panel-border);
+  border-radius:10px; background:#fff; cursor:pointer;
+  font:inherit;
+}
+
+/* Backdrop till verktygslådan */
+[data-page="ritverktyg"] .tools-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.42);
+  z-index:10015; display:none;
+}
+
+/* Off-canvas-låda: återanvänd #toolbar */
+@media (max-width: 700px){
+  [data-page="ritverktyg"] .tools-toggle{ display:inline-flex; align-items:center; gap:.5rem; }
+
+  /* Gör #toolbar till högerpanel som kan scrollas */
+  [data-page="ritverktyg"] #toolbar{
+    position:fixed; top:0; right:0;
+    width:min(88vw, 360px); height:100dvh;
+    padding: .9rem; gap:.5rem;
+    display:grid; grid-auto-rows:minmax(44px, auto);
+    align-content:flex-start; overflow:auto;
+    background:#fff; border-left:1px solid var(--panel-border);
+    box-shadow: -18px 0 40px rgba(0,0,0,.18);
+    transform:translateX(100%); transition:transform .18s ease-out;
+    z-index:10020;
+  }
+  /* Knappar/dropdowns fyller panelens bredd */
+  [data-page="ritverktyg"] #toolbar > *{ width:100%; }
+  [data-page="ritverktyg"] #toolbar .grow,
+  [data-page="ritverktyg"] #toolbar #saveStatus{ display:none; } /* städa bort desktop-rester i panelen */
+
+  /* Öppen-läge */
+  body.tools-open #toolbar{ transform: translateX(0); }
+  body.tools-open .tools-backdrop{ display: block; }
+
+  body.tools-open{ overflow:hidden; } /* lås body-scroll bakom lådan */
+
+  /* Dölj "Draw wall" och "Full screen" i telefonvy */
+  [data-page="ritverktyg"] #wallToolBtn{ display:none !important; }
+  [data-page="ritverktyg"] #fullscreenBtn{ display:none !important; }
+  [data-page="ritverktyg"] #templateSelect{ display: none !important; }
+
+  /* Titel-fältet lite mer kompakt på mobil */
+  [data-page="ritverktyg"] .title-input-group{ flex:1 1 auto; }
+  [data-page="ritverktyg"] #titleInput{
+    height:40px; font-size:16px; /* bättre touch-typografi */
+  }
+}
+
+/* Header som gömmer sig när man scrollar ner (och dyker upp vid uppåt) */
+[data-page="ritverktyg"] .site-header{
+  position: sticky; top:0; z-index: 1000;
+  transition: transform .2s ease;
+}
+.header-hide .site-header{ transform: translateY(-100%); }
+/* Mobil: fyll skärmen och göm footer på ritverktyget */
+@media (max-width: 700px){
+  html[data-page="ritverktyg"] .site-footer{ display:none; }
+
+  /* Låt canvasyta fylla vyhöjd minus appbarens höjd */
+  html[data-page="ritverktyg"] .canvas-viewport{
+    height: calc(100dvh - var(--appbar-h, 96px));
+    max-height: none;      /* så clamp/70vh inte begränsar */
+  }
+
+  /* Lite säkerhetsmarginal längst ner (för iOS ”hak”) */
+  html[data-page="ritverktyg"] .canvas-card{
+    padding-bottom: max(.75rem, env(safe-area-inset-bottom));
+  }
+  html[data-page="ritverktyg"] .floating-buttons{
+    bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+/* Visa horisontell scrollbarspår när det finns overflow */
+html[data-page="ritverktyg"] .canvas-viewport{
+  overflow-x: scroll;                 /* inte auto -> ger spår när det behövs */
+  scrollbar-gutter: stable;           /* reservera plats för scrollbars */
+}
+
+@supports (scrollbar-gutter: stable both-edges){
+  html[data-page="ritverktyg"] .canvas-viewport{
+    scrollbar-gutter: stable both-edges; /* extra buffert på båda sidor */
+  }
+}
+/* === Champagne-look för "Sammanställ" (matchar bordsfärgen) === */
+:root{
+  /* Justera EN färg om du vill fintrimma tonen till dina bord */
+  --champagne: #DEC9A3;        /* bas – “champagne/beige” */
+  --champagne-d: #CCB280;      /* mörkare för skugga */
+  --champagne-b: #F3E7CB;      /* ljusare/highlight */
+  --champagne-border: #B7965E; /* kant */
+  --champagne-text: #1f1405;   /* bra kontrast */
+}
+
+html[data-page="ritverktyg"] .btn--champagne,
+html[data-page="ritverktyg"] #sumButtonMobile.btn--champagne,
+html[data-page="ritverktyg"] #sumButton.btn--champagne{
+  background: linear-gradient(180deg, var(--champagne-b), var(--champagne-d));
+  color: var(--champagne-text);
+  border: 1px solid var(--champagne-border);
+  box-shadow: 0 6px 14px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.25);
+}
+
+html[data-page="ritverktyg"] .btn--champagne:hover{
+  filter: brightness(1.04);
+}
+
+html[data-page="ritverktyg"] .btn--champagne:active{
+  transform: translateY(1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,.16) inset;
+}
+
+html[data-page="ritverktyg"] .btn--champagne:focus-visible{
+  outline: 3px solid color-mix(in srgb, var(--champagne) 60%, transparent);
+  outline-offset: 2px;
+}
+
+html[data-page="ritverktyg"] .btn--champagne[disabled]{ opacity:.7; filter:saturate(.85); }
+/* Lägg färg-väljaren i högerkolumnen (kol 3) för rader som har färgval
+   – gäller både Chair bows och Napkins/Servetter */
+   [data-page="ritverktyg"] #summaryContent
+   .quantity-control:has(#rosettColor, #napkinColor, #servettColor)
+     > :is(.options, .color-select, select, .meta){
+     grid-column: 3;    /* höger om bild (1) och titel (2) */
+     grid-row: 2;       /* under qty-pillret */
+     justify-self: end;
+     display: inline-flex;
+     align-items: center;
+     gap: .5rem;
+   }
+   
+   /* Låt qty-pillret bara uppta rad 1 när det finns färgval */
+   [data-page="ritverktyg"] #summaryContent
+   .quantity-control:has(#rosettColor, #napkinColor, #servettColor)
+     :is(.qty, .quantity, .quantity-buttons){
+     grid-row: 1;       /* inte längre "1 / span 2" */
+   }
+   
+   /* Mobil: 2-kolumnslayout → lägg tillbaka färgvalet under titeln (kol 2) */
+   @media (max-width: 560px){
+     [data-page="ritverktyg"] #summaryContent
+     .quantity-control:has(#rosettColor, #napkinColor, #servettColor)
+       > :is(.options, .color-select, select, .meta){
+       grid-column: 2;
+       grid-row: 2;
+       justify-self: start;
+     }
+   }
+   

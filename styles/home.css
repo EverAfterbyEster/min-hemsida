@@ -1,0 +1,41 @@
+/* ===== Hero utan foto (ren, modern) ===== */
+.hero {
+  background:
+    radial-gradient(1000px 600px at 40% -20%, rgba(198,166,100,0.25), transparent 70%),
+    linear-gradient(180deg, #ffffff, var(--bg) 70%);
+  padding: clamp(4rem, 8vw, 8rem) 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.hero__content {
+  display: grid;
+  gap: 1rem;
+  text-align: center;
+  max-width: 800px;
+  margin-inline: auto;
+  background: #fff;
+  color: var(--text);
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+
+.hero__title {
+  color: var(--text);
+}
+
+.hero__lead {
+  color: var(--muted);
+}
+
+.hero__actions{display:flex; gap:.75rem; justify-content:center; flex-wrap:wrap}
+.features{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--space-3); padding: clamp(2rem,5vw,3rem) 0}
+.feature{
+  background:var(--surface); padding:var(--space-4); border-radius:var(--radius);
+  border:1px solid rgba(255,255,255,.06)
+}
+.feature h3{margin:.25rem 0  .25rem}
+.feature p{margin:0;color:var(--muted)}
+@media (max-width: 880px){
+  .features{grid-template-columns:1fr}
+}
