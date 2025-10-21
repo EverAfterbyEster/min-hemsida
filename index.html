@@ -1,259 +1,88 @@
-<!DOCTYPE html>
-<html lang="sv">
+<!doctype html>
+<html lang="sv" data-page="home">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bröllopsplanering</title>
-  <style>
-    /* ===== Bakgrund & layout ===== */
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-image: url('A_black_and_white_photograph_captures_a_newlywed_c_2.png');
-      background-size: cover;
-      background-position: center;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Planeringsverktyg</title>
 
-    /* ===== Startsida: Header / Meny (NYTT) ===== */
-    .home-header{
-      position: fixed;
-      top: 12px; left: 12px; right: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center; /* centrerar menylänkar på desktop */
-      gap: 12px;
-      z-index: 2000;
-    }
-
-    /* Språkknappen – alltid synlig, vänsterkant */
-    .home-lang{
-      position: absolute;
-      left: 0; top: 0;
-      transform: translateY(-4px);
-      background: rgba(208,172,172,.95);
-      color:#fff;
-      border:0; border-radius:10px;
-      padding:8px 14px;
-      font-weight:700;
-      min-width:48px;
-      line-height:1;
-      box-shadow: 0 2px 6px rgba(0,0,0,.25);
-      cursor: pointer;
-    }
-    .home-lang:hover{ background: rgba(208,172,172,1); }
-
-    /* Hamburger (visas i mobil) */
-    /* === Färger för hamburgaren === */
-/* === Samma färg som tidigare men tre VERTIKALA streck === */
-    /* Menyraden */
-    .home-menu{
-      list-style:none; margin:0; padding:0;
-      display:flex; gap:16px; flex-wrap:nowrap;
-    }
-    .home-menu a{
-      text-decoration:none;
-      color:#fff; font-weight:700;
-      background: rgba(208,172,172,.9);
-      padding:10px 18px; border-radius:12px;
-      display:inline-block;
-      white-space:nowrap;
-      transition: background-color .2s ease;
-    }
-    .home-menu a:hover{ background: rgba(208,172,172,1); }
-
-    /* ===== Intro-ruta ===== */
-    .intro-box {
-      background-color: rgba(208, 172, 172, 0.75);
-      padding: 60px 80px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      text-align: center;
-      max-width: 90vw;
-    }
-    .intro-box h1 {
-      margin: 0 0 20px;
-      font-size: 2.5rem;
-      color: #333;
-    }
-    .intro-box a {
-      display: inline-block;
-      margin-top: 20px;
-      background-color: #fff;
-      color: #333;
-      text-decoration: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: bold;
-      transition: background-color 0.3s;
-    }
-    .intro-box a:hover { background-color: #f8f8f8; }
-
- 
-/* === HAMBURGER — ENDA VERSIONEN === */
-:root{
-  --nav-pink: rgba(208,172,172,.9);
-  --nav-pink-hover: rgba(208,172,172,1);
-  --burger-line: #fff;
-}
-
-/* Knapp */
-.home-hamburger{
-  background: var(--nav-pink);
-  border: 0;
-  border-radius: 12px;
-  width: 56px;
-  height: 44px;
-  padding: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.15);
-  cursor: pointer;
-
-  /* viktiga tre rader för att få 3 vertikala streck */
-  display: none;                 /* visas i mobil (se media) */
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;        /* <-- stapla lodrätt */
-  gap: 6px;                      /* avstånd mellan strecken */
-}
-.home-hamburger:hover{ background: var(--nav-pink-hover); }
-
-/* Strecken */
-.home-hamburger span{
-  display: block;
-  width: 26px;
-  height: 3px;
-  background: var(--burger-line);
-  border-radius: 2px;
-}
-
-/* (valfritt) X-animation när öppen */
-.home-hamburger.is-open span:nth-child(1){ transform: translateY(9px) rotate(45deg); }
-.home-hamburger.is-open span:nth-child(2){ opacity: 0; }
-.home-hamburger.is-open span:nth-child(3){ transform: translateY(-9px) rotate(-45deg); }
-
-
-/* Desktop: dölj hamburgaren och visa horisontell meny */
-@media (min-width: 769px){
-  .home-hamburger{ display: none !important; }
-  .home-menu{
-    display: flex !important;
-    position: static !important;
-    flex-direction: row !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    gap: 16px !important;
-  }
-}
-/* ===== Mobil: utfällbar panel (ENDA VERSIONEN) ===== */
-@media (max-width: 768px){
-  .home-header{
-    justify-content:flex-end;            /* hamburger + panel styr */
-  }
-
-  /* visa hamburgaren i mobil */
-  .home-hamburger{ display:flex; }
-
-  /* panelen: STÄNGD som default */
-  .home-menu{
-    position: absolute;
-    top: 52px; left: 12px; right: 12px;
-    display: none;                       /* <-- viktigt */
-    flex-direction: column;
-    gap: 14px;
-
-    padding: 16px;
-    border-radius: 20px;
-    background: rgba(208,172,172,.95);
-    box-shadow: 0 8px 20px rgba(0,0,0,.25);
-    box-sizing: border-box;
-    overflow: hidden;                    /* klipp spill innanför rundning */
-  }
-
-  /* panelen: ÖPPEN */
-  .home-menu.is-open{ display:flex; }
-
-  .home-menu li{ width: 100%; }
-
-  .home-menu a{
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    padding: 14px 18px;
-    border-radius: 18px;
-    background: #fff;
-    color: #4b3b2b;
-    font-weight: 700;
-    text-align: left;
-    white-space: normal;
-    margin: 0;
-  }
-
-  /* språkknappen – kvar uppe till vänster */
-  .home-lang{
-    position: fixed; top: 12px; left: 12px; transform:none;
-  }
-}
-
-
-
-  </style>
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/home.css" />
 </head>
-<body>
+<body class="site">
+  <!-- ===== Header ===== -->
+  <header class="site-header">
+    <div class="container header__row">
+      <a class="brand" href="./index.html">
+        <img src="./assets/logo.jpg" alt="Logotyp" class="brand__logo" />
+        <span class="brand__name">EverAfterByEster</span>
+      </a>
 
-  <!-- Header / meny -->
-  <nav class="home-header" role="navigation" aria-label="Huvudmeny">
-    <button id="lang-toggle" class="home-lang" aria-label="Byt språk">EN</button>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">
+        <span class="sr-only">Öppna meny</span>
+        ☰
+      </button>
 
-    <button class="home-hamburger" id="homeMenuBtn" aria-label="Öppna meny" aria-expanded="false" aria-controls="homeMenu"><span></span><span></span><span></span></button>
+      <nav id="site-nav" class="nav" aria-label="Huvudmeny">
+        <ul class="nav__list">
+          <li><a class="nav__link"               href="./index.html"     data-i18n="nav_home">Hem</a></li>
+          <li><a class="nav__link nav__link--active" href="./ritverktyg.html" data-i18n="nav_tool">Ritverktyg</a></li>
+          <li><a class="nav__link"               href="./galleri.html"   data-i18n="nav_gallery">Galleri</a></li>
+          <li><a class="nav__link"               href="./kontakt.html"   data-i18n="nav_contact">Kontakt</a></li>
+        </ul>
 
-    
+        <button id="lang-toggle" class="lang-switch" type="button" aria-label="Byt språk">EN</button>
+      </nav>
+    </div>
+  </header>
 
-    <ul class="home-menu" id="homeMenu">
-      <li><a href="#" data-i18n="nav_home">Hem</a></li>
-      <li><a href="ritverktyg.html" data-i18n="nav_tool">Ritverktyg</a></li>
-      <li><a href="galleri.html" data-i18n="nav_gallery">Galleri</a></li>
-      <li><a href="kontakt.html" data-i18n="nav_contact">Kontakt</a></li>
-    </ul>
-  </nav>
+  <!-- ===== Main / Hero ===== -->
+  <main class="site-main">
+    <section class="hero">
+      <div class="container hero__content">
+        <h1 class="hero__title" data-i18n="intro_heading">Kom igång med planeringen</h1>
+        <p class="hero__lead" data-i18n="intro_lead">Skapa layouter, prova idéer och spara dina versioner.</p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="./ritverktyg.html" data-i18n="intro_start">Starta ritverktyget</a>
+          <a class="btn btn--ghost"   href="./galleri.html"   data-i18n="intro_examples">Se exempel</a>
+        </div>
+      </div>
+    </section>
 
-  <!-- Innehåll -->
-  <div class="intro-box">
-    <h1 data-i18n="intro_heading">Kom igång med planeringen</h1>
-    <a href="ritverktyg.html" data-i18n="intro_start">Starta ritverktyget</a>
-  </div>
+    <section class="features container">
+      <div class="feature">
+        <h3 data-i18n="home_feat_fast">Snabbt och enkelt</h3>
+        <p  data-i18n="home_feat_fast_desc">Dra-och-släpp, smarta mått och snygg export.</p>
+      </div>
+      <div class="feature">
+        <h3 data-i18n="home_feat_share">Delbart</h3>
+        <p  data-i18n="home_feat_share_desc">Dela med kollegor eller kunder med en länk.</p>
+      </div>
+      <div class="feature">
+        <h3 data-i18n="home_feat_templates">Färdiga mallar</h3>
+        <p  data-i18n="home_feat_templates_desc">Kom igång på några sekunder.</p>
+      </div>
+    </section>
+  </main>
 
-  <!-- Analytics (oförändrat) -->
+  <!-- ===== Footer / Bottom bar ===== -->
+  <footer class="site-footer">
+    <div class="container footer__row">
+      <p class="footer__copy">
+        © <span id="year"></span> <span data-i18n="footer_brand"></span>
+      </p>
+      <nav class="footer__links" aria-label="Sidfotslänkar">
+        <a href="./om.html" data-i18n="footer_about"></a>
+        <a href="./villkor.html" data-i18n="footer_terms"></a>
+        <a href="./kontakt.html" data-i18n="footer_contact"></a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="./scripts/main.js" defer></script>
+  <script src="./scripts/lang.js" defer></script>
+
   <script async defer src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
   <noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt=""></noscript>
-
-  <!-- Språk-logik -->
-  <script src="lang.js" defer></script>
-
-  <!-- Toggle för hamburgaren -->
-  <script>
-    (function(){
-      const btn = document.getElementById('homeMenuBtn');
-      const menu = document.getElementById('homeMenu');
-      if(!btn || !menu) return;
-      btn.addEventListener('click', () => {
-        const open = menu.classList.toggle('is-open');
-        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-        btn.classList.toggle('is-open', open);
-      });
-      menu.addEventListener('click', e => {
-        if(e.target.tagName === 'A'){
-          menu.classList.remove('is-open');
-          btn.setAttribute('aria-expanded','false');
-          btn.classList.remove('is-open');
-        }
-      });
-    })();
-  </script>
 </body>
 </html>
+
