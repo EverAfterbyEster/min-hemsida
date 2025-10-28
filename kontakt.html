@@ -1,50 +1,66 @@
 <!doctype html>
 <html lang="sv" data-page="kontakt">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Kontakt – Planeringsverktyg</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+    <title>Kontakt | EverAfter by Ester</title>
+    <meta name="description" content="Frågor eller feedback? Hör av dig – vi svarar gärna.">
+  
+    <link rel="canonical" href="https://www.everafterbyester.se/kontakt.html">
 
-  <!-- Ikonfont (samma som övriga sidor) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"></noscript>
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="EverAfter by Ester">
+<meta property="og:locale" content="sv_SE">
+<meta property="og:title" content="Kontakt | EverAfter by Ester">
+<meta property="og:description" content="Frågor eller feedback? Hör av dig – vi svarar gärna.">
+<meta property="og:url" content="https://www.everafterbyester.se/kontakt.html">
+<meta property="og:image" content="https://www.everafterbyester.se/assets/OG.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Exempel på bordsplan i EverAfter by Ester">
 
-  <!-- Global CSS -->
-  <link rel="stylesheet" href="./styles/base.css">
+<!-- Twitter Cards -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Kontakt | EverAfter by Ester">
+<meta name="twitter:description" content="Frågor eller feedback? Hör av dig – vi svarar gärna.">
+<meta name="twitter:image" content="https://www.everafterbyester.se/assets/OG.jpg">
 
-  <!-- Liten, scoped stil för kontakt-kortet -->
-  <style>
-    html[data-page="kontakt"] .contact-card{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow:0 20px 40px rgba(0,0,0,.06);
-      padding:1rem 1.2rem;
-      margin-block:1rem 2rem;
-    }
-    html[data-page="kontakt"] .contact-card h1{
-      margin:0 0 .5rem; font-size:1.4rem;
-    }
-    html[data-page="kontakt"] .contact-list{
-      display:grid; gap:.4rem .8rem;
-      grid-template-columns: max-content 1fr;
-      align-items:center; margin: .5rem 0 0;
-    }
-    html[data-page="kontakt"] .contact-list dt{
-      font-weight:600; color:var(--text-muted);
-    }
-    html[data-page="kontakt"] .contact-list dd{
-      margin:0;
-    }
-    @media (max-width:700px){
-      html[data-page="kontakt"] .contact-card{ padding: .9rem 1rem; }
-      html[data-page="kontakt"] .contact-card h1{ font-size:1.25rem; }
-    }
-  </style>
-</head>
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="./styles/base.css">
+  
+    <!-- Liten, scoped stil för kontakt-kortet -->
+    <style>
+      html[data-page="kontakt"] .contact-card{
+        background:#fff;
+        border:1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow:0 20px 40px rgba(0,0,0,.06);
+        padding:1rem 1.2rem;
+        margin-block:1rem 2rem;
+      }
+      html[data-page="kontakt"] .contact-card h1{
+        margin:0 0 .5rem; font-size:1.4rem;
+      }
+      html[data-page="kontakt"] .contact-list{
+        display:grid; gap:.4rem .8rem;
+        grid-template-columns: max-content 1fr;
+        align-items:center; margin: .5rem 0 0;
+      }
+      html[data-page="kontakt"] .contact-list dt{
+        font-weight:600; color:var(--text-muted);
+      }
+      html[data-page="kontakt"] .contact-list dd{
+        margin:0;
+      }
+      @media (max-width:700px){
+        html[data-page="kontakt"] .contact-card{ padding: .9rem 1rem; }
+        html[data-page="kontakt"] .contact-card h1{ font-size:1.25rem; }
+      }
+    </style>
+  </head>
+  
 
 <body class="site">
   <!-- ===== Site-header (samma som övriga sidor) ===== -->
@@ -135,9 +151,9 @@
         © <span id="year"></span> <span data-i18n="footer_brand"></span>
       </p>
       <nav class="footer__links" aria-label="Sidfotslänkar">
-        <a href="./om.html" data-i18n="footer_about"></a>
-        <a href="./villkor.html" data-i18n="footer_terms"></a>
-        <a href="./kontakt.html" data-i18n="footer_contact"></a>
+        <a href="/om.html" data-i18n="footer_about"></a>
+        <a href="/villkor.html" data-i18n="footer_terms"></a>
+        <a href="/kontakt.html" data-i18n="footer_contact"></a>
       </nav>
     </div>
   </footer>
