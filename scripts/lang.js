@@ -27,7 +27,7 @@ const DICT = {
       nav_tool: "Ritverktyg",
       nav_gallery: "Galleri",
       nav_contact: "Kontakt",
-      intro_heading: "Kom igång med planeringen",
+      intro_heading: "Bordsplacering för bröllop – gratis ritverktyg online",
       intro_start: "Starta ritverktyget",
   
       title_placeholder: "Skriv din rubrik här",
@@ -109,7 +109,7 @@ unit_cm_short: "cm",
 
 // knappar
 btn_close: "Stäng",
-intro_lead: "Skapa layouter, prova idéer och spara dina versioner.",
+intro_lead: "Skapa bordsplan på 5 minuter. Dra-och-släpp bord, importera gäster, exportera bild och dela med länk.",
 intro_examples: "Se exempel",
 
 home_feat_fast: "Snabbt och enkelt",
@@ -202,6 +202,24 @@ products_heading: 'Paket & priser',
 footer_about: "Om",
 footer_terms: "Villkor",
 footer_contact: "Kontakt",
+home_h2_features: "Funktioner",
+  home_h2_how: "Så funkar det",
+  home_h2_faq: "FAQ",
+  home_h2_contact: "Kontakt",
+  home_how_1: "Välj mall eller börja tomt.",
+  home_how_2: "Dra in runda/långa bord och ställ in platser.",
+  home_how_3: "Importera gästlista och placera med drag-and-drop.",
+  home_how_4: "Exportera som bild/CSV eller dela med länk.",
+  home_faq_export_q: "Kan jag exportera planen?",
+  home_faq_export_a: "Ja, som bild eller CSV för gästlista/platser.",
+  home_faq_share_q: "Hur delar jag med andra?",
+  home_faq_share_a: "Skapa en delningslänk från verktyget.",
+  home_contact_copy: "Har du frågor eller feedback? Kontakta oss här",
+  home_contact_link: "Kontakta oss här",
+  home_faq_guestlist_q: "Kan jag skapa en egen gästlista?",
+home_faq_guestlist_a: "Ja, en gästlista genereras direkt när du trycker \"skapa gästlista\" med de gästnamn du lagt in i planen.",
+home_faq_rename_q: "Kan jag döpa om borden/gästerna?",
+home_faq_rename_a: "Ja, genom att klicka på \"Döp om\"-knappen nere till höger i ritverktyget.",
 
     },
   
@@ -231,7 +249,7 @@ footer_contact: "Kontakt",
       nav_tool: "Planner",
       nav_gallery: "Gallery",
       nav_contact: "Contact",
-      intro_heading: "Get started with planning",
+      intro_heading: "Wedding Seating Chart – Free Online Design Tool",
       intro_start: "Open the planner",
   
       title_placeholder: "Enter your title",
@@ -311,7 +329,7 @@ unit_meter_short: "m",
 unit_cm_short: "cm",
 
 btn_close: "Close",
-intro_lead: "Create layouts, try ideas and save your versions.",
+intro_lead: "Create your seating plan in 5 minutes. Drag and drop tables, import guests, export an image, and share via link.",
 intro_examples: "See examples",
 
 home_feat_fast: "Fast and easy",
@@ -404,6 +422,28 @@ products_heading: 'Packages & pricing',
 footer_about: "About",
 footer_terms: "Terms",
 footer_contact: "Contact",
+// === Headings / sections ===
+home_h2_features: "Features",
+home_h2_how: "How it works",
+home_h2_faq: "FAQ",
+home_h2_contact: "Contact",
+
+// === “How it works” steps ===
+home_how_1: "Choose a template or start blank.",
+home_how_2: "Drag in round/long tables and set seats.",
+home_how_3: "Import the guest list and place with drag-and-drop.",
+home_how_4: "Export as image/CSV or share a link.",
+
+// === FAQ ===
+home_faq_export_q: "Can I export the plan?",
+home_faq_export_a: "Yes—export as an image or CSV for guests/seats.",
+home_faq_share_q: "How do I share with others?",
+home_faq_share_a: "Create a share link from the tool.",
+home_faq_guestlist_q: "Can I create my own guest list?",
+home_faq_guestlist_a: "Yes, a guest list is generated as soon as you press \"Create guest list\", using the guest names you've added to the plan.",
+home_faq_rename_q: "Can I rename tables/guests?",
+home_faq_rename_a: "Yes—click the \"Rename\" button at the bottom-right in the drawing tool.",
+home_contact_copy: "If you have any questions? Contact us",
 
     }
   };
@@ -548,3 +588,4 @@ window.setLang = function(lang){
   applyI18n();
   updateLocalizedDates();
 };
+
