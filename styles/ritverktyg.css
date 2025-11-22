@@ -811,4 +811,17 @@ html[data-page="ritverktyg"] .btn--champagne[disabled]{ opacity:.7; filter:satur
   flex: 0 0 auto;
 }
   
-   
+/* Se till att AI-placering-modalen hamnar över floating buttons */
+#aiSeatingModal {
+  z-index: 99999;          /* högre än floating-buttons */
+  position: fixed;        /* samma typ som övriga modaler, men säkerställer att z-index används */
+}
+
+/* (valfritt men bra) – säkerställ att dialog + backdrop hamnar i rätt ordning */
+#aiSeatingModal .modal__backdrop {
+  z-index: 99998;
+}
+
+#aiSeatingModal .modal__dialog {
+  z-index: 99999;
+}  
