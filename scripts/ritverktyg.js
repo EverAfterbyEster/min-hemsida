@@ -13,6 +13,9 @@ let nextTableId = 1;
 let guests = window.guests || [];
 let todoItems = window.todoItems || [];
 let summary = window.summary || {};
+let aiGuests = window.aiGuests || [];
+window.aiGuests = aiGuests;
+
 
 
 // === Persistenta räknare för bord ===
@@ -1453,10 +1456,12 @@ function getCurrentPlan() {
     },
     tables: objects,
     guests: guests,
+    aiGuests: aiGuests,     // <-- NYTT
     todo: todoItems,
     summary: summary
   };
 }
+
 
 
 function restorePlan(plan) {
@@ -1465,11 +1470,14 @@ function restorePlan(plan) {
   if (titleInput) titleInput.value = plan?.meta?.title || "";
 
   // Skriv tillbaka dina arrayer/objekt
-  objects   = Array.isArray(plan?.tables) ? plan.tables : [];
-  guests    = Array.isArray(plan?.guests) ? plan.guests : [];
-  todoItems = Array.isArray(plan?.todo)   ? plan.todo   : [];
+  objects   = Array.isArray(plan?.tables)   ? plan.tables   : [];
+  guests    = Array.isArray(plan?.guests)   ? plan.guests   : [];
+  aiGuests  = Array.isArray(plan?.aiGuests) ? plan.aiGuests : [];
+  todoItems = Array.isArray(plan?.todo)     ? plan.todo     : [];
   summary   = plan?.summary || {};
-  // Återställ räknare för bord (med fallback om saknas i äldre filer)
+
+  window.aiGuests = aiGuests;
+
 if (typeof plan?.meta?.nextTableNumber === "number") {
   nextTableNumber = plan.meta.nextTableNumber;
 } else {
@@ -2099,6 +2107,1009 @@ function scrollToLayout(tables, pad = 60){
   if (vp.el.scrollTo) vp.el.scrollTo({left, top, behavior: 'smooth'});
 }
 
+// ===== AI-bordsplacering (med attribut) =====
+
+// En rad i textfältet kan se ut så här:
+// "Anna Andersson; vuxen; brudens familj; sv"
+// "Björn Björnsson; ungdom; brudgummens vänner; en"
+// Allt utom namn är valfritt.
+
+// --- Hjälpfunktion: parsa gästlistan till objekt ---
+function parseGuests(raw) {
+  return raw
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      const parts = line.split(';').map(p => p.trim()).filter(Boolean);
+      const [name, ageGroup, group, lang] = parts;
+      if (!name) return null;
+      return {
+        name,
+        ageGroup: (ageGroup || '').toLowerCase() || null, // t.ex. "barn", "ungdom", "vuxen", "senior"
+        group: group || null,                              // t.ex. "brudens familj"
+        lang: (lang || '').toLowerCase() || null          // t.ex. "sv", "en"
+      };
+    })
+    .filter(Boolean);
+}
+
+// --- Hjälpfunktion: hur bra "matchar" två gäster? ---
+function compatibilityScore(a, b, mode = 'mix') {
+  let score = 0;
+
+  // Samma språk → lätt att prata
+  if (a.lang && b.lang && a.lang === b.lang) score += 3;
+
+  // Samma åldersgrupp → tenderar att trivas
+  if (a.ageGroup && b.ageGroup && a.ageGroup === b.ageGroup) {
+    score += 2;
+    // Extra bonus om båda är barn/ungdom
+    if (a.ageGroup === 'barn' || a.ageGroup === 'ungdom') {
+      score += 1;
+    }
+  }
+
+  // Grupp (familj, vänner osv)
+  if (a.group && b.group && a.group === b.group) {
+    if (mode === 'family') {
+      // Familjebord / kluster
+      score += 2;
+    } else if (mode === 'mix') {
+      // Vi vill blanda olika grupper lite mer
+      score -= 1;
+    }
+  }
+
+  return score;
+}
+
+// --- Hjälpfunktion: skapa ordning på gästerna för att fylla stolar ---
+// Strategy:
+//  - Ta en gäst (slump) som start för bordet
+//  - Fyll på med den gäst som ger högst total-score mot de som redan sitter där
+function makeSeatingOrder(guests, seatsPerTable, mode = 'mix') {
+  const remaining = guests.slice();
+  const ordered = [];
+
+  while (remaining.length) {
+    const table = [];
+
+    // Första gästen vid bordet (slump)
+    const firstIndex = Math.floor(Math.random() * remaining.length);
+    table.push(remaining.splice(firstIndex, 1)[0]);
+
+    // Fyll resten av bordet
+    while (table.length < seatsPerTable && remaining.length) {
+      let bestIdx = 0;
+      let bestScore = -Infinity;
+
+      for (let i = 0; i < remaining.length; i++) {
+        const candidate = remaining[i];
+        const score = table.reduce(
+          (sum, seated) => sum + compatibilityScore(candidate, seated, mode),
+          0
+        );
+        if (score > bestScore) {
+          bestScore = score;
+          bestIdx = i;
+        }
+      }
+
+      table.push(remaining.splice(bestIdx, 1)[0]);
+    }
+
+    ordered.push(...table);
+  }
+
+  return ordered; // platt array i den ordning stolarna fylls
+}
+
+// ===== AI-bordsplacering (tabell med gäster + attribut) =====
+
+// Hämta gästerna från tabellen i modalen
+function collectGuestsFromForm() {
+  const tbody = document.getElementById('aiGuestTableBody');
+  if (!tbody) return [];
+
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const guests = rows.map(function (row) {
+    const nameInput   = row.querySelector('.ai-guest-name');
+    const ageSelect   = row.querySelector('.ai-guest-age');
+    const groupSelect = row.querySelector('.ai-guest-group');
+    const roleSelect  = row.querySelector('.ai-guest-role');
+    const langSelect  = row.querySelector('.ai-guest-lang');
+
+    const name = nameInput ? nameInput.value.trim() : '';
+    if (!name) return null;
+
+    return {
+      name: name,
+      ageGroup: ageSelect && ageSelect.value ? ageSelect.value : null,   // barn/ungdom/vuxen/senior
+      group:    groupSelect && groupSelect.value ? groupSelect.value : null, // familj/vän
+      role:     roleSelect && roleSelect.value ? roleSelect.value : null,    // "honor" = honnörsgäst
+      lang:     langSelect && langSelect.value ? langSelect.value : null     // språk
+    };
+  }).filter(Boolean);
+
+  return guests;
+}
+
+// Skapar en ny rad i gästtabellen
+function addGuestRow(initial) {
+  initial = initial || {};
+
+  const tbody = document.getElementById('aiGuestTableBody');
+  if (!tbody) return;
+
+  const tr = document.createElement('tr');
+  tr.innerHTML = '' +
+    '<td>' +
+      '<input type="text" class="ai-guest-name" placeholder="Namn" />' +
+    '</td>' +
+    '<td>' +
+      '<select class="ai-guest-age">' +
+        '<option value="">-</option>' +
+        '<option value="barn">Barn</option>' +
+        '<option value="ungdom">Ungdom</option>' +
+        '<option value="vuxen">Vuxen</option>' +
+        '<option value="senior">Senior</option>' +
+      '</select>' +
+    '</td>' +
+    '<td>' +
+      '<select class="ai-guest-group">' +
+        '<option value="">-</option>' +
+        '<option value="brudens familj">Brudens familj</option>' +
+        '<option value="brudgummens familj">Brudgummens familj</option>' +
+        '<option value="brudens vänner">Brudens vänner</option>' +
+        '<option value="brudgummens vänner">Brudgummens vänner</option>' +
+        '<option value="övriga">Övriga</option>' +
+      '</select>' +
+    '</td>' +
+    '<td>' +
+      '<select class="ai-guest-role">' +
+        '<option value="">Ingen särskild</option>' +
+        '<option value="honor">Brud</option>' +
+        '<option value="honor">Brudgum</option>' +
+        '<option value="honor">Brudens mor/far</option>' +
+        '<option value="honor">Brudgummens mor/far</option>' +
+        '<option value="honor">Övrig honnörsgäst</option>' +
+      '</select>' +
+    '</td>' +
+    '<td>' +
+      '<select class="ai-guest-lang">' +
+        '<option value="">-</option>' +
+        '<option value="sv">Svenska</option>' +
+        '<option value="en">Engelska</option>' +
+        '<option value="no">Norska</option>' +
+        '<option value="da">Danska</option>' +
+        '<option value="fi">Finska</option>' +
+      '</select>' +
+    '</td>' +
+    '<td>' +
+      '<button type="button" class="ai-guest-remove">×</button>' +
+    '</td>';
+
+  tbody.appendChild(tr);
+
+  // Förifyll om initiala värden skickas in
+  if (initial.name)     tr.querySelector('.ai-guest-name').value  = initial.name;
+  if (initial.ageGroup) tr.querySelector('.ai-guest-age').value   = initial.ageGroup;
+  if (initial.group)    tr.querySelector('.ai-guest-group').value = initial.group;
+  if (initial.role)     tr.querySelector('.ai-guest-role').value  = initial.role;
+  if (initial.lang)     tr.querySelector('.ai-guest-lang').value  = initial.lang;
+
+  const removeBtn = tr.querySelector('.ai-guest-remove');
+  removeBtn.addEventListener('click', function () {
+    tr.remove();
+  });
+}
+
+// Hur bra matchar två gäster?
+function compatibilityScore(a, b, mode) {
+  mode = mode || 'mix';
+  var score = 0;
+
+  // Samma språk → lätt att prata
+  if (a.lang && b.lang && a.lang === b.lang) score += 3;
+
+  // Samma åldersgrupp
+  if (a.ageGroup && b.ageGroup && a.ageGroup === b.ageGroup) {
+    score += 2;
+    if (a.ageGroup === 'barn' || a.ageGroup === 'ungdom') {
+      score += 1; // extra plus för ungdomar/barn tillsammans
+    }
+  }
+
+  // Grupp (familj/vänner)
+  if (a.group && b.group && a.group === b.group) {
+    if (mode === 'family') {
+      score += 2;   // familjebord
+    } else if (mode === 'mix') {
+      score -= 1;   // försök blanda grupper
+    }
+  }
+
+  return score;
+}
+
+// Skapar ordning för hur gästerna ska placeras ut på stolarna
+function makeSeatingOrder(guests, seatsPerTable, mode) {
+  mode = mode || 'mix';
+
+  var remaining = guests.slice();
+  var ordered = [];
+
+  while (remaining.length) {
+    var table = [];
+
+    // första gäst vid bordet
+    var firstIndex = Math.floor(Math.random() * remaining.length);
+    table.push(remaining.splice(firstIndex, 1)[0]);
+
+    // fyll resten av bordet
+    while (table.length < seatsPerTable && remaining.length) {
+      var bestIdx = 0;
+      var bestScore = -Infinity;
+
+      for (var i = 0; i < remaining.length; i++) {
+        var candidate = remaining[i];
+        var score = 0;
+        for (var j = 0; j < table.length; j++) {
+          score += compatibilityScore(candidate, table[j], mode);
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          bestIdx = i;
+        }
+      }
+
+      table.push(remaining.splice(bestIdx, 1)[0]);
+    }
+
+    ordered.push.apply(ordered, table);
+  }
+
+  return ordered;
+}
+
+// ===== AI-bordsplacering (tabell med gäster + attribut) =====
+
+// Hämta gästerna från tabellen i modalen
+function collectGuestsFromForm() {
+  var tbody = document.getElementById('aiGuestTableBody');
+  if (!tbody) return [];
+
+  var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+  var guests = rows.map(function (row) {
+    var nameInput   = row.querySelector('.ai-guest-name');
+    var ageSelect   = row.querySelector('.ai-guest-age');
+    var groupSelect = row.querySelector('.ai-guest-group');
+    var roleSelect  = row.querySelector('.ai-guest-role');
+    var langSelect  = row.querySelector('.ai-guest-lang');
+
+    var name = nameInput ? nameInput.value.trim() : '';
+    if (!name) return null;
+
+    return {
+      name: name,
+      ageGroup: ageSelect && ageSelect.value ? ageSelect.value : null,       // barn/ungdom/vuxen/senior
+      group:    groupSelect && groupSelect.value ? groupSelect.value : null, // familj/vän
+      role:     roleSelect && roleSelect.value ? roleSelect.value : null,    // brud/brudgum/föräldrar/honor_other
+      lang:     langSelect && langSelect.value ? langSelect.value : null     // språk
+    };
+  }).filter(Boolean);
+
+  return guests;
+}
+
+function syncAiGuestsFromForm() {
+  if (typeof collectGuestsFromForm !== 'function') return;
+
+  aiGuests = collectGuestsFromForm();
+  window.aiGuests = aiGuests;
+
+  if (typeof onPlanChanged === 'function') {
+    onPlanChanged();
+  }
+}
+
+
+// Skapar en ny rad i gästtabellen
+function addGuestRow(initial) {
+  initial = initial || {};
+
+  const tbody = document.getElementById('aiGuestTableBody');
+  if (!tbody) return;
+
+  const tr = document.createElement('tr');
+  tr.innerHTML = '' +
+    '<td>' +
+      '<input type="text" class="ai-guest-name" placeholder="Namn" data-i18n-placeholder="ai_name_placeholder" />' +
+    '</td>' +
+    '<td>' +
+      '<select class="ai-guest-age">' +
+        '<option value="">-</option>' +
+        '<option value="barn" data-i18n="ai_age_child">Barn</option>' +
+        '<option value="ungdom" data-i18n="ai_age_teen">Ungdom</option>' +
+        '<option value="vuxen" data-i18n="ai_age_adult">Vuxen</option>' +
+        '<option value="senior" data-i18n="ai_age_senior">Senior</option>' +
+      '</select>' +
+    '</td>' +
+    '<td>' +
+      '<select class="ai-guest-group">' +
+        '<option value="">-</option>' +
+        '<option value="brudens familj" data-i18n="ai_group_bride_family">Brudens familj</option>' +
+        '<option value="brudgummens familj" data-i18n="ai_group_groom_family">Brudgummens familj</option>' +
+        '<option value="brudens vänner" data-i18n="ai_group_bride_friends">Brudens vänner</option>' +
+        '<option value="brudgummens vänner" data-i18n="ai_group_groom_friends">Brudgummens vänner</option>' +
+        '<option value="övriga" data-i18n="ai_group_other">Övriga</option>' +
+      '</select>' +
+    '</td>' +
+    '<td>' +
+      '<select class="ai-guest-role">' +
+        '<option value="" data-i18n="ai_role_none">Ingen särskild</option>' +
+        '<option value="honor" data-i18n="ai_role_bride">Brud</option>' +
+        '<option value="honor" data-i18n="ai_role_groom">Brudgum</option>' +
+        '<option value="honor" data-i18n="ai_role_bride_parents">Brudens mor/far</option>' +
+        '<option value="honor" data-i18n="ai_role_groom_parents">Brudgummens mor/far</option>' +
+        '<option value="honor" data-i18n="ai_role_other_honor">Övrig honnörsgäst</option>' +
+      '</select>' +
+    '</td>' +
+    '<td>' +
+      '<select class="ai-guest-lang">' +
+        '<option value="">-</option>' +
+        '<option value="sv" data-i18n="ai_lang_sv">Svenska</option>' +
+        '<option value="en" data-i18n="ai_lang_en">Engelska</option>' +
+        '<option value="no" data-i18n="ai_lang_no">Norska</option>' +
+        '<option value="da" data-i18n="ai_lang_da">Danska</option>' +
+        '<option value="fi" data-i18n="ai_lang_fi">Finska</option>' +
+      '</select>' +
+    '</td>' +
+    '<td>' +
+      '<button type="button" class="ai-guest-remove" aria-label="Ta bort rad" data-i18n-aria-label="ai_remove_row">×</button>' +
+    '</td>';
+
+  tbody.appendChild(tr);
+
+  // Översätt ny rad beroende på valt språk
+  if (typeof applyI18n === 'function') {
+    applyI18n(tr);
+  }
+
+  // Förifyll om initiala värden skickas in
+  const nameEl  = tr.querySelector('.ai-guest-name');
+  const ageEl   = tr.querySelector('.ai-guest-age');
+  const groupEl = tr.querySelector('.ai-guest-group');
+  const roleEl  = tr.querySelector('.ai-guest-role');
+  const langEl  = tr.querySelector('.ai-guest-lang');
+
+  if (initial.name)     nameEl.value  = initial.name;
+  if (initial.ageGroup) ageEl.value   = initial.ageGroup;
+  if (initial.group)    groupEl.value = initial.group;
+  if (initial.role)     roleEl.value  = initial.role;
+  if (initial.lang)     langEl.value  = initial.lang;
+
+  const removeBtn = tr.querySelector('.ai-guest-remove');
+  if (removeBtn) {
+    removeBtn.addEventListener('click', function () {
+      tr.remove();
+      if (typeof syncAiGuestsFromForm === 'function') {
+        syncAiGuestsFromForm();
+      }
+    });
+  }
+
+  // Lyssna på ändringar → autospara AI-gästlistan
+  [nameEl, ageEl, groupEl, roleEl, langEl].forEach(function (el) {
+    if (!el) return;
+    el.addEventListener('input', function () {
+      if (typeof syncAiGuestsFromForm === 'function') {
+        syncAiGuestsFromForm();
+      }
+    });
+    el.addEventListener('change', function () {
+      if (typeof syncAiGuestsFromForm === 'function') {
+        syncAiGuestsFromForm();
+      }
+    });
+  });
+
+  if (typeof syncAiGuestsFromForm === 'function') {
+    syncAiGuestsFromForm();
+  }
+}
+
+
+// Hur bra matchar två gäster?
+function compatibilityScore(a, b, mode) {
+  mode = mode || 'mix';
+  var score = 0;
+
+  // Samma språk → lätt att prata
+  if (a.lang && b.lang && a.lang === b.lang) score += 3;
+
+  // Samma åldersgrupp
+  if (a.ageGroup && b.ageGroup && a.ageGroup === b.ageGroup) {
+    score += 2;
+    if (a.ageGroup === 'barn' || a.ageGroup === 'ungdom') {
+      score += 1; // extra plus för ungdomar/barn tillsammans
+    }
+  }
+
+  // Grupp (familj/vänner)
+  if (a.group && b.group && a.group === b.group) {
+    if (mode === 'family') {
+      score += 2;   // familjebord
+    } else if (mode === 'mix') {
+      score -= 1;   // försök blanda grupper
+    }
+  }
+
+  return score;
+}
+
+// Skapar ordning för hur gästerna ska placeras ut på stolarna
+function makeSeatingOrder(guests, seatsPerTable, mode) {
+  mode = mode || 'mix';
+
+  var remaining = guests.slice();
+  var ordered = [];
+
+  while (remaining.length) {
+    var table = [];
+
+    // första gäst vid bordet
+    var firstIndex = Math.floor(Math.random() * remaining.length);
+    table.push(remaining.splice(firstIndex, 1)[0]);
+
+    // fyll resten av bordet
+    while (table.length < seatsPerTable && remaining.length) {
+      var bestIdx = 0;
+      var bestScore = -Infinity;
+
+      for (var i = 0; i < remaining.length; i++) {
+        var candidate = remaining[i];
+        var score = 0;
+        for (var j = 0; j < table.length; j++) {
+          score += compatibilityScore(candidate, table[j], mode);
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          bestIdx = i;
+        }
+      }
+
+      table.push(remaining.splice(bestIdx, 1)[0]);
+    }
+
+    ordered.push.apply(ordered, table);
+  }
+
+  return ordered;
+}
+
+// Bygger honnörsbordet enligt reglerna:
+// Brudens far – Brudgummens mor – Bruden – Brudgummen – Brudens mor – Brudgummens far
+function buildHeadTable(guests, seatsPerTable) {
+  seatsPerTable = seatsPerTable || 8;
+
+  var bride = null;
+  var groom = null;
+  var brideFather = null;
+  var groomMother = null;
+  var brideMother = null;
+  var groomFather = null;
+  var honorOthers = [];
+
+  guests.forEach(function (g) {
+    switch (g.role) {
+      case 'bride':
+        if (!bride) bride = g;
+        break;
+      case 'groom':
+        if (!groom) groom = g;
+        break;
+      case 'bride_father':
+        if (!brideFather) brideFather = g;
+        break;
+      case 'groom_mother':
+        if (!groomMother) groomMother = g;
+        break;
+      case 'bride_mother':
+        if (!brideMother) brideMother = g;
+        break;
+      case 'groom_father':
+        if (!groomFather) groomFather = g;
+        break;
+      case 'honor_other':
+        honorOthers.push(g);
+        break;
+      default:
+        break;
+    }
+  });
+
+  var headSeats = new Array(seatsPerTable);
+
+  function place(guest, idx) {
+    if (guest && idx >= 0 && idx < seatsPerTable && !headSeats[idx]) {
+      headSeats[idx] = guest;
+    }
+  }
+
+  // Endast om brud + brudgum finns placerar vi strikt enligt mönstret
+  if (bride && groom) {
+    // index 0..5 = vänster till höger längs honnörsbordet
+    place(brideFather, 0);  // Brudens far
+    place(groomMother, 1);  // Brudgummens mor
+    place(bride, 2);        // Bruden
+    place(groom, 3);        // Brudgummen
+    place(brideMother, 4);  // Brudens mor
+    place(groomFather, 5);  // Brudgummens far
+  } else {
+    // fallback om något saknas – försök ändå placera bra
+    if (bride) place(bride, 2);
+    if (groom) place(groom, 3);
+    place(brideFather, 0);
+    place(brideMother, 1);
+    place(groomMother, 4);
+    place(groomFather, 5);
+  }
+
+  // Fyll kvarvarande platser på honnörsbordet med övriga honnörsgäster
+  for (var i = 0; i < seatsPerTable && honorOthers.length; i++) {
+    if (!headSeats[i]) {
+      headSeats[i] = honorOthers.shift();
+    }
+  }
+
+  // Resterande gäster = alla som INTE sitter vid honnörsbordet
+  var remaining = guests.filter(function (g) {
+    return headSeats.indexOf(g) === -1;
+  });
+
+  return {
+    head: headSeats,     // array med längd = seatsPerTable (kan innehålla null)
+    remaining: remaining // övriga gäster
+  };
+}
+function generateAiSeating() {
+  console.log('[AI] === generateAiSeating start ===');
+
+  // === Hjälpare: bygg sittning för rektangulära bord med två-bords-honnör ===
+  function buildRectSeatingUsingGeometry(guestObjects, createdTables, headSeats, orderedNormal, seatsPerTable) {
+    var totalSeats = guestObjects.length;
+    var orderedGuests = new Array(totalSeats);
+    var i;
+
+    // Hämta rektangulära bord, använd de två första som honnörsbord
+    var rectTables = (createdTables || []).filter(function (t) {
+      return t && t.type === 'rect';
+    });
+
+    if (rectTables.length < 2) {
+      console.warn('[AI] Hittar inte två rektangulära bord, använder enkel fallback.');
+      // Fallback: samma som rund logik – fyll första 8 platser med headSeats
+      for (i = 0; i < totalSeats; i++) {
+        if (i < seatsPerTable) {
+          var gHead = headSeats[i];
+          orderedGuests[i] = gHead || (orderedNormal.length ? orderedNormal.shift() : null);
+        } else {
+          orderedGuests[i] = orderedNormal.length ? orderedNormal.shift() : null;
+        }
+      }
+      return orderedGuests;
+    }
+
+    // Sortera borden vänster → höger baserat på x-position (om x saknas, 0)
+    rectTables.sort(function (a, b) {
+      var ax = (typeof a.x === 'number') ? a.x : 0;
+      var bx = (typeof b.x === 'number') ? b.x : 0;
+      return ax - bx;
+    });
+
+    var leftTable  = rectTables[0];
+    var rightTable = rectTables[1];
+
+    function seatsForTable(table) {
+      var tid = table.tableId || table.id;
+      return guestObjects.filter(function (s) {
+        if (!s) return false;
+        // Anpassa vid behov om dina fält ändras
+        return (s.parentId === tid || s.tableId === tid || s.ownerId === tid);
+      });
+    }
+
+    var seatsLeft  = seatsForTable(leftTable);
+    var seatsRight = seatsForTable(rightTable);
+
+    if (!seatsLeft.length || !seatsRight.length) {
+      console.warn('[AI] Kunde inte koppla stolar till bord, använder fallback.');
+      for (i = 0; i < totalSeats; i++) {
+        if (i < seatsPerTable) {
+          var gHead2 = headSeats[i];
+          orderedGuests[i] = gHead2 || (orderedNormal.length ? orderedNormal.shift() : null);
+        } else {
+          orderedGuests[i] = orderedNormal.length ? orderedNormal.shift() : null;
+        }
+      }
+      return orderedGuests;
+    }
+
+    function splitRows(seats) {
+      if (!seats.length) return { top: [], bottom: [] };
+
+      var ys = seats.map(function (s) { return s.y; });
+      var minY = Math.min.apply(null, ys);
+      var maxY = Math.max.apply(null, ys);
+      var midY = (minY + maxY) / 2;
+
+      var top = [];
+      var bottom = [];
+
+      seats.forEach(function (s) {
+        if (s.y < midY) {
+          top.push(s);
+        } else {
+          bottom.push(s);
+        }
+      });
+
+      // sortera vänster → höger
+      top.sort(function (a, b) { return a.x - b.x; });
+      bottom.sort(function (a, b) { return a.x - b.x; });
+
+      return { top: top, bottom: bottom };
+    }
+
+    var rowsLeft  = splitRows(seatsLeft);
+    var rowsRight = splitRows(seatsRight);
+
+    function avgY(arr) {
+      if (!arr.length) return 0;
+      var sum = 0;
+      for (var i = 0; i < arr.length; i++) sum += arr[i].y;
+      return sum / arr.length;
+    }
+
+    // Välj den sida (top eller bottom) där radens y-läge matchar bäst mellan borden
+    var leftRow, rightRow;
+
+    if (rowsLeft.top.length && rowsRight.top.length && rowsLeft.bottom.length && rowsRight.bottom.length) {
+      var diffTop = Math.abs(avgY(rowsLeft.top) - avgY(rowsRight.top));
+      var diffBottom = Math.abs(avgY(rowsLeft.bottom) - avgY(rowsRight.bottom));
+      if (diffTop <= diffBottom) {
+        leftRow = rowsLeft.top;
+        rightRow = rowsRight.top;
+      } else {
+        leftRow = rowsLeft.bottom;
+        rightRow = rowsRight.bottom;
+      }
+    } else {
+      // Om någon rad saknas, ta den som finns
+      leftRow = rowsLeft.bottom.length ? rowsLeft.bottom : rowsLeft.top;
+      rightRow = rowsRight.bottom.length ? rowsRight.bottom : rowsRight.top;
+    }
+
+    // Nu har vi en rad stolar på vänster bord + en rad på höger bord
+    // Vi vill ha dem i ordning vänster → höger över båda borden
+    var rowSeats = leftRow.concat(rightRow);
+
+    // 🔁 NYTT: rotera headSeats ett steg åt höger så att brud & brudgum
+    // (index 2 & 3 i headSeats) hamnar i skarven (position 3 & 4 i raden)
+    var headRow = headSeats.slice();
+    if (headRow.length) {
+      headRow.unshift(headRow.pop());
+    }
+
+    // Mappa dessa stolar till deras index i guestObjects
+var headSeatIndices = rowSeats.map(function (seat) {
+  return guestObjects.indexOf(seat);
+});
+
+// Skapa en variant av headSeats för rektangulärt honnörsbord
+// där vi byter plats på Brudens mor och Brudgummens mor.
+var rectHeadSeats = headSeats.slice(); // kopia
+
+var iBrideMom = -1;
+var iGroomMom = -1;
+
+// Hitta index för respektive mor i kopian
+for (i = 0; i < rectHeadSeats.length; i++) {
+  var g = rectHeadSeats[i];
+  if (!g || !g.role) continue;
+
+  if (g.role === 'bride_mother' && iBrideMom === -1) {
+    iBrideMom = i;
+  } else if (g.role === 'groom_mother' && iGroomMom === -1) {
+    iGroomMom = i;
+  }
+}
+
+// Om båda finns, byt plats på dem
+if (iBrideMom >= 0 && iGroomMom >= 0) {
+  var tmp = rectHeadSeats[iBrideMom];
+  rectHeadSeats[iBrideMom] = rectHeadSeats[iGroomMom];
+  rectHeadSeats[iGroomMom] = tmp;
+}
+
+// Lägg ut rectHeadSeats i den här ordningen längs raden
+for (i = 0; i < headSeatIndices.length && i < rectHeadSeats.length; i++) {
+  var seatIdx = headSeatIndices[i];
+  if (seatIdx >= 0) {
+    orderedGuests[seatIdx] = rectHeadSeats[i];
+  }
+}
+
+// Fyll alla andra stolar med remaining guests
+for (i = 0; i < totalSeats; i++) {
+  if (!orderedGuests[i]) {
+    orderedGuests[i] = orderedNormal.length ? orderedNormal.shift() : null;
+  }
+}
+
+
+    return orderedGuests;
+  }
+
+  // === Här börjar "gamla" generateAiSeating ===
+
+  var guests = collectGuestsFromForm();
+  console.log('[AI] antal gäster:', guests.length, guests);
+
+  if (!guests.length) {
+    alert('Lägg till minst en gäst i tabellen.');
+    return false;
+  }
+
+  // Bordstyp
+  var shapeInput = document.querySelector('input[name="aiTableShape"]:checked');
+  var shape = shapeInput ? shapeInput.value : 'round';
+
+  var seatsPerTable = 8; // 8 platser/bord
+  var tableTypeValue = (shape === 'rect') ? 'rect-8' : 'round-8';
+  var tableCount = Math.max(1, Math.ceil(guests.length / seatsPerTable));
+
+  // Minst två bord för rektangulär honnör
+  if (shape === 'rect') {
+    tableCount = Math.max(2, tableCount);
+  }
+
+  console.log('[AI] shape:', shape, 'tableTypeValue:', tableTypeValue, 'tableCount:', tableCount);
+
+  // Strategi
+  var mode = 'mix';
+  var strategySelect = document.getElementById('aiStrategy');
+  if (strategySelect && strategySelect.value) {
+    mode = strategySelect.value;
+  }
+  console.log('[AI] strategy mode:', mode);
+
+  // Bygg honnör + övriga gäster
+  var headData = buildHeadTable(guests, seatsPerTable);
+  var headSeats = headData.head;
+  var remainingGuests = headData.remaining;
+
+  // Rensa plan
+  if (typeof resetPlan === 'function') {
+    var ok = resetPlan();
+    if (!ok) {
+      console.log('[AI] resetPlan avbröts av användaren');
+      return false;
+    }
+  } else {
+    if (typeof objects !== 'undefined') objects = [];
+    if (typeof selected !== 'undefined') selected = null;
+    if (typeof nextTableNumber !== 'undefined') nextTableNumber = 1;
+    if (typeof nextTableId !== 'undefined') nextTableId = 1;
+  }
+
+  // Skapa bord
+  var createdTables = [];
+
+  if (typeof addTables === 'function') {
+    createdTables = addTables(tableCount, tableTypeValue);
+    console.log('[AI] addTables skapade bord:', createdTables.length);
+  } else if (typeof addSelectedTable === 'function') {
+    var sel = document.getElementById('tableType');
+    var prev = sel ? sel.value : null;
+
+    if (sel) sel.value = tableTypeValue;
+    for (var iT = 0; iT < tableCount; iT++) {
+      addSelectedTable();
+    }
+    if (sel && prev !== null) sel.value = prev;
+
+    createdTables = Array.isArray(objects)
+      ? objects.filter(function (o) { return o && (o.type === 'rect' || o.type === 'circle'); })
+      : [];
+
+    console.log('[AI] fallback skapade bord:', createdTables.length);
+  } else {
+    console.error('[AI] varken addTables eller addSelectedTable finns');
+    alert('Det gick inte att skapa några bord (intern funktion saknas).');
+    return false;
+  }
+
+  console.log('[AI] objects efter bordsskapande:', Array.isArray(objects) ? objects.length : 'inte array');
+
+  // Hämta alla gäst-/stolsobjekt
+  var guestObjects = [];
+  if (Array.isArray(objects)) {
+    guestObjects = objects.filter(function (o) { return o && o.type === 'guest'; });
+
+    if (!guestObjects.length) {
+      guestObjects = objects.filter(function (o) { return o && (o.type === 'seat' || o.isSeat); });
+    }
+  }
+
+  console.log('[AI] antal hittade gäst-objekt:', guestObjects.length);
+
+  if (!guestObjects.length) {
+    alert('Det gick inte att hitta några platser att fylla med gäster.');
+    return false;
+  }
+
+  // Skapa ordning för övriga gäster
+  var orderedNormal = makeSeatingOrder(remainingGuests, seatsPerTable, mode);
+
+  var totalSeats = guestObjects.length;
+  var orderedGuests;
+
+  if (shape === 'rect') {
+    // Rektangulär honnör på två bord med geometri + rotation av hedersgäster
+    orderedGuests = buildRectSeatingUsingGeometry(
+      guestObjects,
+      createdTables,
+      headSeats,
+      orderedNormal,
+      seatsPerTable
+    );
+  } else {
+    // RUNDA BORD: originallogik, oförändrad
+    orderedGuests = new Array(totalSeats);
+    var i;
+
+    for (i = 0; i < seatsPerTable && i < totalSeats; i++) {
+      var gHead = headSeats[i];
+      if (gHead) {
+        orderedGuests[i] = gHead;
+      } else if (orderedNormal.length) {
+        orderedGuests[i] = orderedNormal.shift();
+      } else {
+        orderedGuests[i] = null;
+      }
+    }
+
+    for (i = seatsPerTable; i < totalSeats; i++) {
+      orderedGuests[i] = orderedNormal.length ? orderedNormal.shift() : null;
+    }
+  }
+
+  console.log('[AI] orderedGuests längd:', orderedGuests.length);
+
+  // Tilldela namn till platserna i ordning
+  guestObjects.forEach(function (g, idx) {
+    var guest = orderedGuests[idx];
+    g.name = guest ? guest.name : '';
+  });
+
+  console.log('[AI] namn tilldelade till',
+    Math.min(guestObjects.length, orderedGuests.length), 'gäster');
+
+  // Rita om & uppdatera UI
+  if (typeof drawAll === 'function') drawAll();
+  if (typeof updateSumButtonState === 'function') updateSumButtonState();
+  if (typeof onPlanChanged === 'function') onPlanChanged();
+
+  // Centrera vy runt layouten om funktionen finns
+  if (typeof scrollToLayout === 'function' && createdTables.length) {
+    scrollToLayout(createdTables);
+  }
+
+  console.log('[AI] === generateAiSeating klar ===');
+  return true;
+}
+
+
+
+function openAiSeatingModal() {
+  var modal = document.getElementById('aiSeatingModal');
+  if (!modal) return;
+  modal.style.display = 'block';
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeAiSeatingModal() {
+  var modal = document.getElementById('aiSeatingModal');
+  if (!modal) return;
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+// Kör direkt (scriptet är defer: DOM finns redan)
+(function initAiSeating() {
+  var aiBtn      = document.getElementById('aiSeatingBtn');
+  var aiModal    = document.getElementById('aiSeatingModal');
+  var aiGenerate = document.getElementById('aiGenerateBtn');
+  var addRowBtn  = document.getElementById('aiAddGuestRowBtn');
+  var tbody      = document.getElementById('aiGuestTableBody');
+
+  if (!aiBtn || !aiModal || !aiGenerate) {
+    console.warn('AI-bordsplacering: element saknas i DOM');
+    return;
+  }
+
+  aiBtn.addEventListener('click', function () {
+    openAiSeatingModal();
+    if (!tbody) return;
+
+    // Töm tabellen
+    tbody.innerHTML = '';
+
+    // Om det finns sparade AI-gäster – fyll dem
+    if (Array.isArray(aiGuests) && aiGuests.length) {
+      aiGuests.forEach(function (g) {
+        addGuestRow(g);
+      });
+    } else {
+      // Annars minst en tom rad
+      addGuestRow();
+    }
+  });
+
+
+
+  if (addRowBtn) {
+    addRowBtn.addEventListener('click', function () {
+      addGuestRow();
+      if (typeof syncAiGuestsFromForm === 'function') {
+        syncAiGuestsFromForm();
+      }
+    });
+  }
+
+
+  aiGenerate.addEventListener('click', function () {
+    console.log('[AI] Skapa bordsplacering klickad');
+    var ok = false;
+    try {
+      ok = generateAiSeating();
+    } catch (err) {
+      console.error('Fel i generateAiSeating:', err);
+      alert('Ett fel uppstod när bordsplaceringen skulle skapas. Öppna utvecklarverktygen (F12) och titta i konsolen.');
+      return;
+    }
+
+    // Stäng bara om vi faktiskt lyckades skapa något
+    if (ok) {
+      if (typeof syncAiGuestsFromForm === 'function') {
+        syncAiGuestsFromForm();
+      }
+      closeAiSeatingModal();
+    }
+
+  });
+
+  // Stäng på klick på backdrop eller [data-close]
+  aiModal.addEventListener('click', function (e) {
+    if (e.target.matches('[data-close], .modal__backdrop, .modal__close')) {
+      closeAiSeatingModal();
+    }
+  });
+
+  // Stäng med Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && aiModal.getAttribute('aria-hidden') === 'false') {
+      closeAiSeatingModal();
+    }
+  });
+})();
+
+
+
+
 // ===== Kör valda mallar =====
 const templateSelect = document.getElementById('templateSelect');
 templateSelect?.addEventListener('change', (e) => {
@@ -2154,4 +3165,49 @@ templateSelect?.addEventListener('change', (e) => {
 
   });
   
+// ===== Öppna/stäng AI-modal & koppla knappar =====
+function openAiSeatingModal() {
+  const modal = document.getElementById('aiSeatingModal');
+  if (!modal) return;
+  modal.style.display = 'block';
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeAiSeatingModal() {
+  const modal = document.getElementById('aiSeatingModal');
+  if (!modal) return;
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const aiBtn       = document.getElementById('aiSeatingBtn');
+  const aiModal     = document.getElementById('aiSeatingModal');
+  const aiGenerate  = document.getElementById('aiGenerateBtn');
+
+  aiBtn && aiBtn.addEventListener('click', () => {
+    openAiSeatingModal();
+  });
+
+  aiGenerate && aiGenerate.addEventListener('click', () => {
+    generateAiSeating();
+    // Stäng modalen efter lyckad generering
+    closeAiSeatingModal();
+  });
+
+  // Stäng på klick på backdrop eller [data-close]
+  aiModal && aiModal.addEventListener('click', (e) => {
+    if (e.target.matches('[data-close], .modal__backdrop, .modal__close')) {
+      closeAiSeatingModal();
+    }
+  });
+
+  // Stäng med Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && aiModal?.getAttribute('aria-hidden') === 'false') {
+      closeAiSeatingModal();
+    }
+  });
+});
+
 
