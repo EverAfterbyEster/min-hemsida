@@ -157,6 +157,17 @@
             <span class="material-icons btn-icon" aria-hidden="true">person_add</span>
             <span data-i18n="btn_add_guest">Lägg till gäst</span>
           </button>
+
+          <button
+  id="aiSeatingBtn"
+  type="button"
+  data-i18n-aria-label="btn_ai_seating"
+  aria-label="AI-placering">
+  <span class="material-icons btn-icon" aria-hidden="true">auto_awesome</span>
+  <span data-i18n="btn_ai_seating">AI-placering</span>
+</button>
+
+          
           
           <button id="wallToolBtn" type="button" aria-pressed="false"
   data-i18n-title="title_draw_wall" title="Draw wall">
@@ -414,6 +425,83 @@
     <button type="button" onclick="exportGuestList('csv')">Exportera CSV</button>
   </div>
 </div>
+
+<!-- AI-bordsplacering -->
+<div id="aiSeatingModal" class="modal" aria-hidden="true">
+  <div class="modal__backdrop" data-close></div>
+  <div class="modal__dialog" role="dialog" aria-modal="true"
+       aria-labelledby="aiSeatingTitle" aria-describedby="aiSeatingDesc">
+    <button class="modal__close" type="button" data-close aria-label="Stäng">×</button>
+
+    <h2 id="aiSeatingTitle" data-i18n="ai_title">AI-placering</h2>
+
+    <div id="aiSeatingDesc" class="modal__content">
+      <p data-i18n="ai_intro">
+        Lägg till gästerna i listan, välj bordstyp och låt verktyget
+        skapa en smart bordsplacering.
+      </p>
+    
+
+      <fieldset>
+        <legend data-i18n="ai_tabletype">Bordstyp</legend>
+        <label>
+          <input type="radio" name="aiTableShape" value="round" checked>
+          <span data-i18n="ai_round">Runda bord (8 platser/bord)</span>
+        </label><br>
+        <label>
+          <input type="radio" name="aiTableShape" value="rect">
+          <span data-i18n="ai_rect">Långbord (8 platser/bord)</span>
+        </label>
+      </fieldset>
+      
+
+      <h3><strong data-i18n="ai_guestlist_heading">Gästlista</strong></h3>
+<p class="modal__hint" data-i18n="ai_hint">
+  Namn är obligatoriskt. Ålder, familj/vän, roll och språk är valfria men
+  hjälper verktyget att placera smartare.
+</p>
+
+
+<div class="ai-guestlist">
+  <div class="ai-guestlist__toolbar">
+    <button type="button" id="aiAddGuestRowBtn" data-i18n="btn_add_guest">
+      Lägg till gäst
+    </button>
+  </div>
+
+
+  <table class="ai-guestlist__table">
+    <thead>
+      <tr>
+        <th data-i18n="ai_col_name">Namn</th>
+        <th data-i18n="ai_col_age">Ålder</th>
+        <th data-i18n="ai_col_group">Familj/vän</th>
+        <th data-i18n="ai_col_role">Roll</th>
+        <th data-i18n="ai_col_lang">Språk</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="aiGuestTableBody">
+      <!-- Rader skapas via JavaScript -->
+    </tbody>
+  </table>
+  
+      </div>
+    </div>
+
+    <div class="modal__actions">
+      <button type="button" id="aiGenerateBtn" data-i18n="ai_generate">
+        Skapa bordsplacering
+      </button>
+      <button type="button" data-close data-i18n="cancel">
+        Avbryt
+      </button>
+    </div>
+    
+  </div>
+</div>
+
+
 
 
     <div class="floating-buttons" id="floatingButtons">
