@@ -221,6 +221,53 @@ home_faq_guestlist_a: "Ja, en gästlista genereras direkt när du trycker \"skap
 home_faq_rename_q: "Kan jag döpa om borden/gästerna?",
 home_faq_rename_a: "Ja, genom att klicka på \"Döp om\"-knappen nere till höger i ritverktyget.",
 
+      // --- AI-placering ---
+      btn_ai_seating: "AI-placering",
+
+      ai_title: "AI-placering",
+      ai_intro: "Lägg till gästerna i listan, välj bordstyp och låt verktyget skapa en smart bordsplacering.",
+      ai_tabletype: "Bordstyp",
+      ai_round: "Runda bord (8 platser/bord)",
+      ai_rect: "Långbord (8 platser/bord)",
+      ai_guestlist_heading: "Gästlista",
+      ai_hint: "Namn är obligatoriskt. Ålder, familj/vän, roll och språk är valfria men hjälper verktyget att placera smartare.",
+
+      ai_col_name: "Namn",
+      ai_col_age: "Ålder",
+      ai_col_group: "Familj/vän",
+      ai_col_role: "Roll",
+      ai_col_lang: "Språk",
+      ai_generate: "Skapa bordsplacering",
+
+      ai_name_placeholder: "Namn",
+
+      ai_age_child: "Barn",
+      ai_age_teen: "Ungdom",
+      ai_age_adult: "Vuxen",
+      ai_age_senior: "Senior",
+
+      ai_group_bride_family: "Brudens familj",
+      ai_group_groom_family: "Brudgummens familj",
+      ai_group_bride_friends: "Brudens vänner",
+      ai_group_groom_friends: "Brudgummens vänner",
+      ai_group_other: "Övriga",
+
+      ai_role_none: "Ingen särskild",
+      ai_role_bride: "Brud",
+      ai_role_groom: "Brudgum",
+      ai_role_bride_parents: "Brudens mor/far",
+      ai_role_groom_parents: "Brudgummens mor/far",
+      ai_role_other_honor: "Övrig honnörsgäst",
+
+      ai_lang_sv: "Svenska",
+      ai_lang_en: "Engelska",
+      ai_lang_no: "Norska",
+      ai_lang_da: "Danska",
+      ai_lang_fi: "Finska",
+
+      ai_remove_row: "Ta bort rad",
+
+
     },
   
     en: {
@@ -444,6 +491,52 @@ home_faq_guestlist_a: "Yes, a guest list is generated as soon as you press \"Cre
 home_faq_rename_q: "Can I rename tables/guests?",
 home_faq_rename_a: "Yes—click the \"Rename\" button at the bottom-right in the drawing tool.",
 home_contact_copy: "If you have any questions? Contact us",
+      // --- AI seating ---
+      btn_ai_seating: "AI seating",
+
+      ai_title: "AI seating",
+      ai_intro: "Add your guests to the list, choose table type and let the tool create a smart seating plan.",
+      ai_tabletype: "Table type",
+      ai_round: "Round tables (8 seats/table)",
+      ai_rect: "Banquet tables (8 seats/table)",
+      ai_guestlist_heading: "Guest list",
+      ai_hint: "Name is required. Age, family/friend, role and language are optional but help the tool place guests more intelligently.",
+
+      ai_col_name: "Name",
+      ai_col_age: "Age",
+      ai_col_group: "Family/Friend",
+      ai_col_role: "Role",
+      ai_col_lang: "Language",
+      ai_generate: "Create seating",
+
+      ai_name_placeholder: "Name",
+
+      ai_age_child: "Child",
+      ai_age_teen: "Teenager",
+      ai_age_adult: "Adult",
+      ai_age_senior: "Senior",
+
+      ai_group_bride_family: "Bride's family",
+      ai_group_groom_family: "Groom's family",
+      ai_group_bride_friends: "Bride's friends",
+      ai_group_groom_friends: "Groom's friends",
+      ai_group_other: "Other",
+
+      ai_role_none: "No special role",
+      ai_role_bride: "Bride",
+      ai_role_groom: "Groom",
+      ai_role_bride_parents: "Bride's mother/father",
+      ai_role_groom_parents: "Groom's mother/father",
+      ai_role_other_honor: "Other guest of honour",
+
+      ai_lang_sv: "Swedish",
+      ai_lang_en: "English",
+      ai_lang_no: "Norwegian",
+      ai_lang_da: "Danish",
+      ai_lang_fi: "Finnish",
+
+      ai_remove_row: "Remove row",
+
 
     }
   };
@@ -588,4 +681,5 @@ window.setLang = function(lang){
   applyI18n();
   updateLocalizedDates();
 };
+
 
