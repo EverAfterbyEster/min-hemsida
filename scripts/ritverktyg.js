@@ -2235,75 +2235,7 @@ function collectGuestsFromForm() {
   return guests;
 }
 
-// Skapar en ny rad i gästtabellen
-function addGuestRow(initial) {
-  initial = initial || {};
 
-  const tbody = document.getElementById('aiGuestTableBody');
-  if (!tbody) return;
-
-  const tr = document.createElement('tr');
-  tr.innerHTML = '' +
-    '<td>' +
-      '<input type="text" class="ai-guest-name" placeholder="Namn" />' +
-    '</td>' +
-    '<td>' +
-      '<select class="ai-guest-age">' +
-        '<option value="">-</option>' +
-        '<option value="barn">Barn</option>' +
-        '<option value="ungdom">Ungdom</option>' +
-        '<option value="vuxen">Vuxen</option>' +
-        '<option value="senior">Senior</option>' +
-      '</select>' +
-    '</td>' +
-    '<td>' +
-      '<select class="ai-guest-group">' +
-        '<option value="">-</option>' +
-        '<option value="brudens familj">Brudens familj</option>' +
-        '<option value="brudgummens familj">Brudgummens familj</option>' +
-        '<option value="brudens vänner">Brudens vänner</option>' +
-        '<option value="brudgummens vänner">Brudgummens vänner</option>' +
-        '<option value="övriga">Övriga</option>' +
-      '</select>' +
-    '</td>' +
-    '<td>' +
-      '<select class="ai-guest-role">' +
-        '<option value="">Ingen särskild</option>' +
-        '<option value="honor">Brud</option>' +
-        '<option value="honor">Brudgum</option>' +
-        '<option value="honor">Brudens mor/far</option>' +
-        '<option value="honor">Brudgummens mor/far</option>' +
-        '<option value="honor">Övrig honnörsgäst</option>' +
-      '</select>' +
-    '</td>' +
-    '<td>' +
-      '<select class="ai-guest-lang">' +
-        '<option value="">-</option>' +
-        '<option value="sv">Svenska</option>' +
-        '<option value="en">Engelska</option>' +
-        '<option value="no">Norska</option>' +
-        '<option value="da">Danska</option>' +
-        '<option value="fi">Finska</option>' +
-      '</select>' +
-    '</td>' +
-    '<td>' +
-      '<button type="button" class="ai-guest-remove">×</button>' +
-    '</td>';
-
-  tbody.appendChild(tr);
-
-  // Förifyll om initiala värden skickas in
-  if (initial.name)     tr.querySelector('.ai-guest-name').value  = initial.name;
-  if (initial.ageGroup) tr.querySelector('.ai-guest-age').value   = initial.ageGroup;
-  if (initial.group)    tr.querySelector('.ai-guest-group').value = initial.group;
-  if (initial.role)     tr.querySelector('.ai-guest-role').value  = initial.role;
-  if (initial.lang)     tr.querySelector('.ai-guest-lang').value  = initial.lang;
-
-  const removeBtn = tr.querySelector('.ai-guest-remove');
-  removeBtn.addEventListener('click', function () {
-    tr.remove();
-  });
-}
 
 // Hur bra matchar två gäster?
 function compatibilityScore(a, b, mode) {
@@ -2447,15 +2379,17 @@ function addGuestRow(initial) {
       '</select>' +
     '</td>' +
     '<td>' +
-      '<select class="ai-guest-role">' +
-        '<option value="" data-i18n="ai_role_none">Ingen särskild</option>' +
-        '<option value="honor" data-i18n="ai_role_bride">Brud</option>' +
-        '<option value="honor" data-i18n="ai_role_groom">Brudgum</option>' +
-        '<option value="honor" data-i18n="ai_role_bride_parents">Brudens mor/far</option>' +
-        '<option value="honor" data-i18n="ai_role_groom_parents">Brudgummens mor/far</option>' +
-        '<option value="honor" data-i18n="ai_role_other_honor">Övrig honnörsgäst</option>' +
-      '</select>' +
-    '</td>' +
+    '<select class="ai-guest-role">' +
+      '<option value="" data-i18n="ai_role_none">Ingen särskild</option>' +
+      '<option value="bride" data-i18n="ai_role_bride">Brud</option>' +
+      '<option value="groom" data-i18n="ai_role_groom">Brudgum</option>' +
+      '<option value="bride_father" data-i18n="ai_role_bride_father">Brudens far</option>' +
+      '<option value="bride_mother" data-i18n="ai_role_bride_mother">Brudens mor</option>' +
+      '<option value="groom_mother" data-i18n="ai_role_groom_mother">Brudgummens mor</option>' +
+      '<option value="groom_father" data-i18n="ai_role_groom_father">Brudgummens far</option>' +
+      '<option value="honor_other" data-i18n="ai_role_other_honor">Övrig honnörsgäst</option>' +
+    '</select>' +
+  '</td>' +
     '<td>' +
       '<select class="ai-guest-lang">' +
         '<option value="">-</option>' +
@@ -3209,5 +3143,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
 
 
