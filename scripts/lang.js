@@ -255,8 +255,12 @@ home_faq_rename_a: "Ja, genom att klicka på \"Döp om\"-knappen nere till höge
       ai_role_none: "Ingen särskild",
       ai_role_bride: "Brud",
       ai_role_groom: "Brudgum",
-      ai_role_bride_parents: "Brudens mor/far",
-      ai_role_groom_parents: "Brudgummens mor/far",
+      // I lang.js (sv)
+ai_role_bride_mother: "Brudens mor",
+ai_role_bride_father: "Brudens far",
+ai_role_groom_mother: "Brudgummens mor",
+ai_role_groom_father: "Brudgummens far",
+
       ai_role_other_honor: "Övrig honnörsgäst",
 
       ai_lang_sv: "Svenska",
@@ -525,8 +529,12 @@ home_contact_copy: "If you have any questions? Contact us",
       ai_role_none: "No special role",
       ai_role_bride: "Bride",
       ai_role_groom: "Groom",
-      ai_role_bride_parents: "Bride's mother/father",
-      ai_role_groom_parents: "Groom's mother/father",
+      // I lang.js (en)
+ai_role_bride_mother: "Mother of the bride",
+ai_role_bride_father: "Father of the bride",
+ai_role_groom_mother: "Mother of the groom",
+ai_role_groom_father: "Father of the groom",
+
       ai_role_other_honor: "Other guest of honour",
 
       ai_lang_sv: "Swedish",
@@ -681,5 +689,4 @@ window.setLang = function(lang){
   applyI18n();
   updateLocalizedDates();
 };
-
 
