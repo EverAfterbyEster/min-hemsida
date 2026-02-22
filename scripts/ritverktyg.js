@@ -3146,3 +3146,630 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+/* ===== Inbjudningskort (Word-export) ================================ */
+(function initInvitationCardTool(){
+  const openBtn  = document.getElementById('openInvitationBtn');
+  const panel    = document.getElementById('invitationPanel');
+  const closeBtn = document.getElementById('invitationCloseBtn');
+  if (!openBtn || !panel) return;
+
+  const fields = {
+    names:          document.getElementById('inv_names'),
+    date:           document.getElementById('inv_date'),
+    time:           document.getElementById('inv_time'),
+    ceremonyPlace:  document.getElementById('inv_ceremony_place'),
+    ceremonyAddr:   document.getElementById('inv_ceremony_addr'),
+    partyPlace:     document.getElementById('inv_party_place'),
+    partyAddr:      document.getElementById('inv_party_addr'),
+    rsvpDate:       document.getElementById('inv_rsvp_date'),
+    rsvpTo:         document.getElementById('inv_rsvp_to'),
+    dresscode:      document.getElementById('inv_dresscode'),
+    toastmaster:    document.getElementById('inv_toastmaster'),
+    gifts:          document.getElementById('inv_gifts'),
+    extra:          document.getElementById('inv_extra'),
+  };
+
+  const templateSelect = document.getElementById('inv_template');
+  const previewEl      = document.getElementById('inv_preview');
+  const downloadBtn    = document.getElementById('inv_download_docx');
+
+  const show = () => {
+    panel.hidden = false;
+    panel.setAttribute('aria-hidden', 'false');
+
+    // Stäng mobil-menyn om den är öppen (så panelen syns direkt)
+    document.body.classList.remove('tools-open');
+    const toolsBackdrop = document.getElementById('toolsBackdrop');
+    if (toolsBackdrop) toolsBackdrop.hidden = true;
+
+    // Scrolla så panelen hamnar i fokus
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    updatePreview();
+  };
+
+  const hide = () => {
+    panel.hidden = true;
+    panel.setAttribute('aria-hidden', 'true');
+  };
+
+  openBtn.addEventListener('click', (e) => { e.preventDefault(); show(); });
+  if (closeBtn) closeBtn.addEventListener('click', (e) => { e.preventDefault(); hide(); });
+
+  // Stäng med ESC när panelen är öppen
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !panel.hidden) hide();
+  });
+
+  // Uppdatera preview live
+  Object.values(fields).forEach(inp => inp?.addEventListener('input', updatePreview));
+  templateSelect?.addEventListener('change', updatePreview);
+
+  function clean(v){
+    v = (v || '').trim();
+    if (!v || v === '-') return '';
+    return v;
+  }
+
+  function getData(){
+    return {
+      names:         clean(fields.names?.value),
+      date:          clean(fields.date?.value),
+      time:          clean(fields.time?.value),
+      ceremonyPlace: clean(fields.ceremonyPlace?.value),
+      ceremonyAddr:  clean(fields.ceremonyAddr?.value),
+      partyPlace:    clean(fields.partyPlace?.value),
+      partyAddr:     clean(fields.partyAddr?.value),
+      rsvpDate:      clean(fields.rsvpDate?.value),
+      rsvpTo:        clean(fields.rsvpTo?.value),
+      dresscode:     clean(fields.dresscode?.value),
+      toastmaster:   clean(fields.toastmaster?.value),
+      gifts:         clean(fields.gifts?.value),
+      extra:         clean(fields.extra?.value),
+      template:      String(templateSelect?.value || '1'),
+    };
+  }
+
+  function line(label, value){
+    return value ? `${label}${value}` : '';
+  }
+
+  function joinNonEmpty(lines){
+    return lines.filter(Boolean).join('\n');
+  }
+
+  function baseDetails(d){
+    const ceremony = joinNonEmpty([
+      d.ceremonyPlace ? `Vigsel: ${d.ceremonyPlace}${d.ceremonyAddr ? `, ${d.ceremonyAddr}` : ''}` : '',
+    ]);
+
+    const party = joinNonEmpty([
+      d.partyPlace ? `Middag & fest: ${d.partyPlace}${d.partyAddr ? `, ${d.partyAddr}` : ''}` : '',
+    ]);
+
+    const rsvp = joinNonEmpty([
+      d.rsvpDate ? `OSA senast ${d.rsvpDate}${d.rsvpTo ? ` till ${d.rsvpTo}` : ''}` : (d.rsvpTo ? `OSA till ${d.rsvpTo}` : ''),
+    ]);
+
+    const extras = joinNonEmpty([
+      d.dresscode ? `Klädkod: ${d.dresscode}` : '',
+      d.toastmaster ? `Toastmaster: ${d.toastmaster}` : '',
+      d.extra ? d.extra : '',
+      d.gifts ? d.gifts : '',
+      'Specialkost/allergier meddelas vid OSA.',
+    ]);
+
+    return joinNonEmpty([
+      d.date ? `${d.date}${d.time ? ` kl. ${d.time}` : ''}` : (d.time ? `Tid: ${d.time}` : ''),
+      ceremony,
+      party,
+      '',
+      rsvp,
+      extras ? extras : '',
+    ]);
+  }
+
+  function templateText(tpl, d){
+    const namesLine = d.names || '___ & ___';
+    const headerClassic = `${namesLine}\n\ngifter sig`;
+    const base = baseDetails(d);
+
+    switch (tpl) {
+      case '1': // Klassisk & romantisk
+        return joinNonEmpty([
+          headerClassic,
+          '',
+          base,
+        ]);
+
+      case '2': // Enkel & modern
+        return joinNonEmpty([
+          'Vi ska gifta oss!',
+          '',
+          joinNonEmpty([
+            `${d.date || '[DATUM]'}${d.time ? ` • ${d.time}` : ''}`,
+            d.ceremonyPlace || d.partyPlace || '[PLATS]',
+          ]),
+          '',
+          d.rsvpDate ? `OSA: ${d.rsvpDate}` : 'OSA: [DATUM]',
+          d.rsvpTo ? d.rsvpTo : '[OSA-LÄNK/MAIL]',
+        ]);
+
+      case '3': // Varm & personlig
+        return joinNonEmpty([
+          'Efter en tid tillsammans säger vi äntligen ja.',
+          'Vi skulle bli jätteglada om du vill fira med oss!',
+          '',
+          `${d.date || '[DATUM]'}${d.time ? ` kl. ${d.time}` : ''}`,
+          d.ceremonyPlace ? `Vigsel: ${d.ceremonyPlace}` : 'Vigsel: [PLATS]',
+          d.partyPlace ? `Fest: ${d.partyPlace}` : 'Fest: [PLATS]',
+          '',
+          d.rsvpDate ? `OSA senast ${d.rsvpDate}${d.rsvpTo ? `: ${d.rsvpTo}` : ''}` : `OSA senast [DATUM]${d.rsvpTo ? `: ${d.rsvpTo}` : ''}`,
+          'Specialkost? Skriv det i OSA.',
+        ]);
+
+      case '4': // Tydligt schema
+        return joinNonEmpty([
+          'Välkommen att fira vårt bröllop!',
+          '',
+          d.date || '[DATUM]',
+          joinNonEmpty([
+            d.time ? `${d.time} Vigsel – ${d.ceremonyPlace || '[PLATS]'}` : `Vigsel – ${d.ceremonyPlace || '[PLATS]'}`,
+            d.partyPlace ? `Middag & fest – ${d.partyPlace}` : '',
+          ]),
+          '',
+          d.rsvpDate ? `OSA senast ${d.rsvpDate}${d.rsvpTo ? ` till ${d.rsvpTo}` : ''}` : `OSA senast [DATUM]${d.rsvpTo ? ` till ${d.rsvpTo}` : ''}`,
+          d.dresscode ? `Klädkod: ${d.dresscode}` : '',
+          'Specialkost vid OSA.',
+        ]);
+
+      case '5': // Kort + informationskort
+        return joinNonEmpty([
+          `${namesLine}`,
+          `${d.date || '[DATUM]'}${d.ceremonyPlace || d.partyPlace ? ` • ${(d.partyAddr || d.ceremonyAddr || '').split(',').slice(-1)[0].trim() || ''}` : ''}`.trim(),
+          '',
+          '--- Informationskort ---',
+          joinNonEmpty([
+            d.time ? `Vigsel kl. ${d.time} – ${d.ceremonyPlace || '[PLATS]'}` : `Vigsel – ${d.ceremonyPlace || '[PLATS]'}`,
+            d.partyPlace ? `Fest – ${d.partyPlace}` : '',
+            d.rsvpDate ? `OSA ${d.rsvpDate} – ${d.rsvpTo || ''}`.trim() : `OSA [DATUM] – ${d.rsvpTo || ''}`.trim(),
+            d.dresscode ? `Klädkod: ${d.dresscode}` : 'Klädkod: [ ]',
+            'Specialkost/allergier: [ ]',
+          ]),
+        ]);
+
+      case '6': // Inga presenter
+        return joinNonEmpty([
+          headerClassic,
+          '',
+          base,
+          '',
+          'Din närvaro är den finaste gåvan.',
+          'Vi önskar oss inga presenter.',
+        ]);
+
+      case '7': // Önskelista / Swish
+        return joinNonEmpty([
+          headerClassic,
+          '',
+          base,
+          '',
+          d.gifts ? d.gifts : 'Önskelista: [LÄNK]\nAlternativt bidrag via Swish: [NUMMER] (märkt “Bröllop”)',
+        ]);
+
+      case '8': // Barnfritt
+        return joinNonEmpty([
+          headerClassic,
+          '',
+          base,
+          '',
+          'Vi älskar era barn, men den här dagen firar vi som ett vuxenbröllop.',
+          'Tack för förståelsen. 💛',
+        ]);
+
+      case '9': // Ingen plus-one
+        return joinNonEmpty([
+          headerClassic,
+          '',
+          base,
+          '',
+          'Vi har tyvärr begränsat antal platser och kan därför bara bjuda de som står på inbjudan.',
+          'Tack för att du hjälper oss hålla det intimt.',
+        ]);
+
+      case '10': // Toastmaster-info
+        return joinNonEmpty([
+          headerClassic,
+          '',
+          base,
+          '',
+          'Tal och spex?',
+          `Kontakta vår toastmaster: ${d.toastmaster || '[NAMN] – [TELEFON/MAIL]'}`,
+        ]);
+
+      default:
+        return joinNonEmpty([headerClassic, '', base]);
+    }
+  }
+
+  function updatePreview(){
+    const d = getData();
+    const txt = templateText(d.template, d);
+    if (previewEl) previewEl.textContent = txt;
+  }
+
+  async function downloadDocx(){
+    const d = getData();
+    const text = templateText(d.template, d);
+
+    if (!window.docx || !window.docx.Document) {
+      alert('Word-exporten kunde inte laddas (docx-bibliotek saknas).');
+      return;
+    }
+
+    const { Document, Packer, Paragraph, TextRun } = window.docx;
+
+    // Skapa stycken rad-för-rad
+    const paragraphs = text.split('\n').map(line => {
+      if (!line.trim()) return new Paragraph({ children: [new TextRun('')] });
+      return new Paragraph({
+        children: [new TextRun({ text: line })],
+        spacing: { after: 120 },
+      });
+    });
+
+    const doc = new Document({
+      sections: [{ properties: {}, children: paragraphs }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+
+    const filename = `inbjudningskort${d.names ? ' - ' + d.names.replace(/[\\/:*?"<>|]/g, '') : ''}.docx`;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  if (downloadBtn) downloadBtn.addEventListener('click', downloadDocx);
+})();
+
+
+/* ===== Leverantörsförfrågningar (Word-export) ======================= */
+(function vendorToolBootstrap(){
+  // Robust init: fungerar även om knappen/panelen skapas dynamiskt efter att scriptet laddats.
+  function initVendorRequestTool(){
+    const openBtn  = document.getElementById('openVendorBtn');
+    const panel    = document.getElementById('vendorPanel');
+    const closeBtn = document.getElementById('vendorCloseBtn');
+    if (!panel) return false;
+
+    const el = (id) => document.getElementById(id);
+
+    const fields = {
+      sender:   el('vend_sender'),
+      date:     el('vend_date'),
+      city:     el('vend_city'),
+      guests:   el('vend_guests'),
+      budget:   el('vend_budget'),
+      contact:  el('vend_contact'),
+      replyBy:  el('vend_reply_by'),
+      style:    el('vend_style'),
+      notes:    el('vend_notes'),
+      type:     el('vend_type'),
+      extra:    el('vend_extra_details'),
+
+      // venue
+      venueTimes: el('vend_venue_times'),
+      venueSetup: el('vend_venue_setup'),
+
+      // catering
+      catStyle: el('vend_cat_style'),
+      catDiet:  el('vend_cat_diet'),
+
+      // photo
+      photoHours: el('vend_photo_hours'),
+      photoStyle: el('vend_photo_style'),
+
+      // music
+      musicTimes: el('vend_music_times'),
+      musicStyle: el('vend_music_style'),
+
+      // flowers
+      flowersTheme: el('vend_flowers_theme'),
+      flowersNeed:  el('vend_flowers_need'),
+
+      // cake
+      cakeServings: el('vend_cake_servings'),
+      cakeStyle:    el('vend_cake_style'),
+
+      // transport
+      transportRoute:  el('vend_transport_route'),
+      transportPeople: el('vend_transport_people'),
+
+      // hmua
+      hmuaPeople: el('vend_hmua_people'),
+      hmuaPlace:  el('vend_hmua_place'),
+
+      // decor
+      decorNeed:     el('vend_decor_need'),
+      decorDelivery: el('vend_decor_delivery'),
+
+      // planner
+      plannerHelp:  el('vend_planner_help'),
+      plannerScope: el('vend_planner_scope'),
+    };
+
+    const previewEl   = el('vend_preview');
+    const downloadBtn = el('vend_download_docx');
+
+    const show = () => {
+      panel.hidden = false;
+      panel.setAttribute('aria-hidden', 'false');
+
+      // Stäng mobil-menyn om den är öppen (så panelen syns direkt)
+      document.body.classList.remove('tools-open');
+      const toolsBackdrop = document.getElementById('toolsBackdrop');
+      if (toolsBackdrop) toolsBackdrop.hidden = true;
+
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      updateDynamicFields();
+      updatePreview();
+    };
+
+    const hide = () => {
+      panel.hidden = true;
+      panel.setAttribute('aria-hidden', 'true');
+    };
+
+    const setSectionHidden = (sectionId, hidden) => {
+      const s = el(sectionId);
+      if (!s) return;
+      s.hidden = hidden;
+      s.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+    };
+
+    function updateDynamicFields(){
+      const type = (fields.type && fields.type.value) ? fields.type.value : 'venue';
+      const wrap = document.getElementById('vend_dynamic_fields');
+      if (!wrap) return;
+      const groups = wrap.querySelectorAll('.vendor-fields[data-vend]');
+      groups.forEach(g => {
+        const match = g.getAttribute('data-vend') === type;
+        g.hidden = !match;
+        g.setAttribute('aria-hidden', match ? 'false' : 'true');
+      });
+    }
+
+    const line = (label, value) => value ? `${label}: ${value}` : '';
+
+    function buildText(){
+      const t = (fields.type?.value || 'venue');
+
+      const baseLines = [
+        `Hej!`,
+        ``,
+        `Vi planerar bröllop och vill gärna be om en offert och tillgänglighet.`,
+        ``,
+        line('Datum', fields.date?.value?.trim()),
+        line('Plats/stad', fields.city?.value?.trim()),
+        line('Antal gäster', fields.guests?.value?.trim()),
+        line('Budgetintervall', fields.budget?.value?.trim()),
+        line('Kontakt', fields.contact?.value?.trim()),
+        line('Svar önskas senast', fields.replyBy?.value?.trim()),
+        fields.style?.value?.trim() ? `Stil/tema: ${fields.style.value.trim()}` : '',
+        ``,
+      ].filter(Boolean);
+
+      const sender = fields.sender?.value?.trim();
+      // if (sender) baseLines.unshift(`${sender}`);
+
+      const extraCommon = fields.extra?.value?.trim();
+      if (extraCommon) baseLines.push(`Övrigt: ${extraCommon}`, ``);
+
+      let specTitle = '';
+      let specLines = [];
+
+      if (t === 'venue'){
+        specTitle = 'Förfrågan: Lokal';
+        specLines = [
+          line('Tider (start/slut, vigsel/fest)', fields.venueTimes?.value?.trim()),
+          line('Uppställning/önskemål', fields.venueSetup?.value?.trim()),
+          '',
+          'Frågor:',
+          '• Pris (lokalhyra/minimispend) och vad som ingår',
+          '• Mat/dryck (egen catering? korkavgift?)',
+          '• Teknik (ljud, mic, projektor) och bemanning',
+          '• Sluttid/ljudregler, städ, deposition och avbokningsvillkor',
+        ];
+      } else if (t === 'catering'){
+        specTitle = 'Förfrågan: Catering';
+        specLines = [
+          line('Serveringsform', fields.catStyle?.value?.trim()),
+          line('Specialkost/allergier', fields.catDiet?.value?.trim()),
+          '',
+          'Frågor:',
+          '• Pris per person och vad som ingår (personal, porslin, dukning)',
+          '• Provsmakning och upplägg för dryck/bar',
+          '• Betalplan, avbokningsvillkor och logistik på plats',
+        ];
+      } else if (t === 'photographer'){
+        specTitle = 'Förfrågan: Fotograf';
+        specLines = [
+          line('Antal timmar', fields.photoHours?.value?.trim()),
+          line('Stil', fields.photoStyle?.value?.trim()),
+          '',
+          'Frågor:',
+          '• Paket och vad som ingår (förberedelser/vigsel/fest)',
+          '• Leverans (antal bilder, leveranstid, galleri)',
+          '• Reseersättning, backup-plan och avtalsvillkor',
+        ];
+      } else if (t === 'music'){
+        specTitle = 'Förfrågan: DJ/Band';
+        specLines = [
+          line('Tider', fields.musicTimes?.value?.trim()),
+          line('Musikstil/önskemål', fields.musicStyle?.value?.trim()),
+          '',
+          'Frågor:',
+          '• Pris och vad som ingår (ljud/ljus, mic, riggning)',
+          '• Pauser, spellista/önskelåtar, samt avbokningsvillkor',
+        ];
+      } else if (t === 'flowers'){
+        specTitle = 'Förfrågan: Blommor';
+        specLines = [
+          line('Tema/färger', fields.flowersTheme?.value?.trim()),
+          line('Behov (bukett, corsage, bordsblommor)', fields.flowersNeed?.value?.trim()),
+          '',
+          'Frågor:',
+          '• Prisbild och vad som ingår (leverans/uppsättning)',
+          '• Tillgänglighet och tidsplan för beställning',
+        ];
+      } else if (t === 'cake'){
+        specTitle = 'Förfrågan: Tårta/Dessert';
+        specLines = [
+          line('Antal portioner', fields.cakeServings?.value?.trim()),
+          line('Stil/smaker', fields.cakeStyle?.value?.trim()),
+          '',
+          'Frågor:',
+          '• Pris och provsmakning',
+          '• Leverans/upphämtning och förvaring på plats',
+          '• Allergier/specialönskemål',
+        ];
+      } else if (t === 'transport'){
+        specTitle = 'Förfrågan: Transport';
+        specLines = [
+          line('Sträcka/rutt', fields.transportRoute?.value?.trim()),
+          line('Antal personer', fields.transportPeople?.value?.trim()),
+          '',
+          'Frågor:',
+          '• Pris, tider och villkor (väntetid, avbokning)',
+          '• Fordonstyp och eventuella dekorationer',
+        ];
+      } else if (t === 'hmua'){
+        specTitle = 'Förfrågan: Hår & Makeup';
+        specLines = [
+          line('Antal personer', fields.hmuaPeople?.value?.trim()),
+          line('Plats (på plats/hos er)', fields.hmuaPlace?.value?.trim()),
+          '',
+          'Frågor:',
+          '• Pris per person och vad som ingår (provsminkning?)',
+          '• Tidsplan på bröllopsdagen och avbokningsvillkor',
+        ];
+      } else if (t === 'decor'){
+        specTitle = 'Förfrågan: Dekor/Uthyrning';
+        specLines = [
+          line('Behov', fields.decorNeed?.value?.trim()),
+          line('Leverans/upphämtning', fields.decorDelivery?.value?.trim()),
+          '',
+          'Frågor:',
+          '• Pris, deposition och vad som ingår',
+          '• Leveranstider, montering och avbokningsvillkor',
+        ];
+      } else if (t === 'planner'){
+        specTitle = 'Förfrågan: Koordinator/Planerare';
+        specLines = [
+          line('Typ av hjälp', fields.plannerHelp?.value?.trim()),
+          line('Omfattning', fields.plannerScope?.value?.trim()),
+          '',
+          'Frågor:',
+          '• Prisupplägg och vad som ingår',
+          '• Tillgänglighet och arbetsprocess',
+        ];
+      }
+
+      const footer = [
+        ``,
+        fields.notes?.value?.trim() ? `Extra info: ${fields.notes.value.trim()}` : '',
+        ``,
+        `Tack på förhand!`,
+        sender ? sender : ''
+      ].filter(Boolean);
+
+      return [
+        ...baseLines,
+        specTitle,
+        ...specLines.filter(Boolean),
+        ...footer
+      ].join('\n');
+    }
+
+    function updatePreview(){
+      if (!previewEl) return;
+      previewEl.textContent = buildText();
+    }
+
+    function bindInputs(){
+      Object.values(fields).forEach(inp => {
+        if (!inp) return;
+        inp.addEventListener('input', () => {
+          if (inp === fields.type) updateDynamicFields();
+          updatePreview();
+        });
+        inp.addEventListener('change', () => {
+          if (inp === fields.type) updateDynamicFields();
+          updatePreview();
+        });
+      });
+    }
+
+    function downloadDocx(){
+      if (typeof window.docx === 'undefined') {
+        alert('Word-export (docx) är inte laddat. Kontrollera att docx-scriptet finns i HTML.');
+        return;
+      }
+      const text = buildText();
+      const { Document, Packer, Paragraph, TextRun } = window.docx;
+
+      const paragraphs = text.split('\n').map(line => new Paragraph({
+        children: [new TextRun(line)]
+      }));
+
+      const doc = new Document({ sections: [{ properties: {}, children: paragraphs }] });
+
+      Packer.toBlob(doc).then(blob => {
+        const filename = `leverantorsforfragan_${(fields.type?.value || 'mall')}.docx`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // Bind UI
+    bindInputs();
+    if (downloadBtn) downloadBtn.addEventListener('click', downloadDocx);
+    if (closeBtn) closeBtn.addEventListener('click', hide);
+
+    // Klick på knapp (om den finns redan nu)
+    if (openBtn) openBtn.addEventListener('click', (e) => { e.preventDefault(); show(); });
+
+    // Gör tillgängligt för delegated handler
+    window.__vendorToolReady = true;
+    window.__showVendorPanel = show;
+    window.__hideVendorPanel = hide;
+
+    return true;
+  }
+
+  // 1) Init när DOM är klar
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!window.__vendorToolReady) initVendorRequestTool();
+  });
+
+  // 2) Delegated click: funkar även om knappen skapas efter init (t.ex. via JS)
+  document.addEventListener('click', (e) => {
+    const btn = e.target && e.target.closest ? e.target.closest('#openVendorBtn') : null;
+    if (!btn) return;
+    e.preventDefault();
+    if (!window.__vendorToolReady) initVendorRequestTool();
+    if (typeof window.__showVendorPanel === 'function') window.__showVendorPanel();
+  });
+})();;
