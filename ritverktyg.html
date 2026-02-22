@@ -124,6 +124,32 @@
   <span class="material-icons btn-icon" aria-hidden="true">help_outline</span>
   <span data-i18n="btn_howto">How it works</span>
 </button>
+
+
+
+
+
+
+<button onclick="createGuestList()" id="createGuestListBtn" data-i18n-aria-label="btn_create_GuestList" aria-label="Skapa gästlista">
+  <span class="material-icons btn-icon">dehaze</span>
+  <span data-i18n="btn_create_GuestList">Skapa gästlista</span>
+</button>
+
+<button id="openChecklistBtn" data-i18n-aria-label="btn_open_Checklist" aria-label="Skapa checklista">
+  <span class="material-icons btn-icon">checklist</span>
+  <span data-i18n="btn_open_Checklist">Skapa checklista</span>
+</button>
+
+
+<button id="openInvitationBtn" data-i18n-aria-label="btn_open_invitation" aria-label="Inbjudningskort">
+  <span class="material-icons btn-icon">mail</span>
+  <span>Inbjudningskort</span>
+</button>
+<button id="openVendorBtn" data-i18n-aria-label="btn_open_vendor" aria-label="Leverantörer">
+  <span class="material-icons btn-icon">request_quote</span>
+  <span>Leverantörer</span>
+</button>
+
 <select id="templateSelect" data-close-on-change>
   <option value="" data-i18n="templates_menu"></option>
   <option value="round50" data-i18n="tpl_round50"></option>
@@ -132,10 +158,6 @@
   <option value="banquet96" data-i18n="tpl_banquet96"></option>
   <option value="headPlusRounds56" data-i18n="tpl_headPlusRounds56"></option>
 </select>
-
-
-
-
 
 
           <select id="tableType" data-keep-menu>
@@ -180,17 +202,9 @@
             <span data-i18n="btn_save_As_Image">Spara bild</span>
           </button>
 
-          <button onclick="createGuestList()" id="createGuestListBtn" data-i18n-aria-label="btn_create_GuestList" aria-label="Skapa gästlista">
-            <span class="material-icons btn-icon">dehaze</span>
-            <span data-i18n="btn_create_GuestList">Skapa gästlista</span>
-          </button>
+          
 
-          <button id="openChecklistBtn" data-i18n-aria-label="btn_open_Checklist" aria-label="Skapa checklista">
-            <span class="material-icons btn-icon">checklist</span>
-            <span data-i18n="btn_open_Checklist">Skapa checklista</span>
-          </button>
-
-          <button id="saveJsonBtn" title="Spara som JSON" data-i18n-title="title_save_json">
+<button id="saveJsonBtn" title="Spara som JSON" data-i18n-title="title_save_json">
             <span class="material-icons btn-icon" aria-hidden="true">save</span>
             <span data-i18n="btn_save_json">Spara som (.json)</span>
           </button>
@@ -224,7 +238,292 @@
       <!-- Direkt efter .appbar (inne i #appbarWrapper) -->
 <div id="toolsBackdrop" class="tools-backdrop" hidden></div>
 
-    </div>
+    
+      <!-- Inbjudningskort-panel (öppnas via knappen i verktygsraden) -->
+      <section id="invitationPanel" class="invitation-panel" hidden aria-hidden="true">
+        <div class="invitation-panel__head">
+          <h2 class="invitation-panel__title">Inbjudningskort</h2>
+          <div class="invitation-panel__actions">
+            <button id="invitationCloseBtn" type="button" class="btn--ghost" aria-label="Stäng">×</button>
+          </div>
+        </div>
+
+        <div class="invitation-panel__grid">
+          <div class="invitation-panel__col">
+            <h3 class="invitation-panel__subtitle">Info</h3>
+
+            <div class="invitation-form">
+              <label>Era namn
+                <input id="inv_names" type="text" placeholder="t.ex. Anna & Erik">
+              </label>
+
+              <label>Datum
+                <input id="inv_date" type="text" placeholder="t.ex. 14 juni 2026">
+              </label>
+
+              <label>Tid
+                <input id="inv_time" type="text" placeholder="t.ex. 15:00">
+              </label>
+
+              <label>Vigselplats
+                <input id="inv_ceremony_place" type="text" placeholder="t.ex. Stadskyrkan">
+              </label>
+
+              <label>Vigseladress
+                <input id="inv_ceremony_addr" type="text" placeholder="t.ex. Kyrkogatan 1, Stockholm">
+              </label>
+
+              <label>Festplats
+                <input id="inv_party_place" type="text" placeholder="t.ex. Orangeriet">
+              </label>
+
+              <label>Festadress
+                <input id="inv_party_addr" type="text" placeholder="t.ex. Parkvägen 12, Stockholm">
+              </label>
+
+              <label>OSA senast
+                <input id="inv_rsvp_date" type="text" placeholder="t.ex. 1 maj 2026">
+              </label>
+
+              <label>OSA till (mail/telefon/länk)
+                <input id="inv_rsvp_to" type="text" placeholder="t.ex. osa@exempel.se">
+              </label>
+
+              <label>Klädkod (valfritt)
+                <input id="inv_dresscode" type="text" placeholder="t.ex. Mörk kostym">
+              </label>
+
+              <label>Toastmaster (valfritt)
+                <input id="inv_toastmaster" type="text" placeholder="t.ex. Lisa – 070-123 45 67">
+              </label>
+
+              <label>Present/önskemål (valfritt)
+                <input id="inv_gifts" type="text" placeholder="t.ex. Inga presenter / Önskelista: ... / Swish: ...">
+              </label>
+
+              <label>Extra info (valfritt)
+                <input id="inv_extra" type="text" placeholder="t.ex. Barnfritt bröllop / Regnplan: ...">
+              </label>
+            </div>
+          </div>
+
+          <div class="invitation-panel__col">
+            <h3 class="invitation-panel__subtitle">Välj variant</h3>
+
+            <label class="invitation-select">
+              Mall
+              <select id="inv_template">
+                <option value="1">1) Klassisk & romantisk</option>
+                <option value="2">2) Enkel & modern</option>
+                <option value="3">3) Varm & personlig</option>
+                <option value="4">4) Tydligt schema</option>
+                <option value="5">5) Kort + informationskort</option>
+                <option value="6">6) Inga presenter</option>
+                <option value="7">7) Önskelista / Swish</option>
+                <option value="8">8) Barnfritt</option>
+                <option value="9">9) Ingen plus-one</option>
+                <option value="10">10) Toastmaster-info</option>
+              </select>
+            </label>
+
+            <div class="invitation-preview">
+              <div class="invitation-preview__label">Förhandsvisning</div>
+              <pre id="inv_preview" class="invitation-preview__text"></pre>
+            </div>
+
+            <div class="invitation-download">
+              <button id="inv_download_docx" type="button" class="btn btn--primary">Ladda ner som Word (.docx)</button>
+              <div class="invitation-hint">Tips: Du kan skriva “-” i fält du inte vill ha.</div>
+            </div>
+          </div>
+        </div>
+      
+            </section>
+
+      <!-- Leverantörs-panel (förfrågningar) -->
+      <section id="vendorPanel" class="invitation-panel vendor-panel" hidden aria-hidden="true">
+        <div class="invitation-panel__head">
+          <h2 class="invitation-panel__title">Leverantörsförfrågningar</h2>
+          <div class="invitation-panel__actions">
+            <button id="vendorCloseBtn" type="button" class="btn--ghost" aria-label="Stäng">×</button>
+          </div>
+        </div>
+
+        <div class="invitation-panel__grid">
+          <div class="invitation-panel__col">
+            <h3 class="invitation-panel__subtitle">Basinformation</h3>
+
+            <div class="invitation-form">
+              <label>Era namn / avsändare
+                <input id="vend_sender" type="text" placeholder="t.ex. Anna & Erik">
+              </label>
+
+              <label>Datum (om bestämt)
+                <input id="vend_date" type="text" placeholder="t.ex. 14 juni 2026">
+              </label>
+
+              <label>Ort / område
+                <input id="vend_city" type="text" placeholder="t.ex. Stockholm / Nacka">
+              </label>
+
+              <label>Antal gäster (ungefär)
+                <input id="vend_guests" type="text" placeholder="t.ex. 80">
+              </label>
+
+              <label>Budget (valfritt)
+                <input id="vend_budget" type="text" placeholder="t.ex. 80 000–120 000 kr">
+              </label>
+
+              <label>Kontakt (mail/telefon)
+                <input id="vend_contact" type="text" placeholder="t.ex. osa@exempel.se / 070-123 45 67">
+              </label>
+
+              <label>Svar önskas senast (valfritt)
+                <input id="vend_reply_by" type="text" placeholder="t.ex. 1 mars 2026">
+              </label>
+
+              <label>Kort beskrivning (stil/tema) (valfritt)
+                <input id="vend_style" type="text" placeholder="t.ex. somrigt, avslappnat, mycket grönt">
+              </label>
+
+              <label>Övrigt (valfritt)
+                <input id="vend_notes" type="text" placeholder="t.ex. utomhusvigsel / allergier / barn med">
+              </label>
+            </div>
+
+            <h3 class="invitation-panel__subtitle" style="margin-top:14px;">Kategori & detaljer</h3>
+
+            <label class="invitation-select">
+              Förfrågan
+              <select id="vend_type">
+                <option value="venue">Förfrågan lokal</option>
+                <option value="catering">Förfrågan catering</option>
+                <option value="photographer">Förfrågan fotograf</option>
+                <option value="music">Förfrågan DJ/Band</option>
+                <option value="flowers">Förfrågan blommor</option>
+                <option value="cake">Förfrågan tårta/dessert</option>
+                <option value="transport">Förfrågan transport</option>
+                <option value="hmua">Förfrågan hår & makeup</option>
+                <option value="decor">Förfrågan dekor/uthyrning</option>
+                <option value="planner">Förfrågan koordinator/planerare</option>
+              </select>
+            </label>
+
+            <!-- Extra fält som byts beroende på kategori -->
+            <div id="vend_dynamic_fields" class="vendor-dynamic">
+              <div class="vendor-fields" data-vend="venue">
+                <label>Tider (start/slut) (valfritt)
+                  <input id="vend_venue_times" type="text" placeholder="t.ex. 14:00–01:00">
+                </label>
+                <label>Upplägg (sittande/buffé/dans) (valfritt)
+                  <input id="vend_venue_setup" type="text" placeholder="t.ex. sittande middag + dansgolv">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="catering" hidden>
+                <label>Serveringsform (valfritt)
+                  <input id="vend_cat_style" type="text" placeholder="t.ex. 3-rätters / buffé">
+                </label>
+                <label>Specialkost (valfritt)
+                  <input id="vend_cat_diet" type="text" placeholder="t.ex. veg, gluten, nötallergi">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="photographer" hidden>
+                <label>Hur många timmar? (valfritt)
+                  <input id="vend_photo_hours" type="text" placeholder="t.ex. 8 timmar">
+                </label>
+                <label>Stil (valfritt)
+                  <input id="vend_photo_style" type="text" placeholder="t.ex. dokumentärt, naturligt ljus">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="music" hidden>
+                <label>Tider för musik (valfritt)
+                  <input id="vend_music_times" type="text" placeholder="t.ex. 20:00–01:00">
+                </label>
+                <label>Musikstil (valfritt)
+                  <input id="vend_music_style" type="text" placeholder="t.ex. 90-tal, pop, hits">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="flowers" hidden>
+                <label>Färgtema (valfritt)
+                  <input id="vend_flowers_theme" type="text" placeholder="t.ex. vitt/grönt/ljusrosa">
+                </label>
+                <label>Vad behövs? (valfritt)
+                  <input id="vend_flowers_need" type="text" placeholder="t.ex. bukett, knapphål, bordsdekoration">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="cake" hidden>
+                <label>Antal portioner (valfritt)
+                  <input id="vend_cake_servings" type="text" placeholder="t.ex. 80">
+                </label>
+                <label>Smak/stil (valfritt)
+                  <input id="vend_cake_style" type="text" placeholder="t.ex. vit choklad & hallon / rustik">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="transport" hidden>
+                <label>Sträcka / rutt (valfritt)
+                  <input id="vend_transport_route" type="text" placeholder="t.ex. City → Lokal, 15 km">
+                </label>
+                <label>Antal personer (valfritt)
+                  <input id="vend_transport_people" type="text" placeholder="t.ex. 2 (brudpar) / 20 (gäster)">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="hmua" hidden>
+                <label>Antal personer (valfritt)
+                  <input id="vend_hmua_people" type="text" placeholder="t.ex. 1 brud + 2 tärnor">
+                </label>
+                <label>Plats (hos er/salong) (valfritt)
+                  <input id="vend_hmua_place" type="text" placeholder="t.ex. på plats i lokalen">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="decor" hidden>
+                <label>Vad vill ni hyra/köpa? (valfritt)
+                  <input id="vend_decor_need" type="text" placeholder="t.ex. backdrop, ljusslingor, stolar">
+                </label>
+                <label>Leverans/montering? (valfritt)
+                  <input id="vend_decor_delivery" type="text" placeholder="t.ex. leverans + montering önskas">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="planner" hidden>
+                <label>Vilken hjälp? (valfritt)
+                  <input id="vend_planner_help" type="text" placeholder="t.ex. koordinering på dagen / helplanering">
+                </label>
+                <label>Ungefärlig tidsåtgång (valfritt)
+                  <input id="vend_planner_scope" type="text" placeholder="t.ex. 3 möten + på plats 10h">
+                </label>
+              </div>
+            </div>
+
+            <label style="margin-top:10px; display:block;">Extra detaljer (valfritt)
+              <textarea id="vend_extra_details" rows="4" placeholder="Skriv sådant som är unikt för er förfrågan (t.ex. tider, önskemål, frågor)."></textarea>
+            </label>
+          </div>
+
+          <div class="invitation-panel__col">
+            <h3 class="invitation-panel__subtitle">Förhandsvisning</h3>
+
+            <div class="invitation-preview">
+              <div class="invitation-preview__label">Text</div>
+              <pre id="vend_preview" class="invitation-preview__text"></pre>
+            </div>
+
+            <div class="invitation-download">
+              <button id="vend_download_docx" type="button" class="btn btn--primary">Ladda ner som Word (.docx)</button>
+              <div class="invitation-hint">Tips: Fyll bara i det du vet – resten kan lämnas tomt.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+</section>
+</div>
 
    <!-- Scen -->
 <div id="canvasContainer" class="container canvas-card">
@@ -578,6 +877,8 @@
 
   <!-- Dina script – behåll samma ID:n så lang.js hittar dem -->
   <script src="./scripts/lang.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js" defer></script>
+
   <script src="./scripts/ritverktyg.js" defer></script>
   <script src="./scripts/bestallning.js" defer></script>
   <script src="./scripts/kontaktform.js" defer></script>
