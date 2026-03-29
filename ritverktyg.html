@@ -326,13 +326,21 @@
               </select>
             </label>
 
+            <label class="invitation-select">
+              Exportläge
+              <select id="inv_export_mode">
+                <option value="pages">Pages (Apple)</option>
+                <option value="word">Word (Microsoft)</option>
+              </select>
+            </label>
+
             <div class="invitation-preview">
               <div class="invitation-preview__label">Förhandsvisning</div>
               <pre id="inv_preview" class="invitation-preview__text"></pre>
             </div>
 
             <div class="invitation-download">
-              <button id="inv_download_docx" type="button" class="btn btn--primary">Ladda ner som Word (.docx)</button>
+              <button id="inv_download_docx" type="button" class="btn btn--primary">Ladda ner inbjudningskort</button>
               <div class="invitation-hint">Tips: Du kan skriva “-” i fält du inte vill ha.</div>
             </div>
           </div>
@@ -516,7 +524,7 @@
             </div>
 
             <div class="invitation-download">
-              <button id="vend_download_docx" type="button" class="btn btn--primary">Ladda ner som Word (.docx)</button>
+              <button id="vend_download_docx" type="button" class="btn btn--primary">Ladda ner offertförfrågan</button>
               <div class="invitation-hint">Tips: Fyll bara i det du vet – resten kan lämnas tomt.</div>
             </div>
           </div>
