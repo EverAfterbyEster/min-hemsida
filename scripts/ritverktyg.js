@@ -3173,6 +3173,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const templateSelect = document.getElementById('inv_template');
   const previewEl      = document.getElementById('inv_preview');
   const downloadBtn    = document.getElementById('inv_download_docx');
+  const exportModeSelect = document.getElementById('inv_export_mode');
 
   const show = () => {
     panel.hidden = false;
@@ -3227,6 +3228,7 @@ document.addEventListener('DOMContentLoaded', () => {
       gifts:         clean(fields.gifts?.value),
       extra:         clean(fields.extra?.value),
       template:      String(templateSelect?.value || '1'),
+      exportMode:    String(exportModeSelect?.value || 'pages'),
     };
   }
 
@@ -3398,33 +3400,186 @@ document.addEventListener('DOMContentLoaded', () => {
     if (previewEl) previewEl.textContent = txt;
   }
 
-  async function downloadDocx(){
+  async function downloadDocx() {
     const d = getData();
-    const text = templateText(d.template, d);
-
+  
+    if (d.exportMode === 'word') {
+      return downloadDocxWordDesign(d);
+    }
+  
+    return downloadDocxPagesSafe(d);
+  }
+  
+  async function downloadDocxPagesSafe(d) {
     if (!window.docx || !window.docx.Document) {
       alert('Word-exporten kunde inte laddas (docx-bibliotek saknas).');
       return;
     }
-
-    const { Document, Packer, Paragraph, TextRun } = window.docx;
-
-    // Skapa stycken rad-för-rad
-    const paragraphs = text.split('\n').map(line => {
-      if (!line.trim()) return new Paragraph({ children: [new TextRun('')] });
+  
+    const {
+      Document,
+      Packer,
+      Paragraph,
+      TextRun,
+      AlignmentType,
+      PageBreak,
+    } = window.docx;
+  
+    const titleText = d.template === '2' ? 'Inbjudan' : 'Bröllopsinbjudan';
+    const namesText = d.names || '___ & ___';
+  
+    const dateLine = [
+      d.date || '',
+      d.time ? `kl. ${d.time}` : ''
+    ].filter(Boolean).join(' • ');
+  
+    const ceremonyLine = [
+      d.ceremonyPlace ? `Vigsel: ${d.ceremonyPlace}` : '',
+      d.ceremonyAddr || ''
+    ].filter(Boolean).join(', ');
+  
+    const partyLine = [
+      d.partyPlace ? `Middag & fest: ${d.partyPlace}` : '',
+      d.partyAddr || ''
+    ].filter(Boolean).join(', ');
+  
+    const rsvpLine = d.rsvpDate
+      ? `OSA senast ${d.rsvpDate}${d.rsvpTo ? ` till ${d.rsvpTo}` : ''}`
+      : (d.rsvpTo ? `OSA till ${d.rsvpTo}` : '');
+  
+    const introTextByTemplate = {
+      '1': 'Tillsammans med våra familjer har vi glädjen att bjuda in till vårt bröllop.',
+      '2': 'Vi ska gifta oss och vill gärna fira dagen tillsammans med er.',
+      '3': 'Efter en tid tillsammans säger vi äntligen ja — och vi hoppas att du vill fira med oss.',
+      '4': 'Välkommen att fira vårt bröllop med oss.',
+      '5': 'Här kommer vår inbjudan tillsammans med praktisk information inför dagen.',
+      '6': 'Tillsammans med våra familjer har vi glädjen att bjuda in till vårt bröllop.',
+      '7': 'Tillsammans med våra familjer har vi glädjen att bjuda in till vårt bröllop.',
+      '8': 'Tillsammans med våra familjer har vi glädjen att bjuda in till vårt bröllop.',
+      '9': 'Tillsammans med våra familjer har vi glädjen att bjuda in till vårt bröllop.',
+      '10': 'Tillsammans med våra familjer har vi glädjen att bjuda in till vårt bröllop.',
+    };
+  
+    const intro = introTextByTemplate[d.template] || introTextByTemplate['1'];
+  
+    function center(text, size = 24, bold = false, italics = false, color = '3F3A34', after = 120) {
       return new Paragraph({
-        children: [new TextRun({ text: line })],
-        spacing: { after: 120 },
+        alignment: AlignmentType.CENTER,
+        spacing: { after },
+        children: [
+          new TextRun({
+            text,
+            size,
+            bold,
+            italics,
+            color,
+          }),
+        ],
       });
-    });
-
+    }
+  
+    function left(text, size = 22, bold = false, color = '3F3A34', after = 100) {
+      return new Paragraph({
+        spacing: { after },
+        children: [
+          new TextRun({
+            text,
+            size,
+            bold,
+            color,
+          }),
+        ],
+      });
+    }
+  
+    function spacer(after = 140) {
+      return new Paragraph({
+        spacing: { after },
+        children: [new TextRun('')],
+      });
+    }
+  
+    const children = [
+      spacer(200),
+      center('⛪', 30, false, false, 'B08D57', 120),
+      center(titleText, 24, false, true, '7A5C3E', 160),
+      center(namesText, 34, true, false, '2F2A26', 160),
+      center('✦', 22, false, false, 'B08D57', 140),
+      center(intro, 22, false, false, '4A443E', 220),
+    ];
+  
+    if (dateLine) children.push(center(dateLine, 24, true, false, '2F2A26', 120));
+    if (ceremonyLine) children.push(center(ceremonyLine, 22, false, false, '3F3A34', 100));
+    if (partyLine) children.push(center(partyLine, 22, false, false, '3F3A34', 180));
+  
+    if (rsvpLine) {
+      children.push(center('✦', 22, false, false, 'B08D57', 120));
+      children.push(center(rsvpLine, 21, false, false, '4A443E', 140));
+    }
+  
+    const infoLines = [];
+    if (d.dresscode) infoLines.push(`Klädkod: ${d.dresscode}`);
+    if (d.toastmaster) infoLines.push(`Toastmaster: ${d.toastmaster}`);
+    if (d.gifts) infoLines.push(d.gifts);
+    if (d.extra) infoLines.push(d.extra);
+    infoLines.push('Specialkost/allergier meddelas vid OSA.');
+  
+    children.push(spacer(120));
+    children.push(center('Information', 24, true, false, '7A5C3E', 140));
+    infoLines.forEach(line => children.push(center(line, 20, false, false, '3F3A34', 100)));
+  
+    if (d.template === '6') {
+      children.push(spacer(100));
+      children.push(center('Din närvaro är den finaste gåvan.', 21, false, true, '7A5C3E', 80));
+      children.push(center('Vi önskar oss inga presenter.', 21, false, true, '7A5C3E', 120));
+    }
+  
+    if (d.template === '8') {
+      children.push(spacer(100));
+      children.push(center('Vi älskar era barn, men den här dagen firar vi som ett vuxenbröllop.', 20, false, false, '7A5C3E', 80));
+      children.push(center('Tack för förståelsen.', 20, false, false, '7A5C3E', 120));
+    }
+  
+    if (d.template === '9') {
+      children.push(spacer(100));
+      children.push(center('Vi har tyvärr begränsat antal platser och kan därför bara bjuda de som står på inbjudan.', 20, false, false, '7A5C3E', 80));
+      children.push(center('Tack för att du hjälper oss hålla det intimt.', 20, false, false, '7A5C3E', 120));
+    }
+  
+    if (d.template === '10') {
+      children.push(spacer(100));
+      children.push(center('Tal och spex?', 22, true, false, '7A5C3E', 80));
+      children.push(center(`Kontakta vår toastmaster: ${d.toastmaster || '[NAMN – TELEFON/MAIL]'}`, 20, false, false, '4A443E', 120));
+    }
+  
+    if (d.template === '5') {
+      children.push(new Paragraph({ children: [new PageBreak()] }));
+      children.push(center('Informationskort', 28, true, false, '7A5C3E', 180));
+      children.push(center('✦', 22, false, false, 'B08D57', 140));
+  
+      if (dateLine) children.push(center(dateLine, 22, true));
+      if (ceremonyLine) children.push(center(ceremonyLine, 22));
+      if (partyLine) children.push(center(partyLine, 22));
+      if (rsvpLine) children.push(center(rsvpLine, 22));
+      if (d.dresscode) children.push(center(`Klädkod: ${d.dresscode}`, 22));
+      if (d.toastmaster) children.push(center(`Toastmaster: ${d.toastmaster}`, 22));
+      if (d.gifts) children.push(center(d.gifts, 22));
+      if (d.extra) children.push(center(d.extra, 22));
+      cchildren.push(center('Specialkost/allergier meddelas vid OSA.', 22));
+    }
+  
     const doc = new Document({
-      sections: [{ properties: {}, children: paragraphs }],
+      sections: [
+        {
+          properties: {},
+          children,
+        },
+      ],
     });
-
+  
     const blob = await Packer.toBlob(doc);
-
     const filename = `inbjudningskort${d.names ? ' - ' + d.names.replace(/[\\/:*?"<>|]/g, '') : ''}.docx`;
+  
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -3434,6 +3589,11 @@ document.addEventListener('DOMContentLoaded', () => {
     a.remove();
     URL.revokeObjectURL(url);
   }
+  
+  async function downloadDocxWordDesign(d) {
+    return downloadDocxPagesSafe(d);
+  }
+  
 
   if (downloadBtn) downloadBtn.addEventListener('click', downloadDocx);
 })();
@@ -3716,31 +3876,324 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    function downloadDocx(){
+    async function downloadDocx(){
       if (typeof window.docx === 'undefined') {
         alert('Word-export (docx) är inte laddat. Kontrollera att docx-scriptet finns i HTML.');
         return;
       }
-      const text = buildText();
-      const { Document, Packer, Paragraph, TextRun } = window.docx;
+    
+      const {
+        Document,
+        Packer,
+        Paragraph,
+        TextRun,
+        AlignmentType,
+        HeadingLevel,
+      } = window.docx;
+    
+      const v = (input) => input?.value?.trim() || '';
+      const vendorType = fields.type?.value || 'venue';
+    
+      const typeLabels = {
+        venue: 'Lokal',
+        catering: 'Catering',
+        photographer: 'Fotograf',
+        music: 'DJ/Band',
+        flowers: 'Blommor',
+        cake: 'Tårta/Dessert',
+        transport: 'Transport',
+        hmua: 'Hår & Makeup',
+        decor: 'Dekor/Uthyrning',
+        planner: 'Koordinator/Planerare',
+      };
+    
+      const prettyType = typeLabels[vendorType] || 'Leverantör';
+    
+      function p(text, opts = {}) {
+        return new Paragraph({
+          alignment: opts.align || AlignmentType.LEFT,
+          spacing: { after: opts.after ?? 120, before: opts.before ?? 0 },
+          heading: opts.heading,
+          children: [
+            new TextRun({
+              text,
+              bold: !!opts.bold,
+              italics: !!opts.italics,
+              size: opts.size ?? 22,
+              color: opts.color || '333333',
+              break: opts.breakLine ? 1 : 0,
+            }),
+          ],
+        });
+      }
+    
+      function empty(after = 120) {
+        return new Paragraph({
+          spacing: { after },
+          children: [new TextRun('')],
+        });
+      }
+    
+      function line(label, value) {
+        if (!value) return null;
+        return new Paragraph({
+          spacing: { after: 90 },
+          children: [
+            new TextRun({
+              text: `${label}: `,
+              bold: true,
+              size: 22,
+              color: '4A4A4A',
+            }),
+            new TextRun({
+              text: value,
+              size: 22,
+              color: '333333',
+            }),
+          ],
+        });
+      }
+    
+      function bullet(text) {
+        return new Paragraph({
+          bullet: { level: 0 },
+          spacing: { after: 70 },
+          children: [
+            new TextRun({
+              text,
+              size: 22,
+              color: '333333',
+            }),
+          ],
+        });
+      }
+    
+      function sectionTitle(text) {
+        return p(text, {
+          heading: HeadingLevel.HEADING_1,
+          bold: true,
+          size: 26,
+          color: '7A5C3E',
+          before: 120,
+          after: 130,
+        });
+      }
+    
+      const sender = v(fields.sender);
+      const date = v(fields.date);
+      const city = v(fields.city);
+      const guests = v(fields.guests);
+      const budget = v(fields.budget);
+      const contact = v(fields.contact);
+      const replyBy = v(fields.replyBy);
+      const style = v(fields.style);
+      const notes = v(fields.notes);
+      const extra = v(fields.extra);
+    
+      let needLines = [];
+      let questionLines = [];
+    
+      if (vendorType === 'venue') {
+        needLines = [
+          ['Tider', v(fields.venueTimes)],
+          ['Uppställning / önskemål', v(fields.venueSetup)],
+        ];
+        questionLines = [
+          'Pris (lokalhyra/minimispend) och vad som ingår',
+          'Mat/dryck: går egen catering eller korkavgift att ordna?',
+          'Teknik: ljud, mikrofon, projektor och eventuell bemanning',
+          'Sluttid, ljudregler, städning, deposition och avbokningsvillkor',
+        ];
+      } else if (vendorType === 'catering') {
+        needLines = [
+          ['Serveringsform', v(fields.catStyle)],
+          ['Specialkost / allergier', v(fields.catDiet)],
+        ];
+        questionLines = [
+          'Pris per person och vad som ingår',
+          'Ingår personal, porslin, servering och dukning?',
+          'Finns provsmakning och upplägg för dryck/bar?',
+          'Betalplan, logistik och avbokningsvillkor',
+        ];
+      } else if (vendorType === 'photographer') {
+        needLines = [
+          ['Antal timmar', v(fields.photoHours)],
+          ['Fotostil', v(fields.photoStyle)],
+        ];
+        questionLines = [
+          'Vilka paket erbjuder ni och vad ingår?',
+          'Ingår förberedelser, vigsel, porträtt och fest?',
+          'Hur sker leverans av bilder och ungefär när?',
+          'Reseersättning, backup-plan och avtalsvillkor',
+        ];
+      } else if (vendorType === 'music') {
+        needLines = [
+          ['Tider', v(fields.musicTimes)],
+          ['Musikstil / önskemål', v(fields.musicStyle)],
+        ];
+        questionLines = [
+          'Pris och vad som ingår',
+          'Ingår ljud, ljus, mikrofoner och riggning?',
+          'Hur fungerar pauser och önskelåtar?',
+          'Avbokningsvillkor och praktiska behov på plats',
+        ];
+      } else if (vendorType === 'flowers') {
+        needLines = [
+          ['Tema / färger', v(fields.flowersTheme)],
+          ['Behov', v(fields.flowersNeed)],
+        ];
+        questionLines = [
+          'Prisbild och vad som ingår',
+          'Ingår leverans och uppsättning?',
+          'Tillgänglighet och tidsplan för beställning',
+        ];
+      } else if (vendorType === 'cake') {
+        needLines = [
+          ['Antal portioner', v(fields.cakeServings)],
+          ['Stil / smaker', v(fields.cakeStyle)],
+        ];
+        questionLines = [
+          'Pris och möjlighet till provsmakning',
+          'Leverans eller upphämtning',
+          'Förvaring på plats och hantering av allergier',
+        ];
+      } else if (vendorType === 'transport') {
+        needLines = [
+          ['Sträcka / rutt', v(fields.transportRoute)],
+          ['Antal personer', v(fields.transportPeople)],
+        ];
+        questionLines = [
+          'Pris, tider och väntetid',
+          'Vilken fordonstyp erbjuds?',
+          'Eventuella dekorationer samt avbokningsvillkor',
+        ];
+      } else if (vendorType === 'hmua') {
+        needLines = [
+          ['Antal personer', v(fields.hmuaPeople)],
+          ['Plats', v(fields.hmuaPlace)],
+        ];
+        questionLines = [
+          'Pris per person och vad som ingår',
+          'Ingår provsminkning / provuppsättning?',
+          'Tidsplan på bröllopsdagen och avbokningsvillkor',
+        ];
+      } else if (vendorType === 'decor') {
+        needLines = [
+          ['Behov', v(fields.decorNeed)],
+          ['Leverans / upphämtning', v(fields.decorDelivery)],
+        ];
+        questionLines = [
+          'Pris, deposition och vad som ingår',
+          'Leveranstider och eventuell montering',
+          'Avbokningsvillkor',
+        ];
+      } else if (vendorType === 'planner') {
+        needLines = [
+          ['Typ av hjälp', v(fields.plannerHelp)],
+          ['Omfattning', v(fields.plannerScope)],
+        ];
+        questionLines = [
+          'Prisupplägg och vad som ingår',
+          'Tillgänglighet och arbetsprocess',
+          'Hur samarbetet brukar läggas upp',
+        ];
+      }
+    
+      const children = [
+        p('Offertförfrågan', {
+          align: AlignmentType.CENTER,
+          bold: true,
+          size: 34,
+          color: '7A5C3E',
+          after: 80,
+        }),
+        p(prettyType, {
+          align: AlignmentType.CENTER,
+          italics: true,
+          size: 24,
+          color: '8A7A68',
+          after: 220,
+        }),
 
-      const paragraphs = text.split('\n').map(line => new Paragraph({
-        children: [new TextRun(line)]
-      }));
-
-      const doc = new Document({ sections: [{ properties: {}, children: paragraphs }] });
-
-      Packer.toBlob(doc).then(blob => {
-        const filename = `leverantorsforfragan_${(fields.type?.value || 'mall')}.docx`;
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
+        empty(120),
+        
+        p('Hej!', {
+          size: 22,
+          after: 100,
+        }),
+        p('Vi planerar bröllop och vill gärna be om offert samt information om tillgänglighet för nedanstående tjänst.', {
+          size: 22,
+          after: 180,
+        }),
+    
+        sectionTitle('Grunduppgifter'),
+        line('Typ av leverantör', prettyType),
+        line('Datum', date),
+        line('Plats / stad', city),
+        line('Antal gäster', guests),
+        line('Budgetintervall', budget),
+        line('Stil / tema', style),
+    
+        sectionTitle('Kontaktuppgifter'),
+        line('Kontaktperson', contact),
+        line('Svar önskas senast', replyBy),
+    
+        sectionTitle('Behov & önskemål'),
+        ...needLines.map(([label, value]) => line(label, value)).filter(Boolean),
+    
+        extra ? sectionTitle('Övriga detaljer') : null,
+        extra ? p(extra, { size: 22, after: 140 }) : null,
+    
+        sectionTitle('Frågor till er'),
+        ...questionLines.map(q => bullet(q)),
+    
+        notes ? sectionTitle('Ytterligare information') : null,
+        notes ? p(notes, { size: 22, after: 160 }) : null,
+    
+        empty(120),
+        p('Tack på förhand!', {
+          size: 22,
+          after: 120,
+        }),
+        sender
+          ? p(sender, {
+              bold: true,
+              size: 22,
+              color: '4A4A4A',
+              after: 80,
+            })
+          : null,
+      ].filter(Boolean);
+    
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children,
+          },
+        ],
       });
+    
+      const blob = await Packer.toBlob(doc);
+    
+      const safeType = prettyType
+        .toLowerCase()
+        .replaceAll('å', 'a')
+        .replaceAll('ä', 'a')
+        .replaceAll('ö', 'o')
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '');
+    
+      const filename = `offertforfragan_${safeType || 'leverantor'}.docx`;
+    
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     }
 
     // Bind UI
