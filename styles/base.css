@@ -332,3 +332,4 @@ html[data-page="kontakt"] .btn--champagne:focus-visible{
 :is(html,body)[data-page="produkter"] .summary__item{ display:flex; justify-content:space-between; gap:.8rem; color:var(--muted); }
 :is(html,body)[data-page="produkter"] .summary__total{ font-weight:800; font-size:1.1rem; }
 :is(html,body)[data-page="produkter"] .divider{ height:1px; background:var(--border); margin:.25rem 0; }
+
