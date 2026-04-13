@@ -130,7 +130,7 @@
 
 
 
-<button onclick="createGuestList()" id="createGuestListBtn" data-i18n-aria-label="btn_create_GuestList" aria-label="Skapa gästlista">
+<button "createGuestList()" id="createGuestListBtn" data-i18n-aria-label="btn_create_GuestList" aria-label="Skapa gästlista">
   <span class="material-icons btn-icon">dehaze</span>
   <span data-i18n="btn_create_GuestList">Skapa gästlista</span>
 </button>
@@ -878,6 +878,23 @@
       </nav>
     </div>
   </footer>
+
+  <!-- POP-UP-->
+  <div id="welcomeModal" class="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeWelcomeModal()">×</button>
+      <h2>Vad roligt att du hittat hit!</h2>
+      <p>
+       Vi är så glada att du använder vårt ritverktyg för att planera din dag.
+      </p>
+      <p>
+       För mer inspiration och fler idéer får du gärna följa oss på Instagram:
+       <a href="https://www.instagram.com/everafterbyester" target="_blank" rel="noopener noreferrer">
+    @everafterbyester
+  </a>
+</p>
+    </div>
+  </div>
 
   <!-- JS (ordning viktig) -->
   <script src="./scripts/main.js" defer></script>
