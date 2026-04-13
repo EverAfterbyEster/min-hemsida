@@ -505,11 +505,11 @@ function addGuest() {
   onPlanChanged();
 }
 
-
 function removeSelected() {
   if (selected) {
     const index = objects.indexOf(selected);
     if (index > -1) objects.splice(index, 1);
+
     selected = null;
     drawAll();
     updateFloatingButtons();
@@ -520,9 +520,27 @@ function removeSelected() {
     if (!hasAnyTable) {
       nextTableNumber = 1;
     }
+
+    onPlanChanged();
   }
-  onPlanChanged();
 }
+
+document.addEventListener('keydown', function (e) {
+  const tag = document.activeElement?.tagName;
+  const isTyping =
+    tag === 'INPUT' ||
+    tag === 'TEXTAREA' ||
+    document.activeElement?.isContentEditable;
+
+  if (isTyping) return;
+
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (selected) {
+      e.preventDefault();
+      removeSelected();
+    }
+  }
+});
 
 function rotateSelected() {
   if (selected && selected.type === "rect") {
