@@ -879,6 +879,892 @@
     </div>
   </footer>
 
+  <!--POP-UP-->
+  <div id="instagram-popup" class="popup-overlay">
+    <div class="popup-box">
+      <button id="close-popup" class="popup-close" aria-label="Stäng popup">&times;</button>
+  
+      <div class="popup-heart">♡</div>
+  
+      <h2>Vad kul att du hittade hit</h2>
+      <p>
+        Vad kul att du gillar vårt innehåll. Glöm inte att följa oss på Instagram
+        för mer inspiration, nyheter och fina detaljer.
+      </p>
+  
+      <a
+        class="popup-instagram-link"
+        href="https://www.instagram.com/everafterbyester/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Följ @everafterbyester
+      </a>
+    </div>
+  </div>
+
+  <!-- JS (ordning viktig) -->
+  <script src="./scripts/main.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
+
+  <!-- Dina script – behåll samma ID:n så lang.js hittar dem -->
+  <script src="./scripts/lang.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js" defer></script>
+
+  
+  <script src="./scripts/bestallning.js" defer></script>
+  <script src="./scripts/kontaktform.js" defer></script>
+  <script src="./scripts/ritverktyg.js" defer></script>
+  
+  <script async defer src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+  <noscript><img src="https://queue.simpleanalyticscdn.com/noscript.gif" alt="" /></noscript>
+</body>
+</html>
+    "operatingSystem": "Web",
+    "inLanguage": "sv-SE",
+    "description": "Bygg sittplan för bröllop & fest. Runda bord & långbord, gästlista, checklista, export som bild/CSV.",
+    "image": "https://www.everafterbyester.se/assets/OG.jpg",
+    "screenshot": "https://www.everafterbyester.se/assets/OG.jpg",
+    "publisher": {
+      "@type": "Organization",
+      "name": "EverAfter by Ester",
+      "logo": { "@type": "ImageObject", "url": "https://www.everafterbyester.se/assets/logo.jpg" }
+    },
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "SEK", "availability": "https://schema.org/InStock" },
+    "browserRequirements": "Kräver modern webbläsare med JavaScript aktiverat",
+    "potentialAction": { "@type": "UseAction", "target": "https://www.everafterbyester.se/ritverktyg.html" },
+    "keywords": "bordsplacering, bröllop, bordsplan, gästlista, sittplan, långbord, runda bord, mall"
+  }
+  </script>
+
+  <!-- Ikonfont -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"></noscript>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./styles/base.css">
+  <link rel="stylesheet" href="./styles/ritverktyg.css">
+</head>
+<body class="site">
+  ...
+
+  <!-- ===== Site-header (samma som startsidan) ===== -->
+  <header class="site-header">
+    <div class="container header__row">
+      <a class="brand" href="/index.html">
+        <img src="./assets/logo.jpg" alt="Logotyp" class="brand__logo" />
+        <span class="brand__name">Planeringsverktyg</span>
+      </a>
+
+      <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">
+        <span class="sr-only">Öppna meny</span> ☰
+      </button>
+
+      <nav id="site-nav" class="nav" aria-label="Huvudmeny">
+        <ul class="nav__list">
+          <li><a class="nav__link"               href="/index.html"     data-i18n="nav_home">Hem</a></li>
+          <li><a class="nav__link nav__link--active" href="/ritverktyg.html" data-i18n="nav_tool">Ritverktyg</a></li>
+          <li><a class="nav__link"               href="/galleri.html"   data-i18n="nav_gallery">Galleri</a></li>
+          <li><a class="nav__link"               href="/kontakt.html"   data-i18n="nav_contact">Kontakt</a></li>
+        </ul>
+        <!-- istället för <a class="lang-switch" href="./en/ritverktyg.html">EN</a> -->
+<button id="lang-toggle" class="lang-switch" type="button" aria-label="Byt språk">EN</button>
+
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== Innehåll ===== -->
+  <main class="site-main">
+    <!-- NYTT: Appbar som samlar rubrik + språk + verktyg i ett kort -->
+    <div id="appbarWrapper" class="container">
+      <div class="appbar">
+        <!-- Rad 1: Rubrik + språkknapp -->
+        <div class="appbar__row appbar__row--top">
+          <div class="title-input-group">
+            <input
+  type="text"
+  id="titleInput"
+  placeholder="Skriv din rubrik här"             
+  data-i18n-placeholder="title_placeholder"
+  oninput="onTitleChange(); onPlanChanged();"
+/>
+
+          </div>
+          <!-- I .appbar__row--top -->
+<button id="toolsToggle" class="tools-toggle" aria-controls="toolbar" aria-expanded="false">
+  ☰ Meny
+</button>
+
+
+        </div>
+        
+
+        <!-- Rad 2: Dina befintliga kontroller (oförändrade ID:n + data-i18n) -->
+        <div id="toolbar" class="appbar__row appbar__row--tools">
+          <button id="openHelpBtn" class="btn--ghost"
+  data-i18n-aria-label="btn_open_help" aria-label="How it works">
+  <span class="material-icons btn-icon" aria-hidden="true">help_outline</span>
+  <span data-i18n="btn_howto">How it works</span>
+</button>
+
+
+
+
+
+
+<button onclick="createGuestList()" id="createGuestListBtn" data-i18n-aria-label="btn_create_GuestList" aria-label="Skapa gästlista">
+  <span class="material-icons btn-icon">dehaze</span>
+  <span data-i18n="btn_create_GuestList">Skapa gästlista</span>
+</button>
+
+<button id="openChecklistBtn" data-i18n-aria-label="btn_open_Checklist" aria-label="Skapa checklista">
+  <span class="material-icons btn-icon">checklist</span>
+  <span data-i18n="btn_open_Checklist">Skapa checklista</span>
+</button>
+
+
+<button id="openInvitationBtn" data-i18n-aria-label="btn_open_invitation" aria-label="Inbjudningskort">
+  <span class="material-icons btn-icon">mail</span>
+  <span>Inbjudningskort</span>
+</button>
+<button id="openVendorBtn" data-i18n-aria-label="btn_open_vendor" aria-label="Leverantörer">
+  <span class="material-icons btn-icon">request_quote</span>
+  <span>Leverantörer</span>
+</button>
+
+<select id="templateSelect" data-close-on-change>
+  <option value="" data-i18n="templates_menu"></option>
+  <option value="round50" data-i18n="tpl_round50"></option>
+  <option value="round100" data-i18n="tpl_round100"></option>
+  <option value="round64circle" data-i18n="tpl_round64circle"></option>
+  <option value="banquet96" data-i18n="tpl_banquet96"></option>
+  <option value="headPlusRounds56" data-i18n="tpl_headPlusRounds56"></option>
+</select>
+
+
+          <select id="tableType" data-keep-menu>
+            <option value="round-6" data-i18n="opt_round6">Runt bord – 6 platser</option>
+            <option value="round-8" data-i18n="opt_round8">Runt bord – 8 platser</option>
+            <option value="rect-4"  data-i18n="opt_rect4">Rektangulärt bord – 4 platser</option>
+            <option value="rect-6"  data-i18n="opt_rect6">Rektangulärt bord – 6 platser</option>
+            <option value="rect-8"  data-i18n="opt_rect8">Rektangulärt bord – 8 platser</option>
+          </select>
+
+          <button onclick="addSelectedTable()">
+            <span class="material-icons btn-icon">add</span>
+            <span data-i18n="btn_add_table">Lägg till bord</span>
+          </button>
+
+          
+
+          <button onclick="addGuest()" id="addGuestBtn" data-i18n-aria-label="btn_add_guest" aria-label="Lägg till gäst">
+            <span class="material-icons btn-icon" aria-hidden="true">person_add</span>
+            <span data-i18n="btn_add_guest">Lägg till gäst</span>
+          </button>
+
+          <button
+  id="aiSeatingBtn"
+  type="button"
+  data-i18n-aria-label="btn_ai_seating"
+  aria-label="AI-placering">
+  <span class="material-icons btn-icon" aria-hidden="true">auto_awesome</span>
+  <span data-i18n="btn_ai_seating">AI-placering</span>
+</button>
+
+          
+          
+          <button id="wallToolBtn" type="button" aria-pressed="false"
+  data-i18n-title="title_draw_wall" title="Draw wall">
+  <span class="material-icons btn-icon" aria-hidden="true">architecture</span>
+  <span data-i18n="btn_draw_wall">Draw wall</span>
+</button>
+
+          <button onclick="saveAsImage()" id="saveAsImageBtn" data-i18n-aria-label="btn_save_As_Image" aria-label="Spara bild">
+            <span class="material-icons btn-icon">arrow_downward</span>
+            <span data-i18n="btn_save_As_Image">Spara bild</span>
+          </button>
+
+          
+
+<button id="saveJsonBtn" title="Spara som JSON" data-i18n-title="title_save_json">
+            <span class="material-icons btn-icon" aria-hidden="true">save</span>
+            <span data-i18n="btn_save_json">Spara som (.json)</span>
+          </button>
+
+          <button id="loadJsonBtn" title="Ladda upp JSON" data-i18n-title="title_load_json">
+            <span class="material-icons btn-icon">upload_file</span>
+            <span data-i18n="btn_load_json">Ladda upp (.json)</span>
+          </button>
+          <input id="loadJsonInput" type="file" accept=".json" style="display:none" />
+
+          <div class="grow"></div>
+          <div id="saveStatus" class="save-status"></div>
+
+          <!-- Högerställd primärknapp (kan vara disabled) -->
+          <button
+  id="sumButtonMobile"
+  type="button"
+  class="btn btn--primary btn--champagne sum-btn"
+  title="Visa sammanställning"
+  data-i18n-title="title_calculate_totals"
+  data-i18n-aria-label="btn_calculate_totals"
+  aria-label="Sammanställ"
+  aria-haspopup="dialog"
+  aria-controls="summaryModal"
+  aria-expanded="false">
+  <span data-i18n="btn_calculate_totals">Sammanställ</span>
+</button>
+
+        </div>
+      </div>
+      <!-- Direkt efter .appbar (inne i #appbarWrapper) -->
+<div id="toolsBackdrop" class="tools-backdrop" hidden></div>
+
+    
+      <!-- Inbjudningskort-panel (öppnas via knappen i verktygsraden) -->
+      <section id="invitationPanel" class="invitation-panel" hidden aria-hidden="true">
+        <div class="invitation-panel__head">
+          <h2 class="invitation-panel__title">Inbjudningskort</h2>
+          <div class="invitation-panel__actions">
+            <button id="invitationCloseBtn" type="button" class="btn--ghost" aria-label="Stäng">×</button>
+          </div>
+        </div>
+
+        <div class="invitation-panel__grid">
+          <div class="invitation-panel__col">
+            <h3 class="invitation-panel__subtitle">Info</h3>
+
+            <div class="invitation-form">
+              <label>Era namn
+                <input id="inv_names" type="text" placeholder="t.ex. Anna & Erik">
+              </label>
+
+              <label>Datum
+                <input id="inv_date" type="text" placeholder="t.ex. 14 juni 2026">
+              </label>
+
+              <label>Tid
+                <input id="inv_time" type="text" placeholder="t.ex. 15:00">
+              </label>
+
+              <label>Vigselplats
+                <input id="inv_ceremony_place" type="text" placeholder="t.ex. Stadskyrkan">
+              </label>
+
+              <label>Vigseladress
+                <input id="inv_ceremony_addr" type="text" placeholder="t.ex. Kyrkogatan 1, Stockholm">
+              </label>
+
+              <label>Festplats
+                <input id="inv_party_place" type="text" placeholder="t.ex. Orangeriet">
+              </label>
+
+              <label>Festadress
+                <input id="inv_party_addr" type="text" placeholder="t.ex. Parkvägen 12, Stockholm">
+              </label>
+
+              <label>OSA senast
+                <input id="inv_rsvp_date" type="text" placeholder="t.ex. 1 maj 2026">
+              </label>
+
+              <label>OSA till (mail/telefon/länk)
+                <input id="inv_rsvp_to" type="text" placeholder="t.ex. osa@exempel.se">
+              </label>
+
+              <label>Klädkod (valfritt)
+                <input id="inv_dresscode" type="text" placeholder="t.ex. Mörk kostym">
+              </label>
+
+              <label>Toastmaster (valfritt)
+                <input id="inv_toastmaster" type="text" placeholder="t.ex. Lisa – 070-123 45 67">
+              </label>
+
+              <label>Present/önskemål (valfritt)
+                <input id="inv_gifts" type="text" placeholder="t.ex. Inga presenter / Önskelista: ... / Swish: ...">
+              </label>
+
+              <label>Extra info (valfritt)
+                <input id="inv_extra" type="text" placeholder="t.ex. Barnfritt bröllop / Regnplan: ...">
+              </label>
+            </div>
+          </div>
+
+          <div class="invitation-panel__col">
+            <h3 class="invitation-panel__subtitle">Välj variant</h3>
+
+            <label class="invitation-select">
+              Mall
+              <select id="inv_template">
+                <option value="1">1) Klassisk & romantisk</option>
+                <option value="2">2) Enkel & modern</option>
+                <option value="3">3) Varm & personlig</option>
+                <option value="4">4) Tydligt schema</option>
+                <option value="5">5) Kort + informationskort</option>
+                <option value="6">6) Inga presenter</option>
+                <option value="7">7) Önskelista / Swish</option>
+                <option value="8">8) Barnfritt</option>
+                <option value="9">9) Ingen plus-one</option>
+                <option value="10">10) Toastmaster-info</option>
+              </select>
+            </label>
+
+            <label class="invitation-select">
+              Exportläge
+              <select id="inv_export_mode">
+                <option value="pages">Pages (Apple)</option>
+                <option value="word">Word (Microsoft)</option>
+              </select>
+            </label>
+
+            <div class="invitation-preview">
+              <div class="invitation-preview__label">Förhandsvisning</div>
+              <pre id="inv_preview" class="invitation-preview__text"></pre>
+            </div>
+
+            <div class="invitation-download">
+              <button id="inv_download_docx" type="button" class="btn btn--primary">Ladda ner inbjudningskort</button>
+              <div class="invitation-hint">Tips: Du kan skriva “-” i fält du inte vill ha.</div>
+            </div>
+          </div>
+        </div>
+      
+            </section>
+
+      <!-- Leverantörs-panel (förfrågningar) -->
+      <section id="vendorPanel" class="invitation-panel vendor-panel" hidden aria-hidden="true">
+        <div class="invitation-panel__head">
+          <h2 class="invitation-panel__title">Leverantörsförfrågningar</h2>
+          <div class="invitation-panel__actions">
+            <button id="vendorCloseBtn" type="button" class="btn--ghost" aria-label="Stäng">×</button>
+          </div>
+        </div>
+
+        <div class="invitation-panel__grid">
+          <div class="invitation-panel__col">
+            <h3 class="invitation-panel__subtitle">Basinformation</h3>
+
+            <div class="invitation-form">
+              <label>Era namn / avsändare
+                <input id="vend_sender" type="text" placeholder="t.ex. Anna & Erik">
+              </label>
+
+              <label>Datum (om bestämt)
+                <input id="vend_date" type="text" placeholder="t.ex. 14 juni 2026">
+              </label>
+
+              <label>Ort / område
+                <input id="vend_city" type="text" placeholder="t.ex. Stockholm / Nacka">
+              </label>
+
+              <label>Antal gäster (ungefär)
+                <input id="vend_guests" type="text" placeholder="t.ex. 80">
+              </label>
+
+              <label>Budget (valfritt)
+                <input id="vend_budget" type="text" placeholder="t.ex. 80 000–120 000 kr">
+              </label>
+
+              <label>Kontakt (mail/telefon)
+                <input id="vend_contact" type="text" placeholder="t.ex. osa@exempel.se / 070-123 45 67">
+              </label>
+
+              <label>Svar önskas senast (valfritt)
+                <input id="vend_reply_by" type="text" placeholder="t.ex. 1 mars 2026">
+              </label>
+
+              <label>Kort beskrivning (stil/tema) (valfritt)
+                <input id="vend_style" type="text" placeholder="t.ex. somrigt, avslappnat, mycket grönt">
+              </label>
+
+              <label>Övrigt (valfritt)
+                <input id="vend_notes" type="text" placeholder="t.ex. utomhusvigsel / allergier / barn med">
+              </label>
+            </div>
+
+            <h3 class="invitation-panel__subtitle" style="margin-top:14px;">Kategori & detaljer</h3>
+
+            <label class="invitation-select">
+              Förfrågan
+              <select id="vend_type">
+                <option value="venue">Förfrågan lokal</option>
+                <option value="catering">Förfrågan catering</option>
+                <option value="photographer">Förfrågan fotograf</option>
+                <option value="music">Förfrågan DJ/Band</option>
+                <option value="flowers">Förfrågan blommor</option>
+                <option value="cake">Förfrågan tårta/dessert</option>
+                <option value="transport">Förfrågan transport</option>
+                <option value="hmua">Förfrågan hår & makeup</option>
+                <option value="decor">Förfrågan dekor/uthyrning</option>
+                <option value="planner">Förfrågan koordinator/planerare</option>
+              </select>
+            </label>
+
+            <!-- Extra fält som byts beroende på kategori -->
+            <div id="vend_dynamic_fields" class="vendor-dynamic">
+              <div class="vendor-fields" data-vend="venue">
+                <label>Tider (start/slut) (valfritt)
+                  <input id="vend_venue_times" type="text" placeholder="t.ex. 14:00–01:00">
+                </label>
+                <label>Upplägg (sittande/buffé/dans) (valfritt)
+                  <input id="vend_venue_setup" type="text" placeholder="t.ex. sittande middag + dansgolv">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="catering" hidden>
+                <label>Serveringsform (valfritt)
+                  <input id="vend_cat_style" type="text" placeholder="t.ex. 3-rätters / buffé">
+                </label>
+                <label>Specialkost (valfritt)
+                  <input id="vend_cat_diet" type="text" placeholder="t.ex. veg, gluten, nötallergi">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="photographer" hidden>
+                <label>Hur många timmar? (valfritt)
+                  <input id="vend_photo_hours" type="text" placeholder="t.ex. 8 timmar">
+                </label>
+                <label>Stil (valfritt)
+                  <input id="vend_photo_style" type="text" placeholder="t.ex. dokumentärt, naturligt ljus">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="music" hidden>
+                <label>Tider för musik (valfritt)
+                  <input id="vend_music_times" type="text" placeholder="t.ex. 20:00–01:00">
+                </label>
+                <label>Musikstil (valfritt)
+                  <input id="vend_music_style" type="text" placeholder="t.ex. 90-tal, pop, hits">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="flowers" hidden>
+                <label>Färgtema (valfritt)
+                  <input id="vend_flowers_theme" type="text" placeholder="t.ex. vitt/grönt/ljusrosa">
+                </label>
+                <label>Vad behövs? (valfritt)
+                  <input id="vend_flowers_need" type="text" placeholder="t.ex. bukett, knapphål, bordsdekoration">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="cake" hidden>
+                <label>Antal portioner (valfritt)
+                  <input id="vend_cake_servings" type="text" placeholder="t.ex. 80">
+                </label>
+                <label>Smak/stil (valfritt)
+                  <input id="vend_cake_style" type="text" placeholder="t.ex. vit choklad & hallon / rustik">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="transport" hidden>
+                <label>Sträcka / rutt (valfritt)
+                  <input id="vend_transport_route" type="text" placeholder="t.ex. City → Lokal, 15 km">
+                </label>
+                <label>Antal personer (valfritt)
+                  <input id="vend_transport_people" type="text" placeholder="t.ex. 2 (brudpar) / 20 (gäster)">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="hmua" hidden>
+                <label>Antal personer (valfritt)
+                  <input id="vend_hmua_people" type="text" placeholder="t.ex. 1 brud + 2 tärnor">
+                </label>
+                <label>Plats (hos er/salong) (valfritt)
+                  <input id="vend_hmua_place" type="text" placeholder="t.ex. på plats i lokalen">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="decor" hidden>
+                <label>Vad vill ni hyra/köpa? (valfritt)
+                  <input id="vend_decor_need" type="text" placeholder="t.ex. backdrop, ljusslingor, stolar">
+                </label>
+                <label>Leverans/montering? (valfritt)
+                  <input id="vend_decor_delivery" type="text" placeholder="t.ex. leverans + montering önskas">
+                </label>
+              </div>
+
+              <div class="vendor-fields" data-vend="planner" hidden>
+                <label>Vilken hjälp? (valfritt)
+                  <input id="vend_planner_help" type="text" placeholder="t.ex. koordinering på dagen / helplanering">
+                </label>
+                <label>Ungefärlig tidsåtgång (valfritt)
+                  <input id="vend_planner_scope" type="text" placeholder="t.ex. 3 möten + på plats 10h">
+                </label>
+              </div>
+            </div>
+
+            <label style="margin-top:10px; display:block;">Extra detaljer (valfritt)
+              <textarea id="vend_extra_details" rows="4" placeholder="Skriv sådant som är unikt för er förfrågan (t.ex. tider, önskemål, frågor)."></textarea>
+            </label>
+          </div>
+
+          <div class="invitation-panel__col">
+            <h3 class="invitation-panel__subtitle">Förhandsvisning</h3>
+
+            <div class="invitation-preview">
+              <div class="invitation-preview__label">Text</div>
+              <pre id="vend_preview" class="invitation-preview__text"></pre>
+            </div>
+
+            <div class="invitation-download">
+              <button id="vend_download_docx" type="button" class="btn btn--primary">Ladda ner offertförfrågan</button>
+              <div class="invitation-hint">Tips: Fyll bara i det du vet – resten kan lämnas tomt.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+</section>
+</div>
+
+   <!-- Scen -->
+<div id="canvasContainer" class="container canvas-card">
+  <div class="canvas-viewport">
+    <canvas id="canvas" width="3000" height="2000"></canvas>
+    <canvas id="wallCanvas" width="3000" height="2000"></canvas>
+  </div>
+</div>
+
+<!-- Hjälpmodal: Rita vägg -->
+<div id="wallHelp" class="modal" aria-hidden="true">
+  <div class="modal__backdrop" data-close></div>
+  <div class="modal__dialog" role="dialog" aria-modal="true"
+       aria-labelledby="wallHelpTitle" aria-describedby="wallHelpDesc">
+    <button class="modal__close" type="button" data-close aria-label="Stäng">×</button>
+
+    <h2 id="wallHelpTitle" data-i18n="wall_help_title"></h2>
+
+    <div id="wallHelpDesc" class="modal__content">
+      <ol>
+        <li data-i18n-html="wall_help_step1_html"></li>
+        <li data-i18n-html="wall_help_step2_html"></li>
+        <li data-i18n-html="wall_help_step3_html"></li>
+        <li data-i18n-html="wall_help_step4_html"></li>
+        <li data-i18n-html="wall_help_step5_html"></li>
+      </ol>
+    
+      <label class="modal__check">
+        <input type="checkbox" id="wallHelpDontShow">
+        <span data-i18n="wall_help_dont_show"></span>
+      </label>
+    </div>
+    
+
+    <div class="modal__actions">
+      <button id="wallHelpOk" data-i18n="ok_got_it"></button>
+    </div>
+  </div>
+</div>
+
+    
+    
+    
+    <div id="userFormBox" class="container"></div>
+
+    <!-- Backdrops/Modals (behåller dina ID:n) -->
+  
+
+    <div id="checklistContainer"
+     class="modal-panel"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="checklistTitle"
+     aria-hidden="true">
+
+  <button id="closeChecklistBtn" class="close-modal no-print" aria-label="Stäng">×</button>
+  <h2 id="checklistTitle" data-i18n="checklist_title">Checklista</h2>
+
+  <ul id="checklist">
+    <li>
+      <label>
+        <input type="checkbox" data-id="lokal">
+        <span data-i18n="check_lokal">Lokal</span>
+      </label>
+      <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+    </li>
+
+    <li>
+      <label>
+        <input type="checkbox" data-id="inbjudningar">
+        <span data-i18n="check_invitations">Inbjudningar</span>
+      </label>
+      <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+    </li>
+
+    <li>
+      <label>
+        <input type="checkbox" data-id="catering">
+        <span data-i18n="check_catering">Catering</span>
+      </label>
+      <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+    </li>
+
+    <li>
+      <label>
+        <input type="checkbox" data-id="dekorationer">
+        <span data-i18n="check_decorations">Dekorationer</span>
+      </label>
+      <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+    </li>
+
+    <li>
+      <label>
+        <input type="checkbox" data-id="musik">
+        <span data-i18n="check_music">Musik</span>
+      </label>
+      <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+    </li>
+
+    <li>
+      <label>
+        <input type="checkbox" data-id="fotograf">
+        <span data-i18n="check_photographer">Fotograf</span>
+      </label>
+      <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+    </li>
+
+    <li>
+      <label>
+        <input type="checkbox" data-id="transport">
+        <span data-i18n="check_transport">Transport</span>
+      </label>
+      <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+    </li>
+
+    <li>
+      <label>
+        <input type="checkbox" data-id="boende">
+        <span data-i18n="check_accommodation">Boende</span>
+      </label>
+      <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+    </li>
+
+    <li>
+      <label>
+        <input type="checkbox" data-id="underhallning">
+        <span data-i18n="check_entertainment">Underhållning</span>
+      </label>
+      <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+    </li>
+
+    <li>
+      <label>
+        <input type="checkbox" data-id="matdryck">
+        <span data-i18n="check_food_drink">Mat &amp; Dryck</span>
+      </label>
+      <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+    </li>
+
+    <li>
+      <label>
+        <input type="checkbox" data-id="kladsel">
+        <span data-i18n="check_attire_beauty">Klädsel &amp; Skönhet</span>
+      </label>
+      <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+    </li>
+
+    <li>
+      <label>
+        <input type="checkbox" data-id="budget">
+        <span data-i18n="check_budget">Budget</span>
+      </label>
+      <button class="remove-item"><span data-i18n="btn_remove">Ta bort</span></button>
+    </li>
+  </ul>
+
+  <div class="controls">
+    <input id="newChecklistItem"
+           type="text"
+           placeholder="Ny punkt"
+           data-i18n-placeholder="check_item_placeholder">
+    <button id="addChecklistItemBtn" data-i18n="btn_add_item">Lägg till</button>
+    <button id="downloadChecklistBtn" class="no-print"
+            data-i18n="btn_download"
+            data-i18n-title="title_download"
+            title="Ladda ner">
+      Ladda ner
+    </button>
+    <button id="exportChecklistCsvBtn"
+        class="no-print"
+        data-i18n="btn_download_CSV"
+            data-i18n-title="title_download_CSV"
+        onclick="exportChecklistCSV()"
+        title="Ladda ner spreadsheet (CSV)">
+  Download spreadsheet
+</button>
+
+  </div>
+</div>
+
+
+<!-- Gästlista: overlay + modal (en enda instans) -->
+<div id="guestModalOverlay" class="no-print" style="display:none"></div>
+
+<div id="guestListContainer"
+     class="guestlist-modal"
+     role="dialog" aria-modal="true"
+     aria-labelledby="guestListTitle"
+     aria-hidden="true">
+  <button id="closeGuestListBtn" class="close-modal no-print" aria-label="Stäng" onclick="closeGuestList()">×</button>
+  <h2 id="guestListTitle">Gästlista</h2>
+
+  <!-- Viktigt: UL som JS kan fylla -->
+  <ul id="guestList"></ul>
+
+  <div class="controls">
+    <button type="button" onclick="downloadGuestList()">Ladda ner</button>
+    <button type="button" onclick="exportGuestList('csv')">Exportera CSV</button>
+  </div>
+</div>
+
+<!-- AI-bordsplacering -->
+<div id="aiSeatingModal" class="modal" aria-hidden="true">
+  <div class="modal__backdrop" data-close></div>
+  <div class="modal__dialog" role="dialog" aria-modal="true"
+       aria-labelledby="aiSeatingTitle" aria-describedby="aiSeatingDesc">
+    <button class="modal__close" type="button" data-close aria-label="Stäng">×</button>
+
+    <h2 id="aiSeatingTitle" data-i18n="ai_title">AI-placering</h2>
+
+    <div id="aiSeatingDesc" class="modal__content">
+      <p data-i18n="ai_intro">
+        Lägg till gästerna i listan, välj bordstyp och låt verktyget
+        skapa en smart bordsplacering.
+      </p>
+    
+
+      <fieldset>
+        <legend data-i18n="ai_tabletype">Bordstyp</legend>
+        <label>
+          <input type="radio" name="aiTableShape" value="round" checked>
+          <span data-i18n="ai_round">Runda bord (8 platser/bord)</span>
+        </label><br>
+        <label>
+          <input type="radio" name="aiTableShape" value="rect">
+          <span data-i18n="ai_rect">Långbord (8 platser/bord)</span>
+        </label>
+      </fieldset>
+      
+
+      <h3><strong data-i18n="ai_guestlist_heading">Gästlista</strong></h3>
+<p class="modal__hint" data-i18n="ai_hint">
+  Namn är obligatoriskt. Ålder, familj/vän, roll och språk är valfria men
+  hjälper verktyget att placera smartare.
+</p>
+
+
+<div class="ai-guestlist">
+  <div class="ai-guestlist__toolbar">
+    <button type="button" id="aiAddGuestRowBtn" data-i18n="btn_add_guest">
+      Lägg till gäst
+    </button>
+  </div>
+
+
+  <table class="ai-guestlist__table">
+    <thead>
+      <tr>
+        <th data-i18n="ai_col_name">Namn</th>
+        <th data-i18n="ai_col_age">Ålder</th>
+        <th data-i18n="ai_col_group">Familj/vän</th>
+        <th data-i18n="ai_col_role">Roll</th>
+        <th data-i18n="ai_col_lang">Språk</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="aiGuestTableBody">
+      <!-- Rader skapas via JavaScript -->
+    </tbody>
+  </table>
+  
+      </div>
+    </div>
+
+    <div class="modal__actions">
+      <button type="button" id="aiGenerateBtn" data-i18n="ai_generate">
+        Skapa bordsplacering
+      </button>
+      <button type="button" data-close data-i18n="cancel">
+        Avbryt
+      </button>
+    </div>
+    
+  </div>
+</div>
+
+
+
+
+    <div class="floating-buttons" id="floatingButtons">
+      <!-- Valberoende knappar -->
+      <div class="fb-stack fb-stack--selection" id="floatSel">
+        <button onclick="rotateSelected()" disabled><span class="material-icons">rotate_right</span></button>
+        <button onclick="renameTable()" disabled><span class="material-icons">drive_file_rename_outline</span></button>
+        <button onclick="removeSelected()" disabled><span class="material-icons">delete_outline</span></button>
+      </div>
+    
+      <!-- Globala knappar (alltid aktiva) -->
+      <div class="fb-stack fb-stack--global" id="floatGlobal">
+        <button id="toggleAxesBtn" onclick="toggleAxes()" aria-label="Visa/Dölj avstånd">
+          <span class="material-icons">straighten</span>
+        </button>
+    
+        <!-- Helskärm -->
+        <button id="fullscreenBtn" class="fs-toggle" title="Helskärm" data-i18n-title="btn_fullscreen_enter" aria-label="Helskärm">
+          <span class="material-icons" id="fullscreenIcon" aria-hidden="true">fullscreen</span>
+        </button>
+      </div>
+    </div>
+    
+    <div id="helpModal" class="help-modal" role="dialog" aria-modal="true"
+    aria-labelledby="helpTitle" aria-hidden="true">
+ <button id="closeHelpBtn" class="close-modal no-print"
+         data-i18n-aria-label="help_close" aria-label="Close">×</button>
+
+ <h2 id="helpTitle" data-i18n="help_title">How to use the drawing tool</h2>
+ <p data-i18n="help_intro">Here's how to use the drawing tool:</p>
+ <ol class="help-list">
+   <li data-i18n="help_step1">Choose a table type in the menu and click “Add table”.</li>
+   <li data-i18n="help_step2">Drag the tables to where you want them on the floor plan.</li>
+   <li data-i18n="help_step3">Add guests.</li>
+   <li data-i18n="help_step4">Click “Summarize” to see an overview.</li>
+   <li data-i18n="help_step5">Use the guest list and checklist as a guide.</li>
+ </ol>
+</div>
+
+
+  </main>
+  <div id="modalOverlay" style="display:none"></div>
+
+  <!-- Lägg detta nära modalen, t.ex. precis före #summaryModal -->
+<div id="summaryBox" style="display:none"></div>
+
+
+<div id="summaryModal" class="summary-modal" role="dialog"
+     aria-modal="true" aria-labelledby="summaryTitle"
+     aria-hidden="true">
+  <button type="button" class="close-modal" id="closeSummary" aria-label="Stäng">×</button>
+  <h3 id="summaryTitle" data-i18n="sum_heading">Sammanställning:</h3>
+  <div id="summaryContent"></div>
+</div>
+
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="container footer__row">
+      <p class="footer__copy">
+        © <span id="year"></span> <span data-i18n="footer_brand"></span>
+      </p>
+      <nav class="footer__links" aria-label="Sidfotslänkar">
+        <a href="./om.html" data-i18n="footer_about"></a>
+        <a href="./villkor.html" data-i18n="footer_terms"></a>
+        <a href="./kontakt.html" data-i18n="footer_contact"></a>
+      </nav>
+    </div>
+  </footer>
+
   <!-- JS (ordning viktig) -->
   <script src="./scripts/main.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
