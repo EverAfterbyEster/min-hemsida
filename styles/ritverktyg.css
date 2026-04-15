@@ -927,3 +927,93 @@ html[data-page="ritverktyg"] .btn--champagne[disabled]{ opacity:.7; filter:satur
   gap: 10px;
   margin-top: 10px;
 }
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(73, 45, 30, 0.38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.popup-overlay.hidden {
+  display: none;
+}
+
+.popup-box {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  background: linear-gradient(180deg, #fffaf7 0%, #fff0e7 100%);
+  border-radius: 24px;
+  padding: 34px 24px 28px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(89, 54, 36, 0.18);
+  border: 1px solid rgba(205, 158, 129, 0.28);
+  animation: popupFadeIn 0.35s ease;
+}
+
+.popup-heart {
+  font-size: 2rem;
+  color: #d89a86;
+  margin-bottom: 10px;
+}
+
+.popup-box h2 {
+  margin: 0 0 12px;
+  font-size: 1.55rem;
+  color: #7a4d3a;
+}
+
+.popup-box p {
+  margin: 0 0 22px;
+  color: #6f584d;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.popup-instagram-link {
+  display: inline-block;
+  padding: 12px 22px;
+  background: #c98268;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.popup-instagram-link:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.popup-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  color: #9d6f59;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.popup-close:hover {
+  opacity: 0.7;
+}
+
+@keyframes popupFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
