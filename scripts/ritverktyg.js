@@ -87,7 +87,7 @@ function initSiteNotice() {
     closeBtn.addEventListener('touchend', closeNotice, { passive: false });
   }
 
-  setTimeout(closeNotice, 4000);
+  setTimeout(closeNotice, 10000);
 }
 
 // Kör vid kall start…
